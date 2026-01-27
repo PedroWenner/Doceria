@@ -28,4 +28,8 @@ Route::group(['middleware' => ['api', 'auth:api', 'role:admin']], function () {
     Route::get('/users', [App\Http\Controllers\UserController::class, 'index']);
     Route::put('/users/{user}/roles', [App\Http\Controllers\UserController::class, 'updateRoles']);
     Route::get('/roles', [App\Http\Controllers\UserController::class, 'roles']);
+
+    // Product Management
+    Route::get('/categories', [App\Http\Controllers\CategoryController::class, 'index']);
+    Route::apiResource('products', App\Http\Controllers\ProductController::class);
 });
