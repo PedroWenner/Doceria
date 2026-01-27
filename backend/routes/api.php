@@ -23,3 +23,9 @@ Route::group([
     Route::post('refresh', [App\Http\Controllers\AuthController::class, 'refresh']);
     Route::post('me', [App\Http\Controllers\AuthController::class, 'me']);
 });
+
+Route::group(['middleware' => ['api', 'auth:api', 'role:admin']], function () {
+    Route::get('/users', [App\Http\Controllers\UserController::class, 'index']);
+    Route::put('/users/{user}/roles', [App\Http\Controllers\UserController::class, 'updateRoles']);
+    Route::get('/roles', [App\Http\Controllers\UserController::class, 'roles']);
+});
