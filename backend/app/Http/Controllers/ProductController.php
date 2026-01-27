@@ -3,19 +3,22 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class ProductController extends Controller
 {
+    use ApiResponse;
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
         $products = Product::with('category')->latest()->paginate(10);
-        return response()->json($products);
+        return $this->success($products);
     }
 
     /**
@@ -42,7 +45,7 @@ class ProductController extends Controller
 
         $product = Product::create($validated);
 
-        return response()->json($product, 201);
+        return $this->success($product, 'Product created successfully', 201);
     }
 
     /**
@@ -50,7 +53,7 @@ class ProductController extends Controller
      */
     public function show(Product $product)
     {
-        return response()->json($product->load('category'));
+        return $this->success($product->load('category'));
     }
 
     /**
@@ -81,7 +84,7 @@ class ProductController extends Controller
 
         $product->update($validated);
 
-        return response()->json($product);
+        return $this->success($product, 'Product updated successfully');
     }
 
     /**
@@ -95,6 +98,6 @@ class ProductController extends Controller
         
         $product->delete();
 
-        return response()->json(['message' => 'Product deleted successfully']);
+        return $this->success(null, 'Product deleted successfully');
     }
 }

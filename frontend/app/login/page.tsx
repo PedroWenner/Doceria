@@ -28,8 +28,8 @@ export default function LoginPage() {
 
             if (!res.ok) throw new Error('Falha no login');
 
-            const data = await res.json();
-            Cookies.set('auth_token', data.access_token, { expires: 1 }); // 1 day
+            const response = await res.json();
+            Cookies.set('auth_token', response.data.access_token, { expires: 1 }); // 1 day
             router.push('/dashboard');
         } catch (err) {
             setError('Credenciais inválidas ou erro no servidor');

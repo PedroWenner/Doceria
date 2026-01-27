@@ -40,12 +40,13 @@ export default function UsersPage() {
             ]);
 
             if (usersRes.ok) {
-                const data = await usersRes.json();
-                setUsers(data.data); // Pagination 'data' key
+                const response = await usersRes.json();
+                // response.data is the paginator, response.data.data are the items
+                setUsers(response.data.data);
             }
             if (rolesRes.ok) {
-                const data = await rolesRes.json();
-                setRoles(data);
+                const response = await rolesRes.json();
+                setRoles(response.data);
             }
         } catch (error) {
             console.error('Failed to fetch data', error);

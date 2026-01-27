@@ -4,17 +4,20 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Role;
+use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
+    use ApiResponse;
+
     /**
      * List all users with their roles.
      */
     public function index()
     {
         $users = User::with('roles')->paginate(10);
-        return response()->json($users);
+        return $this->success($users);
     }
 
     /**
@@ -22,7 +25,7 @@ class UserController extends Controller
      */
     public function roles()
     {
-        return response()->json(Role::all());
+        return $this->success(Role::all());
     }
 
     /**
@@ -40,9 +43,6 @@ class UserController extends Controller
         
         $user->roles()->sync($roleIds);
 
-        return response()->json([
-            'message' => 'Roles updated successfully',
-            'user' => $user->load('roles')
-        ]);
+        return $this->success($user->load('roles'), 'Roles updated successfully');
     }
 }

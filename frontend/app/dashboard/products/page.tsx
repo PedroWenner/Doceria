@@ -50,8 +50,9 @@ export default function ProductsPage() {
                 headers: { Authorization: `Bearer ${token}` }
             });
             if (res.ok) {
-                const data = await res.json();
-                setProducts(data.data);
+                const response = await res.json();
+                // response.data is the paginator, response.data.data are the items
+                setProducts(response.data.data);
             }
         } catch (error) {
             console.error('Failed to fetch products', error);
@@ -66,8 +67,8 @@ export default function ProductsPage() {
                 headers: { Authorization: `Bearer ${token}` }
             });
             if (res.ok) {
-                const data = await res.json();
-                setCategories(data);
+                const response = await res.json();
+                setCategories(response.data);
             }
         } catch (error) {
             console.error('Failed to fetch categories', error);
