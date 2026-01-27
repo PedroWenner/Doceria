@@ -24,27 +24,26 @@ services:
             - sweetstore-db
 
     sweetstore-db:
-        image: 'postgres:16'
+        image: 'mysql:8.0'
         ports:
-            - '${FORWARD_DB_PORT:-5432}:5432'
+            - '${FORWARD_DB_PORT:-3307}:3306'
         environment:
-            PGPASSWORD: '${DB_PASSWORD:-secret}'
-            POSTGRES_DB: '${DB_DATABASE:-sweetstore}'
-            POSTGRES_USER: '${DB_USERNAME:-sweetstore}'
-            POSTGRES_PASSWORD: '${DB_PASSWORD:-secret}'
+            MYSQL_ROOT_PASSWORD: '${DB_PASSWORD:-secret}'
+            MYSQL_ROOT_HOST: '%'
+            MYSQL_DATABASE: '${DB_DATABASE:-sweetstore}'
+            MYSQL_USER: '${DB_USERNAME:-sweetstore}'
+            MYSQL_PASSWORD: '${DB_PASSWORD:-secret}'
+            MYSQL_ALLOW_EMPTY_PASSWORD: 1
         volumes:
-            - 'sweetstore-db:/var/lib/postgresql/data'
+            - 'sweetstore-db:/var/lib/mysql'
         networks:
             - sail
         healthcheck:
             test:
                 - CMD
-                - pg_isready
-                - '-q'
-                - '-d'
-                - '${DB_DATABASE:-sweetstore}'
-                - '-U'
-                - '${DB_USERNAME:-sweetstore}'
+                - mysqladmin
+                - ping
+                - '-p${DB_PASSWORD}'
             retries: 3
             timeout: 5s
 
