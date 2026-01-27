@@ -4,6 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import Cookies from 'js-cookie';
 import { useRouter } from 'next/navigation';
+import ThemeToggle from '@/app/components/ThemeToggle';
 
 export default function DashboardLayout({
     children,
@@ -38,9 +39,12 @@ export default function DashboardLayout({
         <div className="min-h-screen bg-brand-cream/20 flex">
             {/* Sidebar */}
             <aside className="w-64 bg-white/40 backdrop-blur-xl border-r border-white/50 h-screen fixed top-0 left-0 p-6 flex flex-col z-20">
-                <div className="mb-10">
-                    <h1 className="text-2xl font-bold text-brand-choco">SweetStore</h1>
-                    <p className="text-xs text-brand-choco/60 font-medium tracking-widest uppercase mt-1">Dashboard</p>
+                <div className="mb-10 flex justify-between items-center">
+                    <div>
+                        <h1 className="text-2xl font-bold text-brand-choco">SweetStore</h1>
+                        <p className="text-xs text-brand-choco/60 font-medium tracking-widest uppercase mt-1">Dashboard</p>
+                    </div>
+                    <ThemeToggle />
                 </div>
 
                 <nav className="flex-1 space-y-2">
