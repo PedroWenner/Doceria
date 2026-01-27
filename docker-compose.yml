@@ -1,0 +1,57 @@
+services:
+    sweetstore-app:
+        build:
+            context: ./backend/vendor/laravel/sail/runtimes/8.3
+            dockerfile: Dockerfile
+            args:
+                WWWGROUP: '${WWWGROUP:-1000}'
+        image: sail-8.3/app
+        extra_hosts:
+            - 'host.docker.internal:host-gateway'
+        ports:
+            - '${APP_PORT:-8000}:80'
+        environment:
+            WWWUSER: '${WWWUSER:-1000}'
+            LARAVEL_SAIL: 1
+            XDEBUG_MODE: '${SAIL_XDEBUG_MODE:-off}'
+            XDEBUG_CONFIG: '${SAIL_XDEBUG_CONFIG:-client_host=host.docker.internal}'
+            IGNITION_LOCAL_SITES_PATH: '${PWD}'
+        volumes:
+            - './backend:/var/www/html'
+        networks:
+            - sail
+        depends_on:
+            - sweetstore-db
+
+    sweetstore-db:
+        image: 'postgres:16'
+        ports:
+            - '${FORWARD_DB_PORT:-5432}:5432'
+        environment:
+            PGPASSWORD: '${DB_PASSWORD:-secret}'
+            POSTGRES_DB: '${DB_DATABASE:-sweetstore}'
+            POSTGRES_USER: '${DB_USERNAME:-sweetstore}'
+            POSTGRES_PASSWORD: '${DB_PASSWORD:-secret}'
+        volumes:
+            - 'sweetstore-db:/var/lib/postgresql/data'
+        networks:
+            - sail
+        healthcheck:
+            test:
+                - CMD
+                - pg_isready
+                - '-q'
+                - '-d'
+                - '${DB_DATABASE:-sweetstore}'
+                - '-U'
+                - '${DB_USERNAME:-sweetstore}'
+            retries: 3
+            timeout: 5s
+
+networks:
+    sail:
+        driver: bridge
+
+volumes:
+    sweetstore-db:
+        driver: local

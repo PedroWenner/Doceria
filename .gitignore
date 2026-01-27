@@ -1,0 +1,22 @@
+
+# IDEs
+.vscode/
+.idea/
+
+# Backend
+backend/vendor/
+backend/node_modules/
+backend/.env
+backend/public/storage
+
+# Frontend
+frontend/node_modules/
+frontend/.next/
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.test.local
+frontend/.env.production.local
+
+# OS
+.DS_Store
+Thumbs.db
