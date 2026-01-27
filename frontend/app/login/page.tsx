@@ -3,14 +3,38 @@
 import { useState } from 'react';
 import GlassCard from '@/app/components/GlassCard';
 
+import Cookies from 'js-cookie';
+import { useRouter } from 'next/navigation';
+
 export default function LoginPage() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
+    const router = useRouter();
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        console.log('Login attempt', { email, password });
-        // Connect to Laravel API in next implementation step
+        setLoading(true);
+        setError('');
+
+        try {
+            const res = await fetch('http://localhost:8000/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password }),
+            });
+
+            if (!res.ok) throw new Error('Falha no login');
+
+            const data = await res.json();
+            Cookies.set('auth_token', data.access_token, { expires: 1 }); // 1 day
+            router.push('/dashboard');
+        } catch (err) {
+            setError('Credenciais inválidas ou erro no servidor');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
