@@ -1,11 +1,39 @@
+'use client';
+
 import React from 'react';
 import Link from 'next/link';
+import Cookies from 'js-cookie';
+import { useRouter } from 'next/navigation';
 
 export default function DashboardLayout({
     children,
 }: {
     children: React.ReactNode;
 }) {
+    const router = useRouter();
+
+    const handleLogout = async () => {
+        try {
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+            const token = Cookies.get('auth_token');
+
+            if (token) {
+                await fetch(`${apiUrl}/auth/logout`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+            }
+        } catch (error) {
+            console.error('Logout error:', error);
+        } finally {
+            Cookies.remove('auth_token');
+            router.push('/login');
+        }
+    };
+
     return (
         <div className="min-h-screen bg-brand-cream/20 flex">
             {/* Sidebar */}
@@ -31,6 +59,14 @@ export default function DashboardLayout({
                 </nav>
 
                 <div className="mt-auto pt-6 border-t border-brand-choco/10">
+                    <button
+                        onClick={handleLogout}
+                        className="w-full text-left flex items-center mb-4 px-4 py-2 rounded-lg hover:bg-red-50 text-red-600 transition-colors"
+                    >
+                        <span className="mr-2">🚪</span>
+                        <span className="font-medium">Sign Out</span>
+                    </button>
+
                     <div className="flex items-center space-x-3">
                         <div className="w-10 h-10 rounded-full bg-brand-gold/30 flex items-center justify-center text-brand-choco font-bold">
                             U
