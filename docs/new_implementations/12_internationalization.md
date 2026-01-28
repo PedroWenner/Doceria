@@ -26,6 +26,12 @@ Optamos por uma abordagem baseada em **React Context** em vez de Roteamento (`/p
     - Botão de alternância com bandeiras (🇧🇷 / 🇺🇸).
     - Localizado no Sidebar, ao lado do Theme Toggle.
 
+4.  **Máscara de Moeda (BRL)**
+    - Utilitário: `app/utils/formatters.ts`
+    - Formato de Entrada: `R$ 1.234,56` (Máscara automática ao digitar).
+    - Formato de Envio (API): `1234.56` (Float padrão).
+    - Componentes: Aplicado no formulário de Produtos.
+
 ## Como Adicionar Novas Traduções
 
 1. Abra `app/utils/translations.ts`.

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import GlassCard from '@/app/components/GlassCard';
 import Cookies from 'js-cookie';
 import { useLanguage } from '@/app/context/LanguageContext';
+import { formatCurrency, parseCurrency, displayCurrency } from '@/app/utils/formatters';
 
 interface Product {
     id: number;
@@ -83,7 +84,7 @@ export default function ProductsPage() {
             setFormData({
                 name: product.name,
                 description: product.description || '',
-                price: product.price,
+                price: formatCurrency((Number(product.price) * 100).toFixed(0)), // Convert float to integer string then mask
                 stock_quantity: product.stock_quantity.toString(),
                 min_stock_level: product.min_stock_level.toString(),
                 sku: product.sku,
@@ -119,7 +120,7 @@ export default function ProductsPage() {
             const data = new FormData();
             data.append('name', formData.name);
             data.append('description', formData.description);
-            data.append('price', formData.price);
+            data.append('price', parseCurrency(formData.price)); // Send raw float to API
             data.append('stock_quantity', formData.stock_quantity);
             data.append('min_stock_level', formData.min_stock_level);
             data.append('sku', formData.sku);
@@ -201,7 +202,7 @@ export default function ProductsPage() {
                                             <div className="text-xs text-brand-choco/60">{product.sku}</div>
                                         </td>
                                         <td className="px-6 py-4 text-brand-choco">{product.category?.name}</td>
-                                        <td className="px-6 py-4 font-bold text-brand-choco">${product.price}</td>
+                                        <td className="px-6 py-4 font-bold text-brand-choco">{displayCurrency(product.price)}</td>
                                         <td className="px-6 py-4">
                                             <span className={`px-2 py-1 rounded-full text-xs font-bold ${stockStatus.color}`}>
                                                 {product.stock_quantity}
@@ -259,8 +260,18 @@ export default function ProductsPage() {
                                 </div>
                                 <div>
                                     <label className="block text-sm font-bold text-brand-choco mb-1">{t('products.price')}</label>
-                                    <input required type="number" step="0.01" className="w-full p-2 rounded-lg bg-white/50 border border-white/60 focus:outline-none focus:ring-2 focus:ring-brand-pink/50"
-                                        value={formData.price} onChange={e => setFormData({ ...formData, price: e.target.value })} />
+                                    <input
+                                        required
+                                        type="text"
+                                        maxLength={15}
+                                        placeholder="R$ 0,00"
+                                        className="w-full p-2 rounded-lg bg-white/50 border border-white/60 focus:outline-none focus:ring-2 focus:ring-brand-pink/50"
+                                        value={formData.price}
+                                        onChange={e => {
+                                            const masked = formatCurrency(e.target.value);
+                                            setFormData({ ...formData, price: masked });
+                                        }}
+                                    />
                                 </div>
                             </div>
 
