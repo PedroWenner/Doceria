@@ -7,6 +7,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import ThemeToggle from '@/app/components/ThemeToggle';
 import LanguageToggle from '@/app/components/LanguageToggle';
 import { useLanguage } from '@/app/context/LanguageContext';
+import { Toaster } from 'react-hot-toast';
 
 export default function DashboardLayout({
     children,
@@ -135,6 +136,30 @@ export default function DashboardLayout({
 
             {/* Main Content */}
             <main className="md:ml-64 flex-1 p-8 pt-20 md:pt-8 transition-all duration-300">
+                <Toaster
+                    position="top-right"
+                    toastOptions={{
+                        style: {
+                            background: '#fff',
+                            color: '#4a2c2a', // brand-choco
+                            border: '1px solid #eeb7ce', // brand-pink
+                            padding: '16px',
+                            borderRadius: '12px',
+                        },
+                        success: {
+                            iconTheme: {
+                                primary: '#eeb7ce',
+                                secondary: '#fff',
+                            },
+                        },
+                        error: {
+                            iconTheme: {
+                                primary: '#ef4444',
+                                secondary: '#fff',
+                            },
+                        },
+                    }}
+                />
                 {children}
             </main>
         </div>

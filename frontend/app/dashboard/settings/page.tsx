@@ -5,6 +5,7 @@ import GlassCard from '@/app/components/GlassCard';
 import Cookies from 'js-cookie';
 import { useLanguage } from '@/app/context/LanguageContext';
 import LoadingSpinner from '@/app/components/LoadingSpinner';
+import toast from 'react-hot-toast';
 
 export default function SettingsPage() {
     const { t } = useLanguage();
@@ -28,19 +29,17 @@ export default function SettingsPage() {
             const res = await fetch(`${apiUrl}/settings`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            console.log('Settings Fetch Status:', res.status);
 
             if (res.ok) {
                 const response = await res.json();
-                console.log('Settings Data:', response);
                 setFormData(response.data);
             } else {
                 console.error('Failed to fetch settings:', await res.text());
-                alert(`Erro ao carregar configurações: ${res.status}`);
+                toast.error(`Erro ao carregar configurações: ${res.status}`);
             }
         } catch (error) {
             console.error('Fetch Error:', error);
-            alert('Erro de conexão ao carregar configurações.');
+            toast.error('Erro de conexão ao carregar configurações.');
         } finally {
             setIsLoading(false);
         }
@@ -63,10 +62,10 @@ export default function SettingsPage() {
                 body: JSON.stringify(formData)
             });
             if (res.ok) {
-                alert(t('settings.success'));
+                toast.success(t('settings.success'));
             }
         } catch (error) {
-            alert('Error saving settings');
+            toast.error('Error saving settings');
         } finally {
             setIsSaving(false);
         }

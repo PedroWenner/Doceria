@@ -88,7 +88,7 @@ export default function UsersPage() {
                 await fetchData(); // Refresh list
                 setEditingUser(null);
             } else {
-                alert(t('users.update_error'));
+                toast.error(t('users.update_error'));
             }
         } catch (error) {
             console.error('Update failed', error);

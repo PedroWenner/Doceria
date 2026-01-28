@@ -144,7 +144,8 @@ export default function ProductsPage() {
                 setIsModalOpen(false);
             } else {
                 const err = await res.json();
-                alert('Error saving product: ' + JSON.stringify(err));
+                console.error(err);
+                toast.error('Error saving product');
             }
         } catch (error) {
             console.error('Save failed', error);
