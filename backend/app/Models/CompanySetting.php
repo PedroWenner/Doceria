@@ -27,6 +27,18 @@ class CompanySetting extends Model implements Auditable
         'state',
         'zip_code',
         'orders_refresh_rate',
-        'auth_token_expiration'
+        'auth_token_expiration',
+        'enable_stock_control',
+        'global_min_stock',
+        'logo_url',
+        'login_bg_url',
+        'welcome_message',
+        'currency_symbol',
+        'whatsapp_number',
+        'delivery_message'
+    ];
+
+    protected $casts = [
+        'enable_stock_control' => 'boolean',
     ];
 }

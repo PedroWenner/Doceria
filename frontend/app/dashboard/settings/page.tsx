@@ -14,18 +14,26 @@ export default function SettingsPage() {
     const { t } = useLanguage();
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
-    const [activeTab, setActiveTab] = useState<'general' | 'fiscal' | 'address' | 'system'>('general');
+    const [activeTab, setActiveTab] = useState<'general' | 'operational' | 'fiscal' | 'address' | 'system'>('general');
 
     // Services Loading States
     const [isSearchingCep, setIsSearchingCep] = useState(false);
     const [isSearchingCnpj, setIsSearchingCnpj] = useState(false);
 
     const [formData, setFormData] = useState({
+        // General
         system_name: '', description: '', brand_color: '',
+        // Visual
+        logo_url: '', login_bg_url: '', welcome_message: '',
+        // Fiscal
         cnpj: '', state_registration: '', municipal_registration: '', fiscal_regime: '',
+        // Address
         street: '', number: '', neighborhood: '', city: '', state: '', zip_code: '',
-        orders_refresh_rate: 60,
-        auth_token_expiration: 60
+        // System
+        orders_refresh_rate: 60, auth_token_expiration: 60,
+        // Operational
+        enable_stock_control: true, global_min_stock: 5,
+        currency_symbol: 'R$', whatsapp_number: '', delivery_message: ''
     });
 
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
@@ -46,8 +54,12 @@ export default function SettingsPage() {
                 setFormData(prev => ({
                     ...prev,
                     ...response.data,
+                    // Ensure defaults
                     orders_refresh_rate: response.data.orders_refresh_rate || 60,
-                    auth_token_expiration: response.data.auth_token_expiration || 60
+                    auth_token_expiration: response.data.auth_token_expiration || 60,
+                    enable_stock_control: response.data.enable_stock_control ?? true,
+                    global_min_stock: response.data.global_min_stock || 5,
+                    currency_symbol: response.data.currency_symbol || 'R$'
                 }));
             } else {
                 toast.error(`Erro ao carregar configurações: ${res.status}`);
@@ -61,11 +73,18 @@ export default function SettingsPage() {
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        let value = e.target.value;
+        let value: any = e.target.value;
         const name = e.target.name;
+        const type = e.target.type;
+
+        // Handle checkbox
+        if (type === 'checkbox') {
+            value = (e.target as HTMLInputElement).checked;
+        }
 
         if (name === 'zip_code') value = formatCEP(value);
         if (name === 'cnpj') value = formatCNPJ(value);
+        if (name === 'whatsapp_number') value = formatPhone(value);
 
         setFormData({ ...formData, [name]: value });
     };
@@ -143,6 +162,7 @@ export default function SettingsPage() {
 
     const tabs = [
         { id: 'general', label: 'Geral', icon: '🏢' },
+        { id: 'operational', label: 'Operacional', icon: '🏭' }, // New tab
         { id: 'fiscal', label: 'Fiscal', icon: '⚖️' },
         { id: 'address', label: 'Endereço', icon: '📍' },
         { id: 'system', label: 'Sistema', icon: '⚙️' },
@@ -199,7 +219,81 @@ export default function SettingsPage() {
                             </div>
                             <div className="col-span-full">
                                 <label className="block text-sm font-bold text-brand-choco mb-1">{t('settings.general.description')}</label>
-                                <textarea name="description" value={formData.description} onChange={handleChange} rows={4} className="w-full p-3 rounded-xl bg-white/50 border border-brand-gold/30 outline-none focus:ring-2 focus:ring-brand-pink/50" />
+                                <textarea name="description" value={formData.description} onChange={handleChange} rows={2} className="w-full p-3 rounded-xl bg-white/50 border border-brand-gold/30 outline-none focus:ring-2 focus:ring-brand-pink/50" />
+                            </div>
+
+                            {/* Visual Settings */}
+                            <div className="col-span-full border-t border-brand-gold/20 pt-4 mt-2">
+                                <h3 className="font-bold text-brand-choco mb-4 flex items-center gap-2">🎨 {t('settings.visual.title')}</h3>
+                                <div className="grid md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label className="block text-sm font-bold text-brand-choco mb-1">{t('settings.visual.logo_url')}</label>
+                                        <input name="logo_url" value={formData.logo_url || ''} onChange={handleChange} className="w-full p-3 rounded-xl bg-white/50 border border-brand-gold/30 outline-none" placeholder="https://..." />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-bold text-brand-choco mb-1">{t('settings.visual.bg_url')}</label>
+                                        <input name="login_bg_url" value={formData.login_bg_url || ''} onChange={handleChange} className="w-full p-3 rounded-xl bg-white/50 border border-brand-gold/30 outline-none" placeholder="https://..." />
+                                    </div>
+                                    <div className="col-span-full">
+                                        <label className="block text-sm font-bold text-brand-choco mb-1">{t('settings.visual.welcome')}</label>
+                                        <input name="welcome_message" value={formData.welcome_message || ''} onChange={handleChange} className="w-full p-3 rounded-xl bg-white/50 border border-brand-gold/30 outline-none" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </GlassCard>
+                )}
+
+                {/* Operational Section */}
+                {activeTab === 'operational' && (
+                    <GlassCard className="p-6 animate-fadeIn">
+                        <div className="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <h3 className="font-bold text-brand-choco mb-4">📦 Estoque</h3>
+                                <div className="flex items-center gap-3 mb-4 p-3 bg-white/40 rounded-xl">
+                                    <input
+                                        type="checkbox"
+                                        name="enable_stock_control"
+                                        checked={formData.enable_stock_control}
+                                        onChange={handleChange}
+                                        className="w-6 h-6 text-brand-pink rounded focus:ring-brand-pink cursor-pointer"
+                                    />
+                                    <label className="font-bold text-brand-choco cursor-pointer">{t('settings.operational.enable_stock')}</label>
+                                </div>
+                                <label className="block text-sm font-bold text-brand-choco mb-1">{t('settings.operational.min_stock')}</label>
+                                <input
+                                    type="number"
+                                    name="global_min_stock"
+                                    value={formData.global_min_stock}
+                                    onChange={handleChange}
+                                    className="w-full p-3 rounded-xl bg-white/50 border border-brand-gold/30 outline-none"
+                                />
+                            </div>
+
+                            <div>
+                                <h3 className="font-bold text-brand-choco mb-4">💬 Integrações</h3>
+                                <div className="grid gap-4">
+                                    <div>
+                                        <label className="block text-sm font-bold text-brand-choco mb-1">{t('settings.operational.currency')}</label>
+                                        <input name="currency_symbol" value={formData.currency_symbol} onChange={handleChange} className="w-full p-3 rounded-xl bg-white/50 border border-brand-gold/30 outline-none" />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-bold text-brand-choco mb-1">{t('settings.operational.whatsapp')}</label>
+                                        <input name="whatsapp_number" value={formData.whatsapp_number || ''} onChange={handleChange} className="w-full p-3 rounded-xl bg-white/50 border border-brand-gold/30 outline-none" placeholder="5511999999999" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="col-span-full">
+                                <label className="block text-sm font-bold text-brand-choco mb-1">{t('settings.operational.delivery_msg')}</label>
+                                <textarea
+                                    name="delivery_message"
+                                    value={formData.delivery_message || ''}
+                                    onChange={handleChange}
+                                    rows={3}
+                                    placeholder="Olá! Seu pedido saiu para entrega..."
+                                    className="w-full p-3 rounded-xl bg-white/50 border border-brand-gold/30 outline-none focus:ring-2 focus:ring-brand-pink/50"
+                                />
                             </div>
                         </div>
                     </GlassCard>

@@ -149,6 +149,20 @@ export const translations = {
                 email_config: 'Configuração de E-mail',
                 email_hint: 'As configurações de envio de e-mail (SMTP) devem ser realizadas diretamente no arquivo .env do servidor por motivos de segurança.'
             },
+            operational: {
+                title: 'Operacional',
+                enable_stock: 'Habilitar Controle de Estoque',
+                min_stock: 'Estoque Mínimo Global (Alerta)',
+                currency: 'Símbolo da Moeda',
+                whatsapp: 'WhatsApp da Loja',
+                delivery_msg: 'Mensagem de Despacho'
+            },
+            visual: {
+                title: 'Identidade Visual',
+                logo_url: 'URL da Logo',
+                bg_url: 'URL Fundo Login',
+                welcome: 'Mensagem de Boas-vindas'
+            },
             save_btn: 'Salvar Configurações 💾'
         }
     },
@@ -299,6 +313,20 @@ export const translations = {
                 token_expiration_hint: 'Time user stays logged in. Default: 60 min.',
                 email_config: 'Email Configuration',
                 email_hint: 'Email settings (SMTP) must be configured directly in the server .env file for security reasons.'
+            },
+            operational: {
+                title: 'Operational',
+                enable_stock: 'Enable Stock Control',
+                min_stock: 'Global Min Stock (Alert)',
+                currency: 'Currency Symbol',
+                whatsapp: 'Store WhatsApp',
+                delivery_msg: 'Dispatch Message'
+            },
+            visual: {
+                title: 'Visual Identity',
+                logo_url: 'Logo URL',
+                bg_url: 'Login Background URL',
+                welcome: 'Welcome Message'
             },
             save_btn: 'Save Settings 💾'
         }

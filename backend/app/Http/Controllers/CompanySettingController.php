@@ -38,7 +38,21 @@ class CompanySettingController extends Controller
             'state' => 'nullable|string|max:2',
             'zip_code' => 'nullable|string|max:20',
             'orders_refresh_rate' => 'nullable|integer|min:10|max:3600',
-            'auth_token_expiration' => 'nullable|integer|min:5|max:43200'
+            'auth_token_expiration' => 'nullable|integer|min:5|max:43200',
+            
+            // Stock & Operations
+            'enable_stock_control' => 'nullable|boolean',
+            'global_min_stock' => 'nullable|integer|min:0',
+            
+            // Visual
+            'logo_url' => 'nullable|url|max:255',
+            'login_bg_url' => 'nullable|url|max:255',
+            'welcome_message' => 'nullable|string|max:255',
+            
+            // Integrations
+            'currency_symbol' => 'nullable|string|max:10',
+            'whatsapp_number' => 'nullable|string|max:20',
+            'delivery_message' => 'nullable|string'
         ]);
 
         $settings->update($validated);
