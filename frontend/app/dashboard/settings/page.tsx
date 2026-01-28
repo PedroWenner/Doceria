@@ -7,6 +7,7 @@ import { useLanguage } from '@/app/context/LanguageContext';
 import LoadingSpinner from '@/app/components/LoadingSpinner';
 import { formatCEP, formatCNPJ, formatPhone } from '@/app/utils/formatters';
 import { fetchAddressByCEP } from '@/app/services/cepService';
+import { fetchCompanyByCNPJ } from '@/app/services/cnpjService';
 import toast from 'react-hot-toast';
 
 export default function SettingsPage() {
@@ -14,6 +15,7 @@ export default function SettingsPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     const [isSearchingCep, setIsSearchingCep] = useState(false);
+    const [isSearchingCnpj, setIsSearchingCnpj] = useState(false);
     const [formData, setFormData] = useState({
         system_name: '', description: '', brand_color: '',
         cnpj: '', state_registration: '', municipal_registration: '', fiscal_regime: '',
@@ -27,9 +29,8 @@ export default function SettingsPage() {
         fetchSettings();
     }, []);
 
-    // ... fetchSettings (unchanged code for now, let's preserve it or re-impl if strictly needed, but tool replaces contiguous blocks)
-
     const fetchSettings = async () => {
+        // ... (unchanged)
         try {
             const res = await fetch(`${apiUrl}/settings`, {
                 headers: { Authorization: `Bearer ${token}` }
@@ -54,15 +55,14 @@ export default function SettingsPage() {
         let value = e.target.value;
         const name = e.target.name;
 
-        // Apply Formatters
         if (name === 'zip_code') value = formatCEP(value);
         if (name === 'cnpj') value = formatCNPJ(value);
-        // Phone not in settings yet, but good to have if we add it
 
         setFormData({ ...formData, [name]: value });
     };
 
     const handleBlurCEP = async () => {
+        // ... (unchanged)
         const cep = formData.zip_code.replace(/\D/g, '');
         if (cep.length === 8) {
             setIsSearchingCep(true);
@@ -78,9 +78,33 @@ export default function SettingsPage() {
                     state: address.uf
                 }));
                 toast.success('Endereço encontrado! 🗺️');
-                // Optional: focus number field logic could go here via ref
             } else {
                 toast.error('CEP não encontrado.');
+            }
+        }
+    };
+
+    const handleBlurCNPJ = async () => {
+        const cnpj = formData.cnpj.replace(/\D/g, '');
+        if (cnpj.length === 14) {
+            setIsSearchingCnpj(true);
+            const company = await fetchCompanyByCNPJ(cnpj);
+            setIsSearchingCnpj(false);
+
+            if (company) {
+                setFormData(prev => ({
+                    ...prev,
+                    system_name: company.nome_fantasia || company.razao_social,
+                    zip_code: formatCEP(company.cep),
+                    street: company.logradouro,
+                    number: company.numero,
+                    neighborhood: company.bairro,
+                    city: company.municipio,
+                    state: company.uf
+                }));
+                toast.success('Dados da empresa carregados! 🏢');
+            } else {
+                toast.error('CNPJ não encontrado na Receita.');
             }
         }
     };
@@ -124,7 +148,13 @@ export default function SettingsPage() {
                     <div className="grid md:grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-bold text-brand-choco mb-1">{t('settings.general.name')}</label>
-                            <input name="system_name" value={formData.system_name} onChange={handleChange} className="w-full p-2 rounded bg-white/50 border border-brand-gold/30" />
+                            <input
+                                name="system_name"
+                                value={formData.system_name}
+                                onChange={handleChange}
+                                disabled={isSearchingCnpj}
+                                className="w-full p-2 rounded bg-white/50 border border-brand-gold/30 disabled:opacity-50"
+                            />
                         </div>
                         <div>
                             <label className="block text-sm font-bold text-brand-choco mb-1">{t('settings.general.brand_color')}</label>
@@ -148,7 +178,21 @@ export default function SettingsPage() {
                     <div className="grid md:grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-bold text-brand-choco mb-1">{t('settings.fiscal.cnpj')}</label>
-                            <input name="cnpj" value={formData.cnpj || ''} onChange={handleChange} className="w-full p-2 rounded bg-white/50 border border-brand-gold/30" />
+                            <div className="relative">
+                                <input
+                                    name="cnpj"
+                                    value={formData.cnpj || ''}
+                                    onChange={handleChange}
+                                    onBlur={handleBlurCNPJ}
+                                    placeholder="00.000.000/0000-00"
+                                    className="w-full p-2 rounded bg-white/50 border border-brand-gold/30"
+                                />
+                                {isSearchingCnpj && (
+                                    <span className="absolute right-2 top-2 text-xs text-brand-pink font-bold animate-pulse">
+                                        🔍
+                                    </span>
+                                )}
+                            </div>
                         </div>
                         <div>
                             <label className="block text-sm font-bold text-brand-choco mb-1">{t('settings.fiscal.regime')}</label>
