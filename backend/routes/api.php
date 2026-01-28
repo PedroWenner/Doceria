@@ -39,4 +39,8 @@ Route::group(['middleware' => ['api', 'auth:api', 'role:admin']], function () {
     // Product Management
     Route::get('/categories', [App\Http\Controllers\CategoryController::class, 'index']);
     Route::apiResource('products', App\Http\Controllers\ProductController::class);
+
+    // System Settings
+    Route::get('settings', [App\Http\Controllers\CompanySettingController::class, 'show']);
+    Route::put('settings', [App\Http\Controllers\CompanySettingController::class, 'update']);
 });

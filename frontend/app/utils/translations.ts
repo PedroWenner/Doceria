@@ -111,6 +111,32 @@ export const translations = {
                 'Pix': 'Pix',
                 'Cash': 'Dinheiro'
             }
+        },
+        settings: {
+            title: 'Parâmetros do Sistema',
+            success: 'Configurações salvas com sucesso!',
+            general: {
+                title: 'Geral',
+                name: 'Nome do Sistema',
+                description: 'Descrição / Sobre',
+                brand_color: 'Cor da Marca'
+            },
+            fiscal: {
+                title: 'Dados Fiscais',
+                cnpj: 'CNPJ',
+                ie: 'Inscrição Estadual',
+                im: 'Inscrição Municipal',
+                regime: 'Regime Tributário'
+            },
+            address: {
+                title: 'Endereço',
+                street: 'Logradouro',
+                number: 'Número',
+                neighborhood: 'Bairro',
+                city: 'Cidade',
+                state: 'Estado',
+                zip: 'CEP'
+            }
         }
     },
     en: {
@@ -222,6 +248,32 @@ export const translations = {
                 'Credit Card': 'Credit Card',
                 'Pix': 'Pix',
                 'Cash': 'Cash'
+            }
+        },
+        settings: {
+            title: 'System Settings',
+            success: 'Settings updated successfully!',
+            general: {
+                title: 'General',
+                name: 'System Name',
+                description: 'Description / About',
+                brand_color: 'Brand Color'
+            },
+            fiscal: {
+                title: 'Fiscal Data',
+                cnpj: 'Tax ID (CNPJ)',
+                ie: 'State Registration',
+                im: 'Municipal Registration',
+                regime: 'Fiscal Regime'
+            },
+            address: {
+                title: 'Address',
+                street: 'Street',
+                number: 'Number',
+                neighborhood: 'Neighborhood',
+                city: 'City',
+                state: 'State',
+                zip: 'Zip Code'
             }
         }
     }

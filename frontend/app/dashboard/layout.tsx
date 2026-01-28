@@ -46,6 +46,7 @@ export default function DashboardLayout({
         { icon: '👥', label: 'sidebar.users', href: '/dashboard/users' },
         { icon: '🧁', label: 'sidebar.products', href: '/dashboard/products' },
         { icon: '📋', label: 'sidebar.audit', href: '/dashboard/audit' },
+        { icon: '⚙️', label: 'settings.title', href: '/dashboard/settings' },
     ];
 
     return (
