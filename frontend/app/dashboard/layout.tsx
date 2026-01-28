@@ -19,8 +19,34 @@ export default function DashboardLayout({
     const router = useRouter();
     const pathname = usePathname();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [logoUrl, setLogoUrl] = useState<string | null>(null);
+    const [systemName, setSystemName] = useState<string>('Dashboard');
     const { t } = useLanguage();
     const { user, logout, isLoading } = useAuth();
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+
+    React.useEffect(() => {
+        const fetchSettings = async () => {
+            try {
+                // If user is logged in, we can fetch settings
+                if (user) {
+                    const token = document.cookie.split('; ').find(row => row.startsWith('auth_token='))?.split('=')[1];
+                    const res = await fetch(`${apiUrl}/settings`, {
+                        headers: { Authorization: `Bearer ${token}` }
+                    });
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (data.data.logo_url) setLogoUrl(data.data.logo_url);
+                        if (data.data.system_name) setSystemName(data.data.system_name);
+                    }
+                }
+            } catch (e) {
+                console.error("Failed to fetch settings for layout", e);
+            }
+        };
+
+        if (user) fetchSettings();
+    }, [user, apiUrl]);
 
     React.useEffect(() => {
         if (!isLoading && !user) {
@@ -55,7 +81,15 @@ export default function DashboardLayout({
         <div className="min-h-screen bg-brand-cream/20 flex flex-col md:flex-row">
             {/* Mobile Header */}
             <header className="md:hidden h-16 bg-white/40 backdrop-blur-md border-b border-white/50 flex items-center justify-between px-4 fixed top-0 w-full z-30">
-                <span className="text-xl font-bold text-brand-choco">SweetStore</span>
+                {logoUrl ? (
+                    <img
+                        src={`${apiUrl.replace('/api', '')}/storage/${logoUrl}`}
+                        alt="Logo"
+                        className="h-8 object-contain"
+                    />
+                ) : (
+                    <span className="text-xl font-bold text-brand-choco">SweetStore</span>
+                )}
                 <button
                     onClick={() => setIsSidebarOpen(!isSidebarOpen)}
                     className="p-2 rounded-lg text-brand-choco hover:bg-brand-gold/20 cursor-pointer transition-colors"
@@ -75,24 +109,33 @@ export default function DashboardLayout({
             {/* Sidebar */}
             <aside className={`
                 w-64 bg-white/40 backdrop-blur-xl border-r border-white/50 h-screen fixed top-0 left-0 p-6 flex flex-col z-40
-                transition-transform duration-300 ease-in-out shadow-2xl md:shadow-none
+                transition-transform duration-300 ease-in-out shadow-2xl md:shadow-none overflow-y-auto scrollbar-thin scrollbar-thumb-brand-pink/20
                 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
                 md:translate-x-0
             `}>
-                <div className="mb-10">
-                    <div className="flex justify-between items-center mb-4">
-                        <div>
-                            <h1 className="text-2xl font-bold text-brand-choco">SweetStore</h1>
-                            <p className="text-xs text-brand-choco/60 font-medium tracking-widest uppercase mt-1">Dashboard</p>
+                <div className="mb-8 flex flex-col items-center text-center">
+                    <div className="mb-4 w-full">
+                        <div className="flex flex-col items-center justify-center">
+                            {logoUrl ? (
+                                <img
+                                    src={`${apiUrl.replace('/api', '')}/storage/${logoUrl}`}
+                                    alt="Logo"
+                                    className="h-24 w-auto object-contain mb-3 drop-shadow-sm rounded-2xl"
+                                />
+                            ) : (
+                                <h1 className="text-3xl font-bold text-brand-choco font-serif italic tracking-tight">SweetStore</h1>
+                            )}
+                            <p className="text-xl text-brand-choco/90 font-serif italic font-bold mt-1 leading-tight">{systemName}</p>
+                            <div className="h-0.5 w-16 bg-brand-gold/40 mt-3 rounded-full mx-auto"></div>
                         </div>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 justify-center mt-2">
                         <ThemeToggle />
                         <LanguageToggle />
                     </div>
                 </div>
 
-                <nav className="flex-1 space-y-2">
+                <nav className="flex-1 space-y-2 w-full">
                     {menuItems.map((item) => {
                         const isActive = pathname === item.href;
                         return (
@@ -103,11 +146,11 @@ export default function DashboardLayout({
                                 className={`
                                     block px-4 py-3 rounded-xl transition-all cursor-pointer flex items-center gap-3
                                     ${isActive
-                                        ? 'bg-brand-pink/20 text-brand-choco font-bold border border-brand-pink/30 shadow-sm'
+                                        ? 'bg-brand-pink/20 text-brand-choco font-bold border border-brand-pink/30 shadow-sm translate-x-1'
                                         : 'text-brand-choco/80 font-medium hover:bg-white/40 hover:scale-[1.02] hover:text-brand-choco'}
                                 `}
                             >
-                                <span>{item.icon}</span>
+                                <span className="text-xl">{item.icon}</span>
                                 <span>{t(item.label) || item.label}</span>
                             </Link>
                         );

@@ -5,6 +5,7 @@ import GlassCard from '@/app/components/GlassCard';
 import LoadingSpinner from '@/app/components/LoadingSpinner';
 import Cookies from 'js-cookie';
 import { useLanguage } from '@/app/context/LanguageContext';
+import { toast } from 'react-hot-toast';
 
 interface User {
     id: number;
@@ -76,7 +77,7 @@ export default function UsersPage() {
 
         try {
             const res = await fetch(`${apiUrl}/users/${editingUser.id}/roles`, {
-                method: 'PUT',
+                method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     Authorization: `Bearer ${token}`
@@ -87,8 +88,9 @@ export default function UsersPage() {
             if (res.ok) {
                 await fetchData(); // Refresh list
                 setEditingUser(null);
+                toast.success(t('Usuário atualizado com sucesso'));
             } else {
-                toast.error(t('users.update_error'));
+                toast.error(t('Erro ao atualizar usuário'));
             }
         } catch (error) {
             console.error('Update failed', error);
@@ -153,10 +155,11 @@ export default function UsersPage() {
                             {roles.map(role => (
                                 <label key={role.id} className="flex items-center space-x-3 p-3 rounded-lg hover:bg-white/40 cursor-pointer">
                                     <input
-                                        type="checkbox"
+                                        type="radio"
+                                        name="role_selection"
                                         checked={selectedRoles.includes(role.slug)}
-                                        onChange={() => handleRoleToggle(role.slug)}
-                                        className="h-5 w-5 text-brand-pink focus:ring-brand-pink border-gray-300 rounded"
+                                        onChange={() => setSelectedRoles([role.slug])}
+                                        className="h-5 w-5 text-brand-pink focus:ring-brand-pink border-gray-300"
                                     />
                                     <span className="text-brand-choco font-medium">{role.name}</span>
                                 </label>
