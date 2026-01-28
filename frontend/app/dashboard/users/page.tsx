@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import GlassCard from '@/app/components/GlassCard';
 import Cookies from 'js-cookie';
+import { useLanguage } from '@/app/context/LanguageContext';
 
 interface User {
     id: number;
@@ -24,6 +25,8 @@ export default function UsersPage() {
     const [editingUser, setEditingUser] = useState<User | null>(null);
     const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
     const [isSaving, setIsSaving] = useState(false);
+
+    const { t } = useLanguage();
 
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
     const token = Cookies.get('auth_token');
@@ -84,7 +87,7 @@ export default function UsersPage() {
                 await fetchData(); // Refresh list
                 setEditingUser(null);
             } else {
-                alert('Failed to update roles');
+                alert(t('users.update_error'));
             }
         } catch (error) {
             console.error('Update failed', error);
@@ -93,21 +96,21 @@ export default function UsersPage() {
         }
     };
 
-    if (isLoading) return <div className="text-brand-choco">Loading...</div>;
+    if (isLoading) return <div className="text-brand-choco">{t('common.loading')}</div>;
 
     return (
         <div>
-            <h1 className="text-3xl font-bold text-brand-choco mb-8">User Management</h1>
+            <h1 className="text-3xl font-bold text-brand-choco mb-8">{t('users.title')}</h1>
 
             <GlassCard className="overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left min-w-[600px]">
                         <thead className="bg-brand-pink/20 text-brand-choco uppercase text-sm font-bold">
                             <tr>
-                                <th className="px-6 py-4">Name</th>
-                                <th className="px-6 py-4">Email</th>
-                                <th className="px-6 py-4">Roles</th>
-                                <th className="px-6 py-4 text-center">Actions</th>
+                                <th className="px-6 py-4">{t('common.name')}</th>
+                                <th className="px-6 py-4">{t('users.email')}</th>
+                                <th className="px-6 py-4">{t('users.roles')}</th>
+                                <th className="px-6 py-4 text-center">{t('common.actions')}</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-brand-choco/10">
@@ -128,7 +131,7 @@ export default function UsersPage() {
                                         <button
                                             onClick={() => handleEdit(user)}
                                             className="p-2 text-brand-pink hover:text-brand-choco hover:bg-brand-pink/10 rounded-full transition-all"
-                                            title="Edit Roles"
+                                            title={t('users.edit_roles')}
                                         >
                                             ✏️
                                         </button>
@@ -143,7 +146,7 @@ export default function UsersPage() {
             {editingUser && (
                 <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
                     <GlassCard className="w-full max-w-md">
-                        <h2 className="text-2xl font-bold text-brand-choco mb-4">Edit Roles: {editingUser.name}</h2>
+                        <h2 className="text-2xl font-bold text-brand-choco mb-4">{t('users.edit_roles')}: {editingUser.name}</h2>
 
                         <div className="space-y-3 mb-6">
                             {roles.map(role => (
@@ -164,14 +167,14 @@ export default function UsersPage() {
                                 onClick={() => setEditingUser(null)}
                                 className="px-4 py-2 rounded-lg text-brand-choco/60 hover:bg-white/40 font-bold transition-colors"
                             >
-                                Cancel
+                                {t('common.cancel')}
                             </button>
                             <button
                                 onClick={handleSave}
                                 disabled={isSaving}
                                 className="px-4 py-2 rounded-lg bg-brand-choco text-brand-cream hover:bg-brand-choco/90 font-bold transition-colors disabled:opacity-50"
                             >
-                                {isSaving ? 'Saving...' : 'Save Changes'}
+                                {isSaving ? t('common.saving') : t('users.save_changes')}
                             </button>
                         </div>
                     </GlassCard>

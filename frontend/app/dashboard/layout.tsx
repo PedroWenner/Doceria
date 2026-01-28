@@ -5,6 +5,8 @@ import Link from 'next/link';
 import Cookies from 'js-cookie';
 import { useRouter, usePathname } from 'next/navigation';
 import ThemeToggle from '@/app/components/ThemeToggle';
+import LanguageToggle from '@/app/components/LanguageToggle';
+import { useLanguage } from '@/app/context/LanguageContext';
 
 export default function DashboardLayout({
     children,
@@ -14,6 +16,7 @@ export default function DashboardLayout({
     const router = useRouter();
     const pathname = usePathname();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const { t } = useLanguage();
 
     const handleLogout = async () => {
         try {
@@ -38,10 +41,10 @@ export default function DashboardLayout({
     };
 
     const navItems = [
-        { href: '/dashboard', label: 'Overview', icon: '📊' },
-        { href: '/dashboard/orders', label: 'Orders', icon: '🛍️' },
-        { href: '/dashboard/products', label: 'Products', icon: '🍰' },
-        { href: '/dashboard/users', label: 'Users', icon: '👥' },
+        { href: '/dashboard', label: t('sidebar.dashboard'), icon: '📊' },
+        { href: '/dashboard/orders', label: 'Orders', icon: '🛍️' }, // Add to dict later
+        { href: '/dashboard/products', label: t('sidebar.products'), icon: '🍰' },
+        { href: '/dashboard/users', label: t('sidebar.users'), icon: '👥' },
     ];
 
     return (
@@ -72,12 +75,17 @@ export default function DashboardLayout({
                 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
                 md:translate-x-0
             `}>
-                <div className="mb-10 flex justify-between items-center">
-                    <div>
-                        <h1 className="text-2xl font-bold text-brand-choco">SweetStore</h1>
-                        <p className="text-xs text-brand-choco/60 font-medium tracking-widest uppercase mt-1">Dashboard</p>
+                <div className="mb-10">
+                    <div className="flex justify-between items-center mb-4">
+                        <div>
+                            <h1 className="text-2xl font-bold text-brand-choco">SweetStore</h1>
+                            <p className="text-xs text-brand-choco/60 font-medium tracking-widest uppercase mt-1">Dashboard</p>
+                        </div>
                     </div>
-                    <ThemeToggle />
+                    <div className="flex gap-2">
+                        <ThemeToggle />
+                        <LanguageToggle />
+                    </div>
                 </div>
 
                 <nav className="flex-1 space-y-2">
@@ -108,7 +116,7 @@ export default function DashboardLayout({
                         className="w-full text-left flex items-center mb-4 px-4 py-2 rounded-lg hover:bg-red-50 text-red-600 transition-colors cursor-pointer group"
                     >
                         <span className="mr-2 group-hover:scale-110 transition-transform">🚪</span>
-                        <span className="font-medium">Sign Out</span>
+                        <span className="font-medium">{t('sidebar.logout')}</span>
                     </button>
 
                     <div className="flex items-center space-x-3 cursor-default">
