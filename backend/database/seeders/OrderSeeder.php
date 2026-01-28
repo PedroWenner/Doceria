@@ -24,37 +24,40 @@ class OrderSeeder extends Seeder
             return;
         }
 
-        // Create 15 orders
-        for ($i = 0; $i < 15; $i++) {
-            $status = $statuses[array_rand($statuses)];
+        // Create 20 orders with deterministic statuses for easier testing
+        for ($i = 0; $i < 20; $i++) {
+            $deliveryType = $i % 2 === 0 ? 'delivery' : 'pickup'; // Alternates
             
-            $deliveryType = rand(0, 1) ? 'delivery' : 'pickup';
-            
+            // Status distribution
+            $status = 'pending';
+            if ($i > 5) $status = 'preparing';
+            if ($i > 10) $status = 'ready'; // Good for testing dispatch
+            if ($i > 15) $status = 'delivered';
+
             $order = Order::create([
-                'user_id' => 1, // Admin for now, or random
-                'customer_name' => 'Customer ' . ($i + 1),
-                'customer_phone' => '551199999' . sprintf('%04d', rand(0, 9999)),
+                'user_id' => 1, 
+                'customer_name' => "Cliente " . ($deliveryType === 'delivery' ? 'Delivery' : 'Retirada') . " " . ($i + 1),
+                'customer_phone' => '551199999' . sprintf('%04d', $i),
                 'status' => $status,
-                'total_amount' => 0, // Will update below
+                'total_amount' => 0, 
                 'payment_method' => $paymentMethods[array_rand($paymentMethods)],
                 'delivery_type' => $deliveryType,
                 'delivery_address' => $deliveryType === 'delivery' ? [
-                    'street' => 'Rua das Flores',
-                    'number' => rand(1, 400),
-                    'neighborhood' => 'Centro',
+                    'street' => 'Av. Paulista',
+                    'number' => 1000 + $i,
+                    'neighborhood' => 'Bela Vista',
                     'city' => 'São Paulo',
-                    'zip_code' => '01001-000'
+                    'zip_code' => '01310-100'
                 ] : null,
-                'notes' => rand(0, 1) ? 'Sem cebola' : null
+                'courier_name' => ($status === 'delivered' && $deliveryType === 'delivery') ? 'Motoboy Teste' : null,
+                'notes' => rand(0, 1) ? 'Capricha no recheio!' : null
             ]);
 
             $total = 0;
-
-            // 1 to 4 items per order
-            $itemCount = rand(1, 4);
+            $itemCount = rand(1, 3);
             for ($j = 0; $j < $itemCount; $j++) {
                 $product = $products->random();
-                $qty = rand(1, 3);
+                $qty = rand(1, 2);
                 $price = $product->price;
 
                 OrderItem::create([
@@ -66,7 +69,6 @@ class OrderSeeder extends Seeder
 
                 $total += $qty * $price;
             }
-
             $order->update(['total_amount' => $total]);
         }
     }

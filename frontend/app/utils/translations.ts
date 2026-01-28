@@ -99,7 +99,18 @@ export const translations = {
             delivered: 'Entregue',
             canceled: 'Cancelado',
             items: 'itens',
-            total: 'Total'
+            total: 'Total',
+            empty: 'Sem pedidos',
+            notes: 'Obs',
+            delivery_type: {
+                delivery: 'Entrega 🛵',
+                pickup: 'Retirada 🏪'
+            },
+            payment: {
+                'Credit Card': 'Crédito',
+                'Pix': 'Pix',
+                'Cash': 'Dinheiro'
+            }
         }
     },
     en: {
@@ -200,7 +211,18 @@ export const translations = {
             delivered: 'Delivered',
             canceled: 'Canceled',
             items: 'items',
-            total: 'Total'
+            total: 'Total',
+            empty: 'No orders',
+            notes: 'Note',
+            delivery_type: {
+                delivery: 'Delivery 🛵',
+                pickup: 'Pickup 🏪'
+            },
+            payment: {
+                'Credit Card': 'Credit Card',
+                'Pix': 'Pix',
+                'Cash': 'Cash'
+            }
         }
     }
 };

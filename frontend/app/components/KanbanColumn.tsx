@@ -39,7 +39,7 @@ export default function KanbanColumn({ id, title, orders, color }: Props) {
 
                 {orders.length === 0 && (
                     <div className="h-24 flex items-center justify-center text-brand-choco/40 text-sm border-2 border-dashed border-brand-choco/10 rounded-lg">
-                        Empty
+                        {t('orders.empty')}
                     </div>
                 )}
             </div>
