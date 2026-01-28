@@ -37,7 +37,8 @@ export const translations = {
             logout: 'Sair',
             menu: 'Menu',
             settings: 'Configurações',
-            audit: 'Auditoria'
+            audit: 'Auditoria',
+            session_expires: 'Sessão expira em'
         },
         dashboard: {
             welcome: 'Bem-vindo de volta',
@@ -143,6 +144,8 @@ export const translations = {
                 title: 'Sistema',
                 refresh_rate: 'Intervalo de Atualização de Pedidos (segundos)',
                 refresh_rate_hint: 'Tempo entre cada busca automática de novos pedidos no painel.',
+                token_expiration: 'Expiração do Token de Acesso (minutos)',
+                token_expiration_hint: 'Tempo que o usuário permanece logado. Padrão: 60 min.',
                 email_config: 'Configuração de E-mail',
                 email_hint: 'As configurações de envio de e-mail (SMTP) devem ser realizadas diretamente no arquivo .env do servidor por motivos de segurança.'
             },
@@ -185,7 +188,8 @@ export const translations = {
             logout: 'Logout',
             menu: 'Menu',
             settings: 'Settings',
-            audit: 'Audit Logs'
+            audit: 'Audit Logs',
+            session_expires: 'Session expires in'
         },
         dashboard: {
             welcome: 'Welcome back',
@@ -291,6 +295,8 @@ export const translations = {
                 title: 'System',
                 refresh_rate: 'Order Refresh Interval (seconds)',
                 refresh_rate_hint: 'Time between automatic order fetches in the dashboard.',
+                token_expiration: 'Access Token Expiration (minutes)',
+                token_expiration_hint: 'Time user stays logged in. Default: 60 min.',
                 email_config: 'Email Configuration',
                 email_hint: 'Email settings (SMTP) must be configured directly in the server .env file for security reasons.'
             },

@@ -26,6 +26,7 @@ class CompanySetting extends Model implements Auditable
         'city',
         'state',
         'zip_code',
-        'orders_refresh_rate'
+        'orders_refresh_rate',
+        'auth_token_expiration'
     ];
 }

@@ -37,6 +37,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         try {
             const res = await fetch(`${apiUrl}/auth/me`, {
+                method: 'POST',
                 headers: { Authorization: `Bearer ${token}` }
             });
 

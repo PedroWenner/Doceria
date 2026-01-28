@@ -30,6 +30,12 @@ class AuthController extends Controller
     {
         $credentials = request(['email', 'password']);
 
+        // Set dynamic TTL
+        $settings = \App\Models\CompanySetting::first();
+        if ($settings && $settings->auth_token_expiration) {
+            auth('api')->factory()->setTTL($settings->auth_token_expiration);
+        }
+
         if (! $token = auth('api')->attempt($credentials)) {
             return $this->error('Unauthorized', 401);
         }
@@ -66,6 +72,12 @@ class AuthController extends Controller
      */
     public function refresh()
     {
+        // Set dynamic TTL
+        $settings = \App\Models\CompanySetting::first();
+        if ($settings && $settings->auth_token_expiration) {
+            auth('api')->factory()->setTTL($settings->auth_token_expiration);
+        }
+        
         return $this->respondWithToken(auth('api')->refresh());
     }
 

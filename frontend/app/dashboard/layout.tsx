@@ -9,6 +9,7 @@ import { useLanguage } from '@/app/context/LanguageContext';
 import { useAuth } from '@/app/context/AuthContext';
 import { Toaster } from 'react-hot-toast';
 import LoadingSpinner from '@/app/components/LoadingSpinner';
+import SessionTimer from '@/app/components/SessionTimer';
 
 export default function DashboardLayout({
     children,
@@ -114,6 +115,8 @@ export default function DashboardLayout({
                 </nav>
 
                 <div className="mt-auto pt-6 border-t border-brand-choco/10">
+                    <SessionTimer />
+
                     <button
                         onClick={logout}
                         className="w-full text-left flex items-center mb-4 px-4 py-2 rounded-lg hover:bg-red-50 text-red-600 transition-colors cursor-pointer group"

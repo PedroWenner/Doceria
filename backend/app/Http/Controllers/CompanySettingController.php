@@ -36,7 +36,9 @@ class CompanySettingController extends Controller
             'neighborhood' => 'nullable|string|max:100',
             'city' => 'nullable|string|max:100',
             'state' => 'nullable|string|max:2',
-            'zip_code' => 'nullable|string|max:20'
+            'zip_code' => 'nullable|string|max:20',
+            'orders_refresh_rate' => 'nullable|integer|min:10|max:3600',
+            'auth_token_expiration' => 'nullable|integer|min:5|max:43200'
         ]);
 
         $settings->update($validated);

@@ -24,7 +24,8 @@ export default function SettingsPage() {
         system_name: '', description: '', brand_color: '',
         cnpj: '', state_registration: '', municipal_registration: '', fiscal_regime: '',
         street: '', number: '', neighborhood: '', city: '', state: '', zip_code: '',
-        orders_refresh_rate: 60
+        orders_refresh_rate: 60,
+        auth_token_expiration: 60
     });
 
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
@@ -45,7 +46,8 @@ export default function SettingsPage() {
                 setFormData(prev => ({
                     ...prev,
                     ...response.data,
-                    orders_refresh_rate: response.data.orders_refresh_rate || 60
+                    orders_refresh_rate: response.data.orders_refresh_rate || 60,
+                    auth_token_expiration: response.data.auth_token_expiration || 60
                 }));
             } else {
                 toast.error(`Erro ao carregar configurações: ${res.status}`);
@@ -326,6 +328,22 @@ export default function SettingsPage() {
                                     onChange={handleChange}
                                     min="10"
                                     max="3600"
+                                    className="w-full p-3 rounded-xl bg-white/50 border border-brand-gold/30 outline-none focus:ring-2 focus:ring-brand-pink/50 mb-6"
+                                />
+
+                                <label className="block text-sm font-bold text-brand-choco mb-1">
+                                    🔑 {t('settings.system.token_expiration')}
+                                </label>
+                                <p className="text-xs text-brand-choco/70 mb-2">
+                                    {t('settings.system.token_expiration_hint')}
+                                </p>
+                                <input
+                                    type="number"
+                                    name="auth_token_expiration"
+                                    value={formData.auth_token_expiration || ''}
+                                    onChange={handleChange}
+                                    min="5"
+                                    max="43200"
                                     className="w-full p-3 rounded-xl bg-white/50 border border-brand-gold/30 outline-none focus:ring-2 focus:ring-brand-pink/50"
                                 />
                             </div>
