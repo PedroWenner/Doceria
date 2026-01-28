@@ -43,10 +43,30 @@ export default function ProductsPage() {
     });
     const [isSaving, setIsSaving] = useState(false);
 
+    const [stockSettings, setStockSettings] = useState({ enabled: true, global_min: 5 });
+
     useEffect(() => {
         fetchProducts();
         fetchCategories();
+        fetchSettings();
     }, []);
+
+    const fetchSettings = async () => {
+        try {
+            const res = await fetch(`${apiUrl}/settings`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const response = await res.json();
+                setStockSettings({
+                    enabled: response.data.enable_stock_control ?? true,
+                    global_min: response.data.global_min_stock || 5
+                });
+            }
+        } catch (error) {
+            console.error('Failed to fetch settings', error);
+        }
+    };
 
     const fetchProducts = async () => {
         try {
@@ -122,8 +142,18 @@ export default function ProductsPage() {
             data.append('name', formData.name);
             data.append('description', formData.description);
             data.append('price', parseCurrency(formData.price)); // Send raw float to API
-            data.append('stock_quantity', formData.stock_quantity);
-            data.append('min_stock_level', formData.min_stock_level);
+
+            // Handle Stock Logic
+            if (stockSettings.enabled) {
+                data.append('stock_quantity', formData.stock_quantity);
+                data.append('min_stock_level', formData.min_stock_level);
+            } else {
+                // If disabled, send defaults (e.g. 0 or high number? 0 is safer for logic, but might show OOS)
+                // Let's send 0 for now, assuming logic checks enabled_stock_control first
+                data.append('stock_quantity', '0');
+                data.append('min_stock_level', '0');
+            }
+
             data.append('sku', formData.sku);
             data.append('status', formData.status);
             data.append('category_id', formData.category_id);
@@ -277,18 +307,20 @@ export default function ProductsPage() {
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-bold text-brand-choco mb-1">{t('products.stock')}</label>
-                                    <input required type="number" className="w-full p-2 rounded-lg bg-white/50 border border-white/60 focus:outline-none focus:ring-2 focus:ring-brand-pink/50"
-                                        value={formData.stock_quantity} onChange={e => setFormData({ ...formData, stock_quantity: e.target.value })} />
+                            {stockSettings.enabled && (
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-bold text-brand-choco mb-1">{t('products.stock')}</label>
+                                        <input required type="number" className="w-full p-2 rounded-lg bg-white/50 border border-white/60 focus:outline-none focus:ring-2 focus:ring-brand-pink/50"
+                                            value={formData.stock_quantity} onChange={e => setFormData({ ...formData, stock_quantity: e.target.value })} />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-bold text-brand-choco mb-1">{t('products.min_stock')}</label>
+                                        <input required type="number" className="w-full p-2 rounded-lg bg-white/50 border border-white/60 focus:outline-none focus:ring-2 focus:ring-brand-pink/50"
+                                            value={formData.min_stock_level} onChange={e => setFormData({ ...formData, min_stock_level: e.target.value })} />
+                                    </div>
                                 </div>
-                                <div>
-                                    <label className="block text-sm font-bold text-brand-choco mb-1">{t('products.min_stock')}</label>
-                                    <input required type="number" className="w-full p-2 rounded-lg bg-white/50 border border-white/60 focus:outline-none focus:ring-2 focus:ring-brand-pink/50"
-                                        value={formData.min_stock_level} onChange={e => setFormData({ ...formData, min_stock_level: e.target.value })} />
-                                </div>
-                            </div>
+                            )}
 
                             <div>
                                 <label className="block text-sm font-bold text-brand-choco mb-1">{t('common.status')}</label>

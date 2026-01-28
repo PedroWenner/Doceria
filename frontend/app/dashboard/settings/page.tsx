@@ -33,8 +33,11 @@ export default function SettingsPage() {
         orders_refresh_rate: 60, auth_token_expiration: 60,
         // Operational
         enable_stock_control: true, global_min_stock: 5,
-        currency_symbol: 'R$', whatsapp_number: '', delivery_message: ''
+        whatsapp_number: '', delivery_message: ''
     });
+
+    const [logoFile, setLogoFile] = useState<File | null>(null);
+    const [bgFile, setBgFile] = useState<File | null>(null);
 
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
     const token = Cookies.get('auth_token');
@@ -58,8 +61,7 @@ export default function SettingsPage() {
                     orders_refresh_rate: response.data.orders_refresh_rate || 60,
                     auth_token_expiration: response.data.auth_token_expiration || 60,
                     enable_stock_control: response.data.enable_stock_control ?? true,
-                    global_min_stock: response.data.global_min_stock || 5,
-                    currency_symbol: response.data.currency_symbol || 'R$'
+                    global_min_stock: response.data.global_min_stock || 5
                 }));
             } else {
                 toast.error(`Erro ao carregar configurações: ${res.status}`);
@@ -87,6 +89,13 @@ export default function SettingsPage() {
         if (name === 'whatsapp_number') value = formatPhone(value);
 
         setFormData({ ...formData, [name]: value });
+    };
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'logo' | 'bg') => {
+        if (e.target.files && e.target.files[0]) {
+            if (type === 'logo') setLogoFile(e.target.files[0]);
+            if (type === 'bg') setBgFile(e.target.files[0]);
+        }
     };
 
     const handleBlurCEP = async () => {
@@ -140,18 +149,53 @@ export default function SettingsPage() {
         e.preventDefault();
         setIsSaving(true);
         try {
-            const res = await fetch(`${apiUrl}/settings`, {
-                method: 'PUT',
+            const data = new FormData();
+
+            // Append Text Fields
+            Object.keys(formData).forEach(key => {
+                const value = (formData as any)[key];
+                // Important: Convert boolean to 1/0 or string, FormData needs strings mainly
+                if (typeof value === 'boolean') {
+                    data.append(key, value ? '1' : '0');
+                } else if (value !== null && value !== undefined) {
+                    // Avoid sending nulls or logo_url if we are sending a file via logic below
+                    // Actually backend treats logo_url as file or string.
+                    // If we are uploading a file, we can append it as 'logo_url'.
+                    if (key !== 'logo_url' && key !== 'login_bg_url') {
+                        data.append(key, value);
+                    }
+                }
+            });
+
+            // Append Files
+            if (logoFile) data.append('logo_url', logoFile);
+            if (bgFile) data.append('login_bg_url', bgFile);
+
+            const res = await fetch(`${apiUrl}/settings?_method=PUT`, {
+                method: 'POST', // Use POST with _method=PUT for FormData
                 headers: {
-                    'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify(formData)
+                body: data
             });
+
             if (res.ok) {
                 toast.success(t('settings.success'));
+                // Refresh to get new URLs
+                await fetchSettings();
+                setLogoFile(null);
+                setBgFile(null);
+            } else {
+                try {
+                    const err = await res.json();
+                    console.error(err);
+                    toast.error(`Erro ao salvar: ${err.message || 'Validation'}`);
+                } catch {
+                    toast.error('Erro ao salvar configurações.');
+                }
             }
         } catch (error) {
+            console.error(error);
             toast.error('Error saving settings');
         } finally {
             setIsSaving(false);
@@ -228,11 +272,43 @@ export default function SettingsPage() {
                                 <div className="grid md:grid-cols-2 gap-6">
                                     <div>
                                         <label className="block text-sm font-bold text-brand-choco mb-1">{t('settings.visual.logo_url')}</label>
-                                        <input name="logo_url" value={formData.logo_url || ''} onChange={handleChange} className="w-full p-3 rounded-xl bg-white/50 border border-brand-gold/30 outline-none" placeholder="https://..." />
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-16 h-16 rounded-lg bg-gray-100 border border-brand-gold/20 flex items-center justify-center overflow-hidden">
+                                                {logoFile ? (
+                                                    <img src={URL.createObjectURL(logoFile)} className="w-full h-full object-cover" />
+                                                ) : formData.logo_url ? (
+                                                    <img src={`${apiUrl.replace('/api', '')}/storage/${formData.logo_url}`} className="w-full h-full object-cover" />
+                                                ) : (
+                                                    <span className="text-2xl">🖼️</span>
+                                                )}
+                                            </div>
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                onChange={(e) => handleFileChange(e, 'logo')}
+                                                className="block w-full text-sm text-brand-choco file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-brand-pink/20 file:text-brand-choco hover:file:bg-brand-pink/30 cursor-pointer"
+                                            />
+                                        </div>
                                     </div>
                                     <div>
                                         <label className="block text-sm font-bold text-brand-choco mb-1">{t('settings.visual.bg_url')}</label>
-                                        <input name="login_bg_url" value={formData.login_bg_url || ''} onChange={handleChange} className="w-full p-3 rounded-xl bg-white/50 border border-brand-gold/30 outline-none" placeholder="https://..." />
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-16 h-16 rounded-lg bg-gray-100 border border-brand-gold/20 flex items-center justify-center overflow-hidden">
+                                                {bgFile ? (
+                                                    <img src={URL.createObjectURL(bgFile)} className="w-full h-full object-cover" />
+                                                ) : formData.login_bg_url ? (
+                                                    <img src={`${apiUrl.replace('/api', '')}/storage/${formData.login_bg_url}`} className="w-full h-full object-cover" />
+                                                ) : (
+                                                    <span className="text-2xl">🌄</span>
+                                                )}
+                                            </div>
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                onChange={(e) => handleFileChange(e, 'bg')}
+                                                className="block w-full text-sm text-brand-choco file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-brand-pink/20 file:text-brand-choco hover:file:bg-brand-pink/30 cursor-pointer"
+                                            />
+                                        </div>
                                     </div>
                                     <div className="col-span-full">
                                         <label className="block text-sm font-bold text-brand-choco mb-1">{t('settings.visual.welcome')}</label>
@@ -273,10 +349,6 @@ export default function SettingsPage() {
                             <div>
                                 <h3 className="font-bold text-brand-choco mb-4">💬 Integrações</h3>
                                 <div className="grid gap-4">
-                                    <div>
-                                        <label className="block text-sm font-bold text-brand-choco mb-1">{t('settings.operational.currency')}</label>
-                                        <input name="currency_symbol" value={formData.currency_symbol} onChange={handleChange} className="w-full p-3 rounded-xl bg-white/50 border border-brand-gold/30 outline-none" />
-                                    </div>
                                     <div>
                                         <label className="block text-sm font-bold text-brand-choco mb-1">{t('settings.operational.whatsapp')}</label>
                                         <input name="whatsapp_number" value={formData.whatsapp_number || ''} onChange={handleChange} className="w-full p-3 rounded-xl bg-white/50 border border-brand-gold/30 outline-none" placeholder="5511999999999" />

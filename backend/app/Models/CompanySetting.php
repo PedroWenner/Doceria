@@ -33,7 +33,6 @@ class CompanySetting extends Model implements Auditable
         'logo_url',
         'login_bg_url',
         'welcome_message',
-        'currency_symbol',
         'whatsapp_number',
         'delivery_message'
     ];

@@ -23,7 +23,7 @@ class CompanySettingController extends Controller
     {
         $settings = CompanySetting::firstOrFail();
 
-        $validated = $request->validate([
+        $rules = [
             'system_name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'brand_color' => 'nullable|string|max:20',
@@ -41,19 +41,43 @@ class CompanySettingController extends Controller
             'auth_token_expiration' => 'nullable|integer|min:5|max:43200',
             
             // Stock & Operations
-            'enable_stock_control' => 'nullable|boolean',
+            'enable_stock_control' => 'nullable|boolean', // Frontend sends "true"/"false" string in FormData sometimes, boolean validation handles it
             'global_min_stock' => 'nullable|integer|min:0',
             
-            // Visual
-            'logo_url' => 'nullable|url|max:255',
-            'login_bg_url' => 'nullable|url|max:255',
+            // Visual - Now accepts files OR strings (if keeping old val)
+            'logo_url' => 'nullable', 
+            'login_bg_url' => 'nullable',
             'welcome_message' => 'nullable|string|max:255',
             
             // Integrations
-            'currency_symbol' => 'nullable|string|max:10',
             'whatsapp_number' => 'nullable|string|max:20',
             'delivery_message' => 'nullable|string'
-        ]);
+        ];
+
+        $validated = $request->validate($rules);
+        
+        // Handle boolean conversion explicitly for stock control if it comes as string
+        if ($request->has('enable_stock_control')) {
+            $validated['enable_stock_control'] = filter_var($request->enable_stock_control, FILTER_VALIDATE_BOOLEAN);
+        }
+
+        // Handle File Uploads
+        if ($request->hasFile('logo_url')) {
+            // Delete old file if exists and is not technical URL
+            if ($settings->logo_url && \Illuminate\Support\Facades\Storage::disk('public')->exists($settings->logo_url)) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($settings->logo_url);
+            }
+            $path = $request->file('logo_url')->store('settings', 'public');
+            $validated['logo_url'] = $path;
+        }
+
+        if ($request->hasFile('login_bg_url')) {
+            if ($settings->login_bg_url && \Illuminate\Support\Facades\Storage::disk('public')->exists($settings->login_bg_url)) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($settings->login_bg_url);
+            }
+            $path = $request->file('login_bg_url')->store('settings', 'public');
+            $validated['login_bg_url'] = $path;
+        }
 
         $settings->update($validated);
 

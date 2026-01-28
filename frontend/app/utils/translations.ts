@@ -153,7 +153,6 @@ export const translations = {
                 title: 'Operacional',
                 enable_stock: 'Habilitar Controle de Estoque',
                 min_stock: 'Estoque Mínimo Global (Alerta)',
-                currency: 'Símbolo da Moeda',
                 whatsapp: 'WhatsApp da Loja',
                 delivery_msg: 'Mensagem de Despacho'
             },
