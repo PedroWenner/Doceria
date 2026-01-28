@@ -42,6 +42,7 @@ export default function DashboardLayout({
 
     const menuItems = [
         { icon: '📊', label: 'sidebar.dashboard', href: '/dashboard' },
+        { icon: '🛍️', label: 'orders.title', href: '/dashboard/orders' },
         { icon: '👥', label: 'sidebar.users', href: '/dashboard/users' },
         { icon: '🧁', label: 'sidebar.products', href: '/dashboard/products' },
         { icon: '📋', label: 'sidebar.audit', href: '/dashboard/audit' },

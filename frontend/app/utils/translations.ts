@@ -90,6 +90,16 @@ export const translations = {
             updated: 'Atualizado',
             deleted: 'Excluído',
             restored: 'Restaurado'
+        },
+        orders: {
+            title: 'Gestão de Pedidos',
+            pending: 'Pendente',
+            preparing: 'Em Preparo',
+            ready: 'Pronto',
+            delivered: 'Entregue',
+            canceled: 'Cancelado',
+            items: 'itens',
+            total: 'Total'
         }
     },
     en: {
@@ -181,6 +191,16 @@ export const translations = {
             updated: 'Updated',
             deleted: 'Deleted',
             restored: 'Restored'
+        },
+        orders: {
+            title: 'Order Management',
+            pending: 'Pending',
+            preparing: 'Preparing',
+            ready: 'Ready',
+            delivered: 'Delivered',
+            canceled: 'Canceled',
+            items: 'items',
+            total: 'Total'
         }
     }
 };

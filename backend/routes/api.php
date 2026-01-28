@@ -32,6 +32,10 @@ Route::group(['middleware' => ['api', 'auth:api', 'role:admin']], function () {
     // Audits
     Route::get('audits', [App\Http\Controllers\AuditController::class, 'index']);
 
+    // Orders (Kanban)
+    Route::get('orders', [App\Http\Controllers\OrderController::class, 'index']);
+    Route::put('orders/{order}/status', [App\Http\Controllers\OrderController::class, 'updateStatus']);
+
     // Product Management
     Route::get('/categories', [App\Http\Controllers\CategoryController::class, 'index']);
     Route::apiResource('products', App\Http\Controllers\ProductController::class);
