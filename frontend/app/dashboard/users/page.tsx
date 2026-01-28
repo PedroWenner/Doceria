@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import GlassCard from '@/app/components/GlassCard';
+import LoadingSpinner from '@/app/components/LoadingSpinner';
 import Cookies from 'js-cookie';
 import { useLanguage } from '@/app/context/LanguageContext';
 
@@ -96,7 +97,7 @@ export default function UsersPage() {
         }
     };
 
-    if (isLoading) return <div className="text-brand-choco">{t('common.loading')}</div>;
+    if (isLoading) return <LoadingSpinner />;
 
     return (
         <div>

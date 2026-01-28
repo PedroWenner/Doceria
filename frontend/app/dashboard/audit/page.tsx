@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import GlassCard from '@/app/components/GlassCard';
+import LoadingSpinner from '@/app/components/LoadingSpinner';
 import Cookies from 'js-cookie';
 import { useLanguage } from '@/app/context/LanguageContext';
 
@@ -195,7 +196,9 @@ export default function AuditPage() {
                         <tbody className="divide-y divide-brand-choco/10">
                             {isLoading ? (
                                 <tr>
-                                    <td colSpan={5} className="text-center py-8 text-brand-choco/60">{t('common.loading')}</td>
+                                    <td colSpan={5} className="py-8">
+                                        <LoadingSpinner />
+                                    </td>
                                 </tr>
                             ) : audits.length === 0 ? (
                                 <tr>

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import GlassCard from '@/app/components/GlassCard';
+import LoadingSpinner from '@/app/components/LoadingSpinner';
 import Cookies from 'js-cookie';
 import { useLanguage } from '@/app/context/LanguageContext';
 import { formatCurrency, parseCurrency, displayCurrency } from '@/app/utils/formatters';
@@ -158,7 +159,7 @@ export default function ProductsPage() {
         return { label: 'In Stock', color: 'bg-green-200 text-green-800' };
     };
 
-    if (isLoading) return <div className="text-brand-choco">{t('common.loading')}</div>;
+    if (isLoading) return <LoadingSpinner />;
 
     return (
         <div className="space-y-6">
