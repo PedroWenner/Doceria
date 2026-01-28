@@ -1,10 +1,9 @@
-'use client';
+import React from 'react';
 
 export default function LoadingSpinner() {
     return (
-        <div className="flex flex-col items-center justify-center min-h-[70vh] w-full">
-            <div className="w-12 h-12 border-4 border-brand-pink/30 border-t-brand-choco rounded-full animate-spin mb-4"></div>
-            <p className="text-brand-choco font-bold animate-pulse">Carregando...</p>
+        <div className="flex justify-center items-center h-full">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-brand-pink"></div>
         </div>
     );
 }

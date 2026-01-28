@@ -2,12 +2,13 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import Cookies from 'js-cookie';
 import { useRouter, usePathname } from 'next/navigation';
 import ThemeToggle from '@/app/components/ThemeToggle';
 import LanguageToggle from '@/app/components/LanguageToggle';
 import { useLanguage } from '@/app/context/LanguageContext';
+import { useAuth } from '@/app/context/AuthContext';
 import { Toaster } from 'react-hot-toast';
+import LoadingSpinner from '@/app/components/LoadingSpinner';
 
 export default function DashboardLayout({
     children,
@@ -18,37 +19,36 @@ export default function DashboardLayout({
     const pathname = usePathname();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const { t } = useLanguage();
+    const { user, logout, isLoading } = useAuth();
 
-    const handleLogout = async () => {
-        try {
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
-            const token = Cookies.get('auth_token');
-
-            if (token) {
-                await fetch(`${apiUrl}/auth/logout`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
-            }
-        } catch (error) {
-            console.error('Logout error:', error);
-        } finally {
-            Cookies.remove('auth_token');
+    React.useEffect(() => {
+        if (!isLoading && !user) {
             router.push('/login');
         }
-    };
+    }, [isLoading, user, router]);
 
-    const menuItems = [
-        { icon: '📊', label: 'sidebar.dashboard', href: '/dashboard' },
-        { icon: '🛍️', label: 'orders.title', href: '/dashboard/orders' },
-        { icon: '👥', label: 'sidebar.users', href: '/dashboard/users' },
-        { icon: '🧁', label: 'sidebar.products', href: '/dashboard/products' },
-        { icon: '📋', label: 'sidebar.audit', href: '/dashboard/audit' },
-        { icon: '⚙️', label: 'settings.title', href: '/dashboard/settings' },
+    if (isLoading) {
+        return (
+            <div className="min-h-screen bg-brand-cream/20 flex items-center justify-center">
+                <LoadingSpinner />
+                <p className="ml-3 text-brand-choco font-bold">Carregando...</p>
+            </div>
+        );
+    }
+
+    // Permissions Logic
+    const allMenuItems = [
+        { icon: '📊', label: 'sidebar.dashboard', href: '/dashboard', roles: ['admin', 'manager'] },
+        { icon: '🛍️', label: 'orders.title', href: '/dashboard/orders', roles: ['admin', 'manager'] },
+        { icon: '👥', label: 'sidebar.users', href: '/dashboard/users', roles: ['admin', 'manager'] },
+        { icon: '🧁', label: 'sidebar.products', href: '/dashboard/products', roles: ['admin', 'manager'] },
+        { icon: '📋', label: 'sidebar.audit', href: '/dashboard/audit', roles: ['admin'] },
+        { icon: '⚙️', label: 'settings.title', href: '/dashboard/settings', roles: ['admin'] },
     ];
+
+    const menuItems = allMenuItems.filter(item =>
+        user && item.roles.includes(user.role)
+    );
 
     return (
         <div className="min-h-screen bg-brand-cream/20 flex flex-col md:flex-row">
@@ -107,7 +107,7 @@ export default function DashboardLayout({
                                 `}
                             >
                                 <span>{item.icon}</span>
-                                <span>{t(item.label)}</span>
+                                <span>{t(item.label) || item.label}</span>
                             </Link>
                         );
                     })}
@@ -115,7 +115,7 @@ export default function DashboardLayout({
 
                 <div className="mt-auto pt-6 border-t border-brand-choco/10">
                     <button
-                        onClick={handleLogout}
+                        onClick={logout}
                         className="w-full text-left flex items-center mb-4 px-4 py-2 rounded-lg hover:bg-red-50 text-red-600 transition-colors cursor-pointer group"
                     >
                         <span className="mr-2 group-hover:scale-110 transition-transform">🚪</span>
@@ -123,12 +123,12 @@ export default function DashboardLayout({
                     </button>
 
                     <div className="flex items-center space-x-3 cursor-default">
-                        <div className="w-10 h-10 rounded-full bg-brand-gold/30 flex items-center justify-center text-brand-choco font-bold">
-                            U
+                        <div className="w-10 h-10 rounded-full bg-brand-gold/30 flex items-center justify-center text-brand-choco font-bold uppercase">
+                            {user?.name?.charAt(0) || 'U'}
                         </div>
                         <div>
-                            <p className="text-sm font-bold text-brand-choco">User Name</p>
-                            <p className="text-xs text-brand-choco/60">Admin</p>
+                            <p className="text-sm font-bold text-brand-choco truncate w-32">{user?.name || 'User'}</p>
+                            <p className="text-xs text-brand-choco/60 capitalize">{user?.role || 'Guest'}</p>
                         </div>
                     </div>
                 </div>

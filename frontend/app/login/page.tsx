@@ -7,12 +7,17 @@ import { useLanguage } from '@/app/context/LanguageContext';
 import Cookies from 'js-cookie';
 import { useRouter } from 'next/navigation';
 
+import { useAuth } from '@/app/context/AuthContext';
+
+import { toast, Toaster } from 'react-hot-toast';
+
 export default function LoginPage() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const router = useRouter();
+    const { login } = useAuth(); // Import login from context
 
     const { t } = useLanguage();
 
@@ -32,10 +37,19 @@ export default function LoginPage() {
             if (!res.ok) throw new Error(t('auth.login_failed'));
 
             const response = await res.json();
-            Cookies.set('auth_token', response.data.access_token, { expires: 1 }); // 1 day
-            router.push('/dashboard');
-        } catch (err) {
-            setError(t('auth.invalid_credentials'));
+            const userRole = response.data.user.role;
+
+            if (userRole === 'customer') {
+                throw new Error('Acesso restrito a administradores e gerentes.');
+            }
+
+            // Use Context Login (Updates State + Cookie + Redirect)
+            login(response.data.access_token, response.data.user);
+
+        } catch (err: any) {
+            const msg = err.message || t('auth.invalid_credentials');
+            setError(msg);
+            toast.error(msg); // Show visual feedback
         } finally {
             setLoading(false);
         }
@@ -43,6 +57,7 @@ export default function LoginPage() {
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-brand-pink via-brand-cream to-brand-gold/20 p-4">
+            <Toaster position="top-center" />
             {/* Background Decorative Elements */}
             <div className="absolute top-20 left-20 w-32 h-32 bg-brand-gold/20 rounded-full blur-3xl"></div>
             <div className="absolute bottom-20 right-20 w-40 h-40 bg-brand-pink/40 rounded-full blur-3xl"></div>
