@@ -36,7 +36,8 @@ export const translations = {
             products: 'Produtos',
             logout: 'Sair',
             menu: 'Menu',
-            settings: 'Configurações'
+            settings: 'Configurações',
+            audit: 'Auditoria'
         },
         dashboard: {
             welcome: 'Bem-vindo de volta',
@@ -74,6 +75,21 @@ export const translations = {
             save_success: 'Produto salvo com sucesso',
             save_error: 'Erro ao salvar produto',
             edit_product: 'Editar Produto'
+        },
+        audit: {
+            title: 'Logs de Auditoria',
+            user: 'Usuário',
+            event: 'Evento',
+            auditable: 'Recurso',
+            old_values: 'Valores Antigos',
+            new_values: 'Novos Valores',
+            date: 'Data',
+            filter_user: 'Filtrar Usuário',
+            filter_event: 'Filtrar Evento',
+            created: 'Criado',
+            updated: 'Atualizado',
+            deleted: 'Excluído',
+            restored: 'Restaurado'
         }
     },
     en: {
@@ -111,7 +127,8 @@ export const translations = {
             products: 'Products',
             logout: 'Logout',
             menu: 'Menu',
-            settings: 'Settings'
+            settings: 'Settings',
+            audit: 'Audit Logs'
         },
         dashboard: {
             welcome: 'Welcome back',
@@ -149,6 +166,21 @@ export const translations = {
             save_success: 'Product saved successfully',
             save_error: 'Error saving product',
             edit_product: 'Edit Product'
+        },
+        audit: {
+            title: 'Audit Logs',
+            user: 'User',
+            event: 'Event',
+            auditable: 'Resource',
+            old_values: 'Old Values',
+            new_values: 'New Values',
+            date: 'Date',
+            filter_user: 'Filter User',
+            filter_event: 'Filter Event',
+            created: 'Created',
+            updated: 'Updated',
+            deleted: 'Deleted',
+            restored: 'Restored'
         }
     }
 };

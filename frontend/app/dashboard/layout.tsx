@@ -40,11 +40,11 @@ export default function DashboardLayout({
         }
     };
 
-    const navItems = [
-        { href: '/dashboard', label: t('sidebar.dashboard'), icon: '📊' },
-        { href: '/dashboard/orders', label: 'Orders', icon: '🛍️' }, // Add to dict later
-        { href: '/dashboard/products', label: t('sidebar.products'), icon: '🍰' },
-        { href: '/dashboard/users', label: t('sidebar.users'), icon: '👥' },
+    const menuItems = [
+        { icon: '📊', label: 'sidebar.dashboard', href: '/dashboard' },
+        { icon: '👥', label: 'sidebar.users', href: '/dashboard/users' },
+        { icon: '🧁', label: 'sidebar.products', href: '/dashboard/products' },
+        { icon: '📋', label: 'sidebar.audit', href: '/dashboard/audit' },
     ];
 
     return (
@@ -89,7 +89,7 @@ export default function DashboardLayout({
                 </div>
 
                 <nav className="flex-1 space-y-2">
-                    {navItems.map((item) => {
+                    {menuItems.map((item) => {
                         const isActive = pathname === item.href;
                         return (
                             <Link
@@ -104,7 +104,7 @@ export default function DashboardLayout({
                                 `}
                             >
                                 <span>{item.icon}</span>
-                                <span>{item.label}</span>
+                                <span>{t(item.label)}</span>
                             </Link>
                         );
                     })}

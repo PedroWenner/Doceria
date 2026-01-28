@@ -25,9 +25,12 @@ Route::group([
 });
 
 Route::group(['middleware' => ['api', 'auth:api', 'role:admin']], function () {
-    Route::get('/users', [App\Http\Controllers\UserController::class, 'index']);
-    Route::put('/users/{user}/roles', [App\Http\Controllers\UserController::class, 'updateRoles']);
-    Route::get('/roles', [App\Http\Controllers\UserController::class, 'roles']);
+    Route::get('users', [App\Http\Controllers\UserController::class, 'index']);
+    Route::post('users/{user}/roles', [App\Http\Controllers\UserController::class, 'updateRoles']);
+    Route::get('roles', [App\Http\Controllers\UserController::class, 'roles']);
+    
+    // Audits
+    Route::get('audits', [App\Http\Controllers\AuditController::class, 'index']);
 
     // Product Management
     Route::get('/categories', [App\Http\Controllers\CategoryController::class, 'index']);

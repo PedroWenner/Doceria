@@ -37,3 +37,10 @@ $lastChange = $product->audits()->latest()->first();
 ## Próximos Passos (Sugestão)
 - Criar uma página `/dashboard/audit` para visualizar esses logs no frontend.
 - Implementar "Lixeira" para visualizar e restaurar itens excluídos.
+
+## Frontend: Visualizador de Logs
+Acesse em: `/dashboard/audit`
+Funcionalidades:
+- Filtro por Usuário, Evento e Datas.
+- Visualização de "Valores Antigos" vs "Novos Valores".
+- Expansão de detalhes inline na tabela.
