@@ -25,6 +25,7 @@ class CompanySetting extends Model implements Auditable
         'neighborhood',
         'city',
         'state',
-        'zip_code'
+        'zip_code',
+        'orders_refresh_rate'
     ];
 }
