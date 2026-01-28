@@ -10,10 +10,7 @@ export function middleware(request: NextRequest) {
         return NextResponse.redirect(new URL('/login', request.url));
     }
 
-    // Se acessar a raiz, joga para dashboard (que vai jogar para login se não tiver token)
-    if (pathname === '/') {
-        return NextResponse.redirect(new URL('/dashboard', request.url));
-    }
+
 
     // Se já estiver logado e tentar acessar login, joga para dashboard
     if (pathname === '/login' && token) {

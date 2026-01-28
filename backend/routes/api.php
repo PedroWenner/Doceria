@@ -33,14 +33,27 @@ Route::group(['middleware' => ['api', 'auth:api', 'role:admin']], function () {
     Route::get('audits', [App\Http\Controllers\AuditController::class, 'index']);
 
     // Orders (Kanban)
+    // Orders (Kanban)
     Route::get('orders', [App\Http\Controllers\OrderController::class, 'index']);
     Route::put('orders/{order}/status', [App\Http\Controllers\OrderController::class, 'updateStatus']);
 
-    // Product Management
-    Route::get('/categories', [App\Http\Controllers\CategoryController::class, 'index']);
-    Route::apiResource('products', App\Http\Controllers\ProductController::class);
+    // Admin Product Management (Write)
+    Route::post('/categories', [App\Http\Controllers\CategoryController::class, 'store']);
+    Route::put('/categories/{category}', [App\Http\Controllers\CategoryController::class, 'update']);
+    Route::delete('/categories/{category}', [App\Http\Controllers\CategoryController::class, 'destroy']);
+    
+    Route::post('products', [App\Http\Controllers\ProductController::class, 'store']);
+    Route::put('products/{product}', [App\Http\Controllers\ProductController::class, 'update']);
+    Route::delete('products/{product}', [App\Http\Controllers\ProductController::class, 'destroy']);
 
-    // System Settings
-    Route::get('settings', [App\Http\Controllers\CompanySettingController::class, 'show']);
+    // System Settings (Write)
     Route::put('settings', [App\Http\Controllers\CompanySettingController::class, 'update']);
+});
+
+// Public Routes (Storefront)
+Route::group(['middleware' => ['api']], function () {
+    Route::get('/categories', [App\Http\Controllers\CategoryController::class, 'index']);
+    Route::get('products', [App\Http\Controllers\ProductController::class, 'index']);
+    Route::get('products/{product}', [App\Http\Controllers\ProductController::class, 'show']);
+    Route::get('settings', [App\Http\Controllers\CompanySettingController::class, 'show']);
 });
