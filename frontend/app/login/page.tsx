@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import GlassCard from '@/app/components/GlassCard';
 import { useLanguage } from '@/app/context/LanguageContext';
 
@@ -14,12 +14,22 @@ import { toast, Toaster } from 'react-hot-toast';
 export default function LoginPage() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [rememberMe, setRememberMe] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const router = useRouter();
     const { login } = useAuth(); // Import login from context
 
     const { t } = useLanguage();
+
+    useEffect(() => {
+        const savedEmail = localStorage.getItem('sweetstore_email');
+        if (savedEmail) {
+            setEmail(savedEmail);
+            setRememberMe(true);
+        }
+    }, []);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -41,6 +51,13 @@ export default function LoginPage() {
 
             if (userRole === 'customer') {
                 throw new Error('Acesso restrito a administradores e gerentes.');
+            }
+
+            // Handle Remember Me
+            if (rememberMe) {
+                localStorage.setItem('sweetstore_email', email);
+            } else {
+                localStorage.removeItem('sweetstore_email');
             }
 
             // Use Context Login (Updates State + Cookie + Redirect)
@@ -82,18 +99,32 @@ export default function LoginPage() {
 
                     <div>
                         <label className="block text-sm font-medium text-brand-choco mb-1 ml-1">{t('auth.password')}</label>
-                        <input
-                            type="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            className="w-full px-4 py-3 rounded-xl bg-white/60 border border-white/50 focus:outline-none focus:ring-2 focus:ring-brand-gold/50 text-brand-choco placeholder-brand-choco/30 transition-all font-medium"
-                            placeholder="••••••••"
-                        />
+                        <div className="relative">
+                            <input
+                                type={showPassword ? "text" : "password"}
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                className="w-full px-4 py-3 rounded-xl bg-white/60 border border-white/50 focus:outline-none focus:ring-2 focus:ring-brand-gold/50 text-brand-choco placeholder-brand-choco/30 transition-all font-medium pr-10"
+                                placeholder="••••••••"
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-brand-choco/60 hover:text-brand-choco transition-colors"
+                            >
+                                {showPassword ? '👁️' : '🔒'}
+                            </button>
+                        </div>
                     </div>
 
                     <div className="flex items-center justify-between px-1">
                         <div className="flex items-center">
-                            <input type="checkbox" className="h-4 w-4 text-brand-choco border-brand-gold/50 rounded focus:ring-brand-gold/50" />
+                            <input
+                                type="checkbox"
+                                checked={rememberMe}
+                                onChange={(e) => setRememberMe(e.target.checked)}
+                                className="h-4 w-4 text-brand-choco border-brand-gold/50 rounded focus:ring-brand-gold/50"
+                            />
                             <label className="ml-2 block text-sm text-brand-choco/80 font-medium">{t('auth.remember_me')}</label>
                         </div>
                         <a href="#" className="text-sm font-bold text-brand-choco hover:text-brand-gold transition-colors">{t('auth.forgot_password')}</a>
