@@ -5,12 +5,15 @@ import GlassCard from '@/app/components/GlassCard';
 import Cookies from 'js-cookie';
 import { useLanguage } from '@/app/context/LanguageContext';
 import LoadingSpinner from '@/app/components/LoadingSpinner';
+import { formatCEP, formatCNPJ, formatPhone } from '@/app/utils/formatters';
+import { fetchAddressByCEP } from '@/app/services/cepService';
 import toast from 'react-hot-toast';
 
 export default function SettingsPage() {
     const { t } = useLanguage();
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
+    const [isSearchingCep, setIsSearchingCep] = useState(false);
     const [formData, setFormData] = useState({
         system_name: '', description: '', brand_color: '',
         cnpj: '', state_registration: '', municipal_registration: '', fiscal_regime: '',
@@ -23,6 +26,8 @@ export default function SettingsPage() {
     useEffect(() => {
         fetchSettings();
     }, []);
+
+    // ... fetchSettings (unchanged code for now, let's preserve it or re-impl if strictly needed, but tool replaces contiguous blocks)
 
     const fetchSettings = async () => {
         try {
@@ -46,7 +51,38 @@ export default function SettingsPage() {
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
+        let value = e.target.value;
+        const name = e.target.name;
+
+        // Apply Formatters
+        if (name === 'zip_code') value = formatCEP(value);
+        if (name === 'cnpj') value = formatCNPJ(value);
+        // Phone not in settings yet, but good to have if we add it
+
+        setFormData({ ...formData, [name]: value });
+    };
+
+    const handleBlurCEP = async () => {
+        const cep = formData.zip_code.replace(/\D/g, '');
+        if (cep.length === 8) {
+            setIsSearchingCep(true);
+            const address = await fetchAddressByCEP(cep);
+            setIsSearchingCep(false);
+
+            if (address) {
+                setFormData(prev => ({
+                    ...prev,
+                    street: address.logradouro,
+                    neighborhood: address.bairro,
+                    city: address.localidade,
+                    state: address.uf
+                }));
+                toast.success('Endereço encontrado! 🗺️');
+                // Optional: focus number field logic could go here via ref
+            } else {
+                toast.error('CEP não encontrado.');
+            }
+        }
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -137,11 +173,31 @@ export default function SettingsPage() {
                     <div className="grid md:grid-cols-3 gap-4">
                         <div>
                             <label className="block text-sm font-bold text-brand-choco mb-1">{t('settings.address.zip')}</label>
-                            <input name="zip_code" value={formData.zip_code || ''} onChange={handleChange} className="w-full p-2 rounded bg-white/50 border border-brand-gold/30" />
+                            <div className="relative">
+                                <input
+                                    name="zip_code"
+                                    value={formData.zip_code || ''}
+                                    onChange={handleChange}
+                                    onBlur={handleBlurCEP}
+                                    placeholder="00000-000"
+                                    className="w-full p-2 rounded bg-white/50 border border-brand-gold/30"
+                                />
+                                {isSearchingCep && (
+                                    <span className="absolute right-2 top-2 text-xs text-brand-pink font-bold animate-pulse">
+                                        🔍
+                                    </span>
+                                )}
+                            </div>
                         </div>
                         <div className="md:col-span-2">
                             <label className="block text-sm font-bold text-brand-choco mb-1">{t('settings.address.street')}</label>
-                            <input name="street" value={formData.street || ''} onChange={handleChange} className="w-full p-2 rounded bg-white/50 border border-brand-gold/30" />
+                            <input
+                                name="street"
+                                value={formData.street || ''}
+                                onChange={handleChange}
+                                disabled={isSearchingCep}
+                                className="w-full p-2 rounded bg-white/50 border border-brand-gold/30 disabled:opacity-50 disabled:cursor-not-allowed"
+                            />
                         </div>
                         <div>
                             <label className="block text-sm font-bold text-brand-choco mb-1">{t('settings.address.number')}</label>
@@ -149,15 +205,34 @@ export default function SettingsPage() {
                         </div>
                         <div>
                             <label className="block text-sm font-bold text-brand-choco mb-1">{t('settings.address.neighborhood')}</label>
-                            <input name="neighborhood" value={formData.neighborhood || ''} onChange={handleChange} className="w-full p-2 rounded bg-white/50 border border-brand-gold/30" />
+                            <input
+                                name="neighborhood"
+                                value={formData.neighborhood || ''}
+                                onChange={handleChange}
+                                disabled={isSearchingCep}
+                                className="w-full p-2 rounded bg-white/50 border border-brand-gold/30 disabled:opacity-50 disabled:cursor-not-allowed"
+                            />
                         </div>
                         <div>
                             <label className="block text-sm font-bold text-brand-choco mb-1">{t('settings.address.city')}</label>
-                            <input name="city" value={formData.city || ''} onChange={handleChange} className="w-full p-2 rounded bg-white/50 border border-brand-gold/30" />
+                            <input
+                                name="city"
+                                value={formData.city || ''}
+                                onChange={handleChange}
+                                disabled={isSearchingCep}
+                                className="w-full p-2 rounded bg-white/50 border border-brand-gold/30 disabled:opacity-50 disabled:cursor-not-allowed"
+                            />
                         </div>
                         <div>
                             <label className="block text-sm font-bold text-brand-choco mb-1">{t('settings.address.state')}</label>
-                            <input name="state" value={formData.state || ''} onChange={handleChange} maxLength={2} className="w-full p-2 rounded bg-white/50 border border-brand-gold/30 uppercase" />
+                            <input
+                                name="state"
+                                value={formData.state || ''}
+                                onChange={handleChange}
+                                disabled={isSearchingCep}
+                                maxLength={2}
+                                className="w-full p-2 rounded bg-white/50 border border-brand-gold/30 uppercase disabled:opacity-50 disabled:cursor-not-allowed"
+                            />
                         </div>
                     </div>
                 </GlassCard>

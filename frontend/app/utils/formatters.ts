@@ -35,3 +35,41 @@ export const displayCurrency = (value: string | number): string => {
         currency: 'BRL'
     }).format(Number(value));
 };
+
+export const formatCEP = (value: string): string => {
+    return value
+        .replace(/\D/g, '')
+        .replace(/^(\d{5})(\d)/, '$1-$2')
+        .substring(0, 9);
+};
+
+export const formatPhone = (value: string): string => {
+    const v = value.replace(/\D/g, '');
+    if (v.length > 10) {
+        // (11) 9 9999-9999
+        return v.replace(/^(\d{2})(\d{1})(\d{4})(\d{4}).*/, '($1) $2 $3-$4');
+    } else if (v.length > 9) {
+        // (11) 9999-9999
+        return v.replace(/^(\d{2})(\d{4})(\d{4}).*/, '($1) $2-$3');
+    }
+    return v;
+};
+
+export const formatCPF = (value: string): string => {
+    return value
+        .replace(/\D/g, '')
+        .replace(/(\d{3})(\d)/, '$1.$2')
+        .replace(/(\d{3})(\d)/, '$1.$2')
+        .replace(/(\d{3})(\d{1,2})/, '$1-$2')
+        .replace(/(-\d{2})\d+?$/, '$1');
+};
+
+export const formatCNPJ = (value: string): string => {
+    return value
+        .replace(/\D/g, '')
+        .replace(/^(\d{2})(\d)/, '$1.$2')
+        .replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3')
+        .replace(/\.(\d{3})(\d)/, '.$1/$2')
+        .replace(/(\d{4})(\d)/, '$1-$2')
+        .substring(0, 18);
+};
