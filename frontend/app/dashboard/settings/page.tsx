@@ -314,10 +314,10 @@ export default function SettingsPage() {
                         <div className="grid md:grid-cols-2 gap-6">
                             <div>
                                 <label className="block text-sm font-bold text-brand-choco mb-1">
-                                    ⏱️ Intervalo de Atualização de Pedidos (segundos)
+                                    ⏱️ {t('settings.system.refresh_rate')}
                                 </label>
                                 <p className="text-xs text-brand-choco/70 mb-2">
-                                    Tempo entre cada busca automática de novos pedidos no painel.
+                                    {t('settings.system.refresh_rate_hint')}
                                 </p>
                                 <input
                                     type="number"
@@ -331,11 +331,9 @@ export default function SettingsPage() {
                             </div>
                             <div>
                                 <div className="p-4 bg-brand-gold/10 rounded-xl border border-brand-gold/30">
-                                    <h3 className="font-bold text-brand-choco mb-2">📧 Configuração de E-mail</h3>
+                                    <h3 className="font-bold text-brand-choco mb-2">📧 {t('settings.system.email_config')}</h3>
                                     <p className="text-sm text-brand-choco/80">
-                                        As configurações de envio de e-mail (SMTP) devem ser realizadas diretamente no arquivo
-                                        <code className="bg-white/50 px-1 mx-1 rounded text-brand-pink font-mono">.env</code>
-                                        do servidor por motivos de segurança.
+                                        {t('settings.system.email_hint')}
                                     </p>
                                 </div>
                             </div>
@@ -352,10 +350,10 @@ export default function SettingsPage() {
                 >
                     {isSaving ? (
                         <>
-                            <span className="animate-spin">🔄</span> Salvando...
+                            <span className="animate-spin">🔄</span> {t('common.saving')}
                         </>
                     ) : (
-                        <>Salvar Configurações 💾</>
+                        <>{t('settings.save_btn')}</>
                     )}
                 </button>
             </div>

@@ -12,6 +12,8 @@ import OrderDispatchModal from '@/app/components/OrderDispatchModal';
 export default function OrdersPage() {
     const [orders, setOrders] = useState<Order[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [refreshRate, setRefreshRate] = useState(120);
+    const [secondsLeft, setSecondsLeft] = useState(120);
     const { t } = useLanguage();
 
     // Status config
@@ -25,16 +27,50 @@ export default function OrdersPage() {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
     const token = Cookies.get('auth_token');
 
+    // Initial Load
     useEffect(() => {
-        fetchOrders();
+        const init = async () => {
+            await fetchSettings();
+            await fetchOrders();
+        };
+        init();
+    }, []);
 
-        // Auto-refresh every 2 minutes
+    // Countdown & Auto-Refresh Logic
+    useEffect(() => {
+        if (!refreshRate) return;
+        setSecondsLeft(refreshRate);
+
         const interval = setInterval(() => {
-            fetchOrders();
-        }, 120000);
+            setSecondsLeft((prev) => {
+                if (prev <= 1) {
+                    fetchOrders();
+                    return refreshRate;
+                }
+                return prev - 1;
+            });
+        }, 1000);
 
         return () => clearInterval(interval);
-    }, []);
+    }, [refreshRate]);
+
+    const fetchSettings = async () => {
+        try {
+            const res = await fetch(`${apiUrl}/settings`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const response = await res.json();
+                if (response.data.orders_refresh_rate) {
+                    const rate = response.data.orders_refresh_rate;
+                    setRefreshRate(rate);
+                    setSecondsLeft(rate);
+                }
+            }
+        } catch (error) {
+            console.error('Failed to fetch settings', error);
+        }
+    };
 
     const fetchOrders = async () => {
         try {
@@ -50,6 +86,11 @@ export default function OrdersPage() {
         } finally {
             setIsLoading(false);
         }
+    };
+
+    const handleManualRefresh = () => {
+        setSecondsLeft(refreshRate);
+        fetchOrders();
     };
 
     const [activeOrder, setActiveOrder] = useState<Order | null>(null);
@@ -112,13 +153,52 @@ export default function OrdersPage() {
 
     if (isLoading) return <LoadingSpinner />;
 
+    // Calculate progress for the timer circle
+    const radius = 18;
+    const circumference = 2 * Math.PI * radius;
+    const offset = circumference - ((refreshRate - secondsLeft) / refreshRate) * circumference;
+
     return (
         <div className="h-full flex flex-col">
-            <div className="flex justify-between items-center mb-6">
+            <div className="flex justify-between items-end mb-6">
                 <h1 className="text-3xl font-bold text-brand-choco">{t('orders.title')}</h1>
-                <button onClick={fetchOrders} className="text-brand-choco hover:rotate-180 transition-transform">
-                    🔄
-                </button>
+
+                {/* Countdown Timer Widget */}
+                <div
+                    onClick={handleManualRefresh}
+                    className="flex items-center gap-3 bg-white/50 backdrop-blur-sm px-4 py-2 rounded-full cursor-pointer hover:bg-white/80 transition-all border border-brand-gold/20 shadow-sm group"
+                    title="Clique para atualizar agora"
+                >
+                    <div className="relative flex items-center justify-center">
+                        <svg className="transform -rotate-90 w-10 h-10">
+                            <circle
+                                cx="20"
+                                cy="20"
+                                r={radius}
+                                stroke="currentColor"
+                                strokeWidth="3"
+                                fill="transparent"
+                                className="text-brand-cream/50"
+                            />
+                            <circle
+                                cx="20"
+                                cy="20"
+                                r={radius}
+                                stroke="currentColor"
+                                strokeWidth="3"
+                                fill="transparent"
+                                strokeDasharray={circumference}
+                                strokeDashoffset={offset}
+                                className="text-brand-pink transition-all duration-1000 ease-linear"
+                            />
+                        </svg>
+                        <span className="absolute text-[10px] font-bold text-brand-choco">{secondsLeft}</span>
+                    </div>
+                    <div className="text-right">
+                        <span className="block text-xs font-bold text-brand-choco uppercase tracking-wider">{t('orders.next_update')}</span>
+                        <span className="block text-[10px] text-brand-choco/60 group-hover:text-brand-pink transition-colors">{t('orders.force_refresh')}</span>
+                    </div>
+                </div>
             </div>
 
             <OrderDispatchModal

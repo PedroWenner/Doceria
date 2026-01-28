@@ -110,7 +110,9 @@ export const translations = {
                 'Credit Card': 'Crédito',
                 'Pix': 'Pix',
                 'Cash': 'Dinheiro'
-            }
+            },
+            next_update: 'Próxima atualização',
+            force_refresh: 'Clique para forçar'
         },
         settings: {
             title: 'Parâmetros do Sistema',
@@ -136,7 +138,15 @@ export const translations = {
                 city: 'Cidade',
                 state: 'Estado',
                 zip: 'CEP'
-            }
+            },
+            system: {
+                title: 'Sistema',
+                refresh_rate: 'Intervalo de Atualização de Pedidos (segundos)',
+                refresh_rate_hint: 'Tempo entre cada busca automática de novos pedidos no painel.',
+                email_config: 'Configuração de E-mail',
+                email_hint: 'As configurações de envio de e-mail (SMTP) devem ser realizadas diretamente no arquivo .env do servidor por motivos de segurança.'
+            },
+            save_btn: 'Salvar Configurações 💾'
         }
     },
     en: {
@@ -248,7 +258,9 @@ export const translations = {
                 'Credit Card': 'Credit Card',
                 'Pix': 'Pix',
                 'Cash': 'Cash'
-            }
+            },
+            next_update: 'Next update',
+            force_refresh: 'Click to force'
         },
         settings: {
             title: 'System Settings',
@@ -274,7 +286,15 @@ export const translations = {
                 city: 'City',
                 state: 'State',
                 zip: 'Zip Code'
-            }
+            },
+            system: {
+                title: 'System',
+                refresh_rate: 'Order Refresh Interval (seconds)',
+                refresh_rate_hint: 'Time between automatic order fetches in the dashboard.',
+                email_config: 'Email Configuration',
+                email_hint: 'Email settings (SMTP) must be configured directly in the server .env file for security reasons.'
+            },
+            save_btn: 'Save Settings 💾'
         }
     }
 };
