@@ -14,10 +14,18 @@ class Order extends Model implements Auditable
     protected $fillable = [
         'user_id',
         'customer_name',
+        'customer_phone',
         'status',
         'total_amount',
         'payment_method',
+        'delivery_type',
+        'delivery_address',
+        'courier_name',
         'notes'
+    ];
+
+    protected $casts = [
+        'delivery_address' => 'array',
     ];
 
     public function items()

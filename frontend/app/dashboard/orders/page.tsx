@@ -7,6 +7,7 @@ import { useLanguage } from '@/app/context/LanguageContext';
 import { Order } from '@/app/types/order';
 import KanbanColumn from '@/app/components/KanbanColumn';
 import LoadingSpinner from '@/app/components/LoadingSpinner';
+import OrderDispatchModal from '@/app/components/OrderDispatchModal';
 
 export default function OrdersPage() {
     const [orders, setOrders] = useState<Order[]>([]);
@@ -51,25 +52,41 @@ export default function OrdersPage() {
         }
     };
 
+    const [activeOrder, setActiveOrder] = useState<Order | null>(null);
+    const [targetStatus, setTargetStatus] = useState<string>('');
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
     const handleDragEnd = async (event: DragEndEvent) => {
         const { active, over } = event;
-
         if (!over) return;
 
         const orderId = Number(active.id);
         const newStatus = over.id as string;
+        const currentOrder = orders.find(o => o.id === orderId);
 
-        // Optimistic update
+        if (!currentOrder || currentOrder.status === newStatus) return;
+
+        // Intercept logic
+        if (newStatus === 'delivered' || (newStatus === 'ready' && currentOrder.delivery_type === 'pickup')) {
+            setActiveOrder(currentOrder);
+            setTargetStatus(newStatus);
+            setIsModalOpen(true);
+            return; // Stop drag until confirmed
+        }
+
+        updateOrderStatus(orderId, newStatus);
+    };
+
+    const updateOrderStatus = async (orderId: number, status: string, courierName?: string) => {
+        // Optimistic Update
         const originalOrders = [...orders];
-
         setOrders(prev => prev.map(o => {
             if (o.id === orderId) {
-                return { ...o, status: newStatus as any };
+                return { ...o, status: status as any, courier_name: courierName };
             }
             return o;
         }));
 
-        // API Call
         try {
             await fetch(`${apiUrl}/orders/${orderId}/status`, {
                 method: 'PUT',
@@ -77,11 +94,19 @@ export default function OrdersPage() {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ status: newStatus })
+                body: JSON.stringify({ status, courier_name: courierName })
             });
         } catch (error) {
             console.error('Failed to update status', error);
-            setOrders(originalOrders); // Revert
+            setOrders(originalOrders);
+        }
+    };
+
+    const handleConfirmDispatch = (courierName?: string) => {
+        if (activeOrder) {
+            updateOrderStatus(activeOrder.id, targetStatus, courierName);
+            setIsModalOpen(false);
+            setActiveOrder(null);
         }
     };
 
@@ -95,6 +120,14 @@ export default function OrdersPage() {
                     🔄
                 </button>
             </div>
+
+            <OrderDispatchModal
+                isOpen={isModalOpen}
+                order={activeOrder}
+                status={targetStatus}
+                onClose={() => setIsModalOpen(false)}
+                onConfirm={handleConfirmDispatch}
+            />
 
             <DndContext onDragEnd={handleDragEnd}>
                 <div className="flex gap-4 overflow-x-auto pb-4 h-full items-start">

@@ -14,6 +14,16 @@ export interface Order {
     status: 'pending' | 'preparing' | 'ready' | 'delivered' | 'canceled';
     total_amount: string;
     payment_method: string;
+    delivery_type: 'pickup' | 'delivery';
+    delivery_address?: {
+        street: string;
+        number: string;
+        neighborhood: string;
+        city: string;
+        zip_code: string;
+    };
+    customer_phone?: string;
+    courier_name?: string;
     created_at: string;
     items: OrderItem[];
     notes?: string;

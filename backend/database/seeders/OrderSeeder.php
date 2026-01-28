@@ -28,12 +28,23 @@ class OrderSeeder extends Seeder
         for ($i = 0; $i < 15; $i++) {
             $status = $statuses[array_rand($statuses)];
             
+            $deliveryType = rand(0, 1) ? 'delivery' : 'pickup';
+            
             $order = Order::create([
                 'user_id' => 1, // Admin for now, or random
                 'customer_name' => 'Customer ' . ($i + 1),
+                'customer_phone' => '551199999' . sprintf('%04d', rand(0, 9999)),
                 'status' => $status,
                 'total_amount' => 0, // Will update below
                 'payment_method' => $paymentMethods[array_rand($paymentMethods)],
+                'delivery_type' => $deliveryType,
+                'delivery_address' => $deliveryType === 'delivery' ? [
+                    'street' => 'Rua das Flores',
+                    'number' => rand(1, 400),
+                    'neighborhood' => 'Centro',
+                    'city' => 'São Paulo',
+                    'zip_code' => '01001-000'
+                ] : null,
                 'notes' => rand(0, 1) ? 'Sem cebola' : null
             ]);
 
