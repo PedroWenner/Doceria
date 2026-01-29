@@ -70,7 +70,7 @@ function DashboardInnerLayout({
     const allMenuItems = [
         { icon: '📊', label: 'sidebar.dashboard', href: '/dashboard', roles: ['admin', 'manager'] },
         { icon: '🛍️', label: 'orders.title', href: '/dashboard/orders', roles: ['admin', 'manager'] },
-        { icon: '👥', label: 'sidebar.users', href: '/dashboard/users', roles: ['admin', 'manager'] },
+        { icon: '👥', label: 'sidebar.users', href: '/dashboard/users', roles: ['admin'] },
         { icon: '🧁', label: 'sidebar.products', href: '/dashboard/products', roles: ['admin', 'manager'] },
         { icon: '📋', label: 'sidebar.audit', href: '/dashboard/audit', roles: ['admin'] },
         { icon: '⚙️', label: 'settings.title', href: '/dashboard/settings', roles: ['admin'] },
