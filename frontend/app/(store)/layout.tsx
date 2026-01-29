@@ -30,7 +30,7 @@ export default function StoreLayout({ children }: { children: React.ReactNode })
             {/* Backdrop for Menu */}
             {showProfileMenu && (
                 <div
-                    className="fixed inset-0 z-40 bg-transparent"
+                    className="fixed inset-0 z-20 bg-transparent"
                     onClick={() => setShowProfileMenu(false)}
                 />
             )}
@@ -127,7 +127,10 @@ export default function StoreLayout({ children }: { children: React.ReactNode })
                                         <p className="font-bold text-brand-choco truncate text-sm">{user.name}</p>
                                     </div>
                                     <button
-                                        onClick={() => { setShowProfileMenu(false); logout(); }}
+                                        onClick={() => {
+                                            console.log('Logout clicked desktop');
+                                            logout();
+                                        }}
                                         className="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-red-50 font-bold transition-colors flex items-center gap-2"
                                     >
                                         <span>🚪</span> Sair
@@ -206,7 +209,10 @@ export default function StoreLayout({ children }: { children: React.ReactNode })
                         <p className="text-xs text-gray-400">Olá, {user.name.split(' ')[0]}</p>
                     </div>
                     <button
-                        onClick={() => { setShowProfileMenu(false); logout(); }}
+                        onClick={() => {
+                            console.log('Logout clicked mobile');
+                            logout();
+                        }}
                         className="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-red-50 font-bold transition-colors flex items-center gap-2"
                     >
                         <span>🚪</span> Sair

@@ -61,7 +61,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
 
     const login = (token: string, userData: User, redirectPath?: string) => {
-        Cookies.set('auth_token', token, { expires: 7 }); // 7 days
+        Cookies.set('auth_token', token, { expires: 7, path: '/' });
         setUser(userData);
 
         if (redirectPath) {
@@ -74,17 +74,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
 
     const logout = () => {
-        // Cleaning all possible auth cookies
-        Cookies.remove('auth_token');
+        // Cleaning all possible auth cookies (Global and Local)
+        Cookies.remove('auth_token', { path: '/' });
+        Cookies.remove('auth_token'); // Try removing local too
+        Cookies.remove('token', { path: '/' });
         Cookies.remove('token');
 
         const wasCustomer = user?.role === 'customer';
         setUser(null);
 
         if (wasCustomer) {
-            router.push('/signin');
+            window.location.href = '/signin';
         } else {
-            router.push('/login');
+            window.location.href = '/login';
         }
     };
 

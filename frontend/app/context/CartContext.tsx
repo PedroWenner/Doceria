@@ -32,9 +32,16 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 export function CartProvider({ children }: { children: React.ReactNode }) {
     const [items, setItems] = useState<CartItem[]>([]);
 
-    // Load from LocalStorage on mount
+    // Load from SessionStorage on mount
     useEffect(() => {
-        const savedCart = localStorage.getItem('sweet_cart');
+        // Migration: Check if localStorage has old data, if so, ignore it or move it? 
+        // User asked to clear data when closing browser, so we should IGNORE old persistent data.
+        // We will cleanup localStorage to avoid confusion.
+        if (localStorage.getItem('sweet_cart')) {
+            localStorage.removeItem('sweet_cart');
+        }
+
+        const savedCart = sessionStorage.getItem('sweet_cart');
         if (savedCart) {
             try {
                 setItems(JSON.parse(savedCart));
@@ -44,9 +51,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         }
     }, []);
 
-    // Save to LocalStorage whenever items change
+    // Save to SessionStorage whenever items change
     useEffect(() => {
-        localStorage.setItem('sweet_cart', JSON.stringify(items));
+        sessionStorage.setItem('sweet_cart', JSON.stringify(items));
     }, [items]);
 
     const addToCart = (product: Product, quantity = 1) => {
