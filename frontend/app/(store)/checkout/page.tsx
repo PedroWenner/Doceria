@@ -47,24 +47,26 @@ export default function CheckoutPage() {
         setIsSubmitting(true);
 
         const orderData = {
-            total_price: cartTotal,
-            status: 'pending',
             items: items.map(item => ({
                 product_id: item.product.id,
                 quantity: item.quantity,
-                unit_price: item.product.price,
-                subtotal: item.quantity * parseFloat(item.product.price)
+                unit_price: parseFloat(item.product.price)
             })),
+            total_amount: paymentMethod === 'pix' ? cartTotal * 0.95 : cartTotal, // Apply discount to total stored in DB? Or store raw total? 
+            // Better to store the actual amount to be paid. Logic:
+            // If pix, 5% off. So total_amount should reflect that.
+            // Let's keep consistency with the UI display.
+            payment_method: paymentMethod,
+            delivery_type: 'pickup', // Hardcoded for this version
+            delivery_address: null,
             notes: JSON.stringify({
-                type: 'pickup',
-                payment_method: paymentMethod,
                 change_for: paymentMethod === 'money' ? changeFor : null,
-                pickup_address: 'Rua das Gostosuras, 123'
+                pickup_info: 'Retirada em Rua das Gostosuras, 123'
             })
         };
 
         try {
-            const token = jsCookie.get('auth_token'); // Correct key
+            const token = jsCookie.get('auth_token');
             const res = await fetch(`${apiUrl}/orders`, {
                 method: 'POST',
                 headers: {
@@ -82,7 +84,7 @@ export default function CheckoutPage() {
             } else {
                 const errorData = await res.json();
                 console.error("Order error", errorData);
-                toast.error("Erro ao realizar pedido. Tente novamente.");
+                toast.error(errorData.message || "Erro ao realizar pedido. Tente novamente.");
             }
         } catch (error) {
             console.error("Order error", error);

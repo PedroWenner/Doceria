@@ -34,7 +34,6 @@ Route::group(['middleware' => ['api', 'auth:api', 'role:admin']], function () {
     Route::get('audits', [App\Http\Controllers\AuditController::class, 'index']);
 
     // Orders (Kanban)
-    // Orders (Kanban)
     Route::get('orders', [App\Http\Controllers\OrderController::class, 'index']);
     Route::put('orders/{order}/status', [App\Http\Controllers\OrderController::class, 'updateStatus']);
 
@@ -57,4 +56,9 @@ Route::group(['middleware' => ['api']], function () {
     Route::get('products', [App\Http\Controllers\ProductController::class, 'index']);
     Route::get('products/{product}', [App\Http\Controllers\ProductController::class, 'show']);
     Route::get('settings', [App\Http\Controllers\CompanySettingController::class, 'show']);
+});
+
+// Authenticated Routes (Customers & Admins)
+Route::group(['middleware' => ['api', 'auth:api']], function () {
+    Route::post('orders', [App\Http\Controllers\OrderController::class, 'store']);
 });
