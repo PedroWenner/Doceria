@@ -2,16 +2,19 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import Cookies from 'js-cookie'; // Added import for cookie usage
 import { useRouter, usePathname } from 'next/navigation';
 import ThemeToggle from '@/app/components/ThemeToggle';
 import LanguageToggle from '@/app/components/LanguageToggle';
 import { useLanguage } from '@/app/context/LanguageContext';
-import { useAuth } from '@/app/context/AuthContext';
+// import { useAuth } from '@/app/context/AuthContext'; // Removed
 import { Toaster } from 'react-hot-toast';
 import LoadingSpinner from '@/app/components/LoadingSpinner';
 import SessionTimer from '@/app/components/SessionTimer';
 
-export default function DashboardLayout({
+import { AdminAuthProvider, useAdminAuth } from '@/app/context/AdminAuthContext';
+
+function DashboardInnerLayout({
     children,
 }: {
     children: React.ReactNode;
@@ -22,15 +25,15 @@ export default function DashboardLayout({
     const [logoUrl, setLogoUrl] = useState<string | null>(null);
     const [systemName, setSystemName] = useState<string>('Dashboard');
     const { t } = useLanguage();
-    const { user, logout, isLoading } = useAuth();
+    const { user, logout, isLoading } = useAdminAuth(); // Use specific Admin Auth
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 
+    // ... existing useEffects ...
     React.useEffect(() => {
         const fetchSettings = async () => {
             try {
-                // If user is logged in, we can fetch settings
                 if (user) {
-                    const token = document.cookie.split('; ').find(row => row.startsWith('auth_token='))?.split('=')[1];
+                    const token = Cookies.get('admin_token'); // Use admin_token
                     const res = await fetch(`${apiUrl}/settings`, {
                         headers: { Authorization: `Bearer ${token}` }
                     });
@@ -209,5 +212,13 @@ export default function DashboardLayout({
                 {children}
             </main>
         </div>
+    );
+}
+
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+    return (
+        <AdminAuthProvider>
+            <DashboardInnerLayout>{children}</DashboardInnerLayout>
+        </AdminAuthProvider>
     );
 }

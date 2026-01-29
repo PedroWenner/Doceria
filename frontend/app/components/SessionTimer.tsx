@@ -3,16 +3,16 @@
 import { useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
 import { getTokenExpiration } from '../utils/jwt';
-import { useAuth } from '../context/AuthContext';
+import { useAdminAuth } from '../context/AdminAuthContext'; // Updated import
 import { useLanguage } from '../context/LanguageContext';
 
 export default function SessionTimer() {
     const [timeLeft, setTimeLeft] = useState<number | null>(null);
-    const { logout } = useAuth();
+    const { logout } = useAdminAuth(); // Use admin auth
     const { t } = useLanguage();
 
     useEffect(() => {
-        const token = Cookies.get('auth_token');
+        const token = Cookies.get('admin_token'); // Check admin_token
         if (!token) return;
 
         const exp = getTokenExpiration(token);

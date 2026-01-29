@@ -7,11 +7,11 @@ import { useLanguage } from '@/app/context/LanguageContext';
 import Cookies from 'js-cookie';
 import { useRouter } from 'next/navigation';
 
-import { useAuth } from '@/app/context/AuthContext';
+import { useAdminAuth, AdminAuthProvider } from '@/app/context/AdminAuthContext'; // Updated import
 
 import { toast, Toaster } from 'react-hot-toast';
 
-export default function LoginPage() {
+function LoginContent() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [rememberMe, setRememberMe] = useState(false);
@@ -19,7 +19,7 @@ export default function LoginPage() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const router = useRouter();
-    const { login } = useAuth(); // Import login from context
+    const { login } = useAdminAuth(); // Use admin auth
 
     const { t } = useLanguage();
 
@@ -139,5 +139,13 @@ export default function LoginPage() {
                 </form>
             </GlassCard>
         </div>
+    );
+}
+
+export default function LoginPage() {
+    return (
+        <AdminAuthProvider>
+            <LoginContent />
+        </AdminAuthProvider>
     );
 }

@@ -1,7 +1,7 @@
 'use client';
 
 import { useCart } from '@/app/context/CartContext';
-import { useAuth } from '@/app/context/AuthContext';
+import { useStoreAuth } from '@/app/context/StoreAuthContext'; // Updated import
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
@@ -10,7 +10,7 @@ import jsCookie from 'js-cookie';
 
 export default function CheckoutPage() {
     const { items, cartTotal, clearCart } = useCart();
-    const { user } = useAuth();
+    const { user } = useStoreAuth(); // Use store auth
     const router = useRouter();
 
     // States
@@ -21,7 +21,7 @@ export default function CheckoutPage() {
 
     // Protect Route
     useEffect(() => {
-        const token = jsCookie.get('auth_token');
+        const token = jsCookie.get('store_token'); // Check store_token
         if (!token) {
             router.push('/signin?redirect=/checkout');
         }
@@ -66,7 +66,7 @@ export default function CheckoutPage() {
         };
 
         try {
-            const token = jsCookie.get('auth_token');
+            const token = jsCookie.get('store_token'); // Use store_token
             const res = await fetch(`${apiUrl}/orders`, {
                 method: 'POST',
                 headers: {

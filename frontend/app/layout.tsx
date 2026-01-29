@@ -19,7 +19,6 @@ export const metadata: Metadata = {
 
 import { ThemeProvider } from "./context/ThemeContext";
 import { LanguageProvider } from "./context/LanguageContext";
-import { AuthProvider } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext";
 
 export default function RootLayout({
@@ -33,13 +32,11 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased transition-colors duration-300`}
       >
         <ThemeProvider>
-          <AuthProvider>
-            <CartProvider>
-              <LanguageProvider>
-                {children}
-              </LanguageProvider>
-            </CartProvider>
-          </AuthProvider>
+          <CartProvider>
+            <LanguageProvider>
+              {children}
+            </LanguageProvider>
+          </CartProvider>
         </ThemeProvider>
       </body>
     </html>

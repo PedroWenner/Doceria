@@ -1,7 +1,7 @@
 'use client';
 
 import { useCart } from '@/app/context/CartContext';
-import { useAuth } from '@/app/context/AuthContext';
+import { useStoreAuth } from '@/app/context/StoreAuthContext'; // Updated import
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -9,7 +9,7 @@ import { toast } from 'react-hot-toast';
 
 export default function CartPage() {
     const { items, removeFromCart, updateQuantity, cartTotal, clearCart } = useCart();
-    const { user } = useAuth();
+    const { user } = useStoreAuth(); // Use store auth
     const router = useRouter();
     const [apiUrl] = useState(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api');
 

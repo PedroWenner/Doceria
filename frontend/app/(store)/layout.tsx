@@ -4,13 +4,15 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Toaster } from 'react-hot-toast';
 import { useEffect, useState } from 'react';
-import { useAuth } from '@/app/context/AuthContext';
+// import { useAuth } from '@/app/context/AuthContext'; // Removed
 import { useCart } from '@/app/context/CartContext';
 import { useTheme } from '@/app/context/ThemeContext';
 
-export default function StoreLayout({ children }: { children: React.ReactNode }) {
+import { StoreAuthProvider, useStoreAuth } from '@/app/context/StoreAuthContext';
+
+function StoreLayoutContent({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
-    const { user, logout } = useAuth(); // Destructure logout
+    const { user, logout } = useStoreAuth();
     const { cartCount } = useCart();
     const { storeTheme, toggleStoreTheme } = useTheme();
     const [apiUrl] = useState(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api');
@@ -186,7 +188,7 @@ export default function StoreLayout({ children }: { children: React.ReactNode })
                     <span className={`text-[10px] font-bold mt-1 transition-opacity ${pathname === '/' ? 'opacity-100' : 'opacity-0 h-0'}`} style={{ color: 'var(--store-text)' }}>Início</span>
                 </Link>
                 <Link href="/menu" className={`flex flex-col items-center justify-center w-16 transition-all duration-300 group`}>
-                    <span className={`text-2xl drop-shadow-sm transition-transform group-active:scale-90 ${pathname === '/menu' ? 'grayscale-0 opacity-100' : 'grayscale opacity-50'}`}>🍔</span>
+                    <span className={`text-2xl drop-shadow-sm transition-transform group-active:scale-scale-90 ${pathname === '/menu' ? 'grayscale-0 opacity-100' : 'grayscale opacity-50'}`}>🍔</span>
                     <span className={`text-[10px] font-bold mt-1 transition-opacity ${pathname === '/menu' ? 'opacity-100' : 'opacity-0 h-0'}`} style={{ color: 'var(--store-text)' }}>Menu</span>
                 </Link>
 
@@ -247,5 +249,13 @@ export default function StoreLayout({ children }: { children: React.ReactNode })
                 </div>
             )}
         </div>
+    );
+}
+
+export default function StoreLayout({ children }: { children: React.ReactNode }) {
+    return (
+        <StoreAuthProvider>
+            <StoreLayoutContent>{children}</StoreLayoutContent>
+        </StoreAuthProvider>
     );
 }

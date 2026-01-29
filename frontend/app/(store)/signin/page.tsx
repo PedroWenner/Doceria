@@ -1,13 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import { useAuth } from '@/app/context/AuthContext';
+import { useStoreAuth } from '@/app/context/StoreAuthContext'; // Updated import
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { toast } from 'react-hot-toast';
 
 export default function SigninPage() {
-    const { login } = useAuth();
+    const { login } = useStoreAuth(); // Use store auth
     const router = useRouter();
     const searchParams = useSearchParams();
     const redirectUrl = searchParams.get('redirect');
