@@ -8,6 +8,12 @@ import { Order } from '@/app/types/order';
 import KanbanColumn from '@/app/components/KanbanColumn';
 import LoadingSpinner from '@/app/components/LoadingSpinner';
 import OrderDispatchModal from '@/app/components/OrderDispatchModal';
+import {
+    ClipboardList,
+    Clock,
+    RefreshCw,
+    AlertCircle
+} from 'lucide-react';
 
 export default function OrdersPage() {
     const [orders, setOrders] = useState<Order[]>([]);
@@ -18,14 +24,14 @@ export default function OrdersPage() {
 
     // Status config
     const columns = [
-        { id: 'pending', title: 'orders.pending', color: 'bg-yellow-200/80' },
-        { id: 'preparing', title: 'orders.preparing', color: 'bg-blue-200/80' },
-        { id: 'ready', title: 'orders.ready', color: 'bg-green-200/80' },
-        { id: 'delivered', title: 'orders.delivered', color: 'bg-gray-200/80' }
+        { id: 'pending', title: 'orders.pending', color: 'border-amber-400' },
+        { id: 'preparing', title: 'orders.preparing', color: 'border-sky-500' },
+        { id: 'ready', title: 'orders.ready', color: 'border-emerald-500' },
+        { id: 'delivered', title: 'orders.delivered', color: 'border-slate-500' }
     ];
 
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
-    const token = Cookies.get('auth_token');
+    const token = Cookies.get('admin_token');
 
     // Initial Load
     useEffect(() => {
@@ -153,50 +159,28 @@ export default function OrdersPage() {
 
     if (isLoading) return <LoadingSpinner />;
 
-    // Calculate progress for the timer circle
-    const radius = 18;
-    const circumference = 2 * Math.PI * radius;
-    const offset = circumference - ((refreshRate - secondsLeft) / refreshRate) * circumference;
-
     return (
-        <div className="h-full flex flex-col">
-            <div className="flex justify-between items-end mb-6">
-                <h1 className="text-3xl font-bold text-brand-choco">{t('orders.title')}</h1>
+        <div className="h-full flex flex-col max-w-[1920px] mx-auto pb-6">
+            <div className="flex justify-between items-end mb-8 px-1">
+                <div>
+                    <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-50 tracking-tight flex items-center gap-3">
+                        <ClipboardList size={32} className="text-slate-400" />
+                        {t('orders.title')}
+                    </h1>
+                    <p className="text-slate-500 dark:text-slate-400 mt-1 text-sm ml-11">Gerenciamento visual do fluxo de pedidos.</p>
+                </div>
 
-                {/* Countdown Timer Widget */}
-                <div
-                    onClick={handleManualRefresh}
-                    className="flex items-center gap-3 bg-white/50 backdrop-blur-sm px-4 py-2 rounded-full cursor-pointer hover:bg-white/80 transition-all border border-brand-gold/20 shadow-sm group"
-                    title="Clique para atualizar agora"
-                >
-                    <div className="relative flex items-center justify-center">
-                        <svg className="transform -rotate-90 w-10 h-10">
-                            <circle
-                                cx="20"
-                                cy="20"
-                                r={radius}
-                                stroke="currentColor"
-                                strokeWidth="3"
-                                fill="transparent"
-                                className="text-brand-cream/50"
-                            />
-                            <circle
-                                cx="20"
-                                cy="20"
-                                r={radius}
-                                stroke="currentColor"
-                                strokeWidth="3"
-                                fill="transparent"
-                                strokeDasharray={circumference}
-                                strokeDashoffset={offset}
-                                className="text-brand-pink transition-all duration-1000 ease-linear"
-                            />
-                        </svg>
-                        <span className="absolute text-[10px] font-bold text-brand-choco">{secondsLeft}</span>
-                    </div>
-                    <div className="text-right">
-                        <span className="block text-xs font-bold text-brand-choco uppercase tracking-wider">{t('orders.next_update')}</span>
-                        <span className="block text-[10px] text-brand-choco/60 group-hover:text-brand-pink transition-colors">{t('orders.force_refresh')}</span>
+                {/* Status Pills / Timer */}
+                <div className="flex items-center gap-4">
+                    <div
+                        onClick={handleManualRefresh}
+                        className="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 px-4 py-2 rounded-full cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors group border border-slate-200 dark:border-slate-700"
+                        title="Clique para atualizar agora"
+                    >
+                        <RefreshCw size={16} className={`text-slate-500 group-hover:rotate-180 transition-transform duration-500 ${secondsLeft < 10 ? 'text-amber-500 animate-spin' : ''}`} />
+                        <span className="text-sm font-bold text-slate-700 dark:text-slate-300 font-mono w-12 text-center">
+                            {secondsLeft}s
+                        </span>
                     </div>
                 </div>
             </div>
@@ -210,16 +194,18 @@ export default function OrdersPage() {
             />
 
             <DndContext onDragEnd={handleDragEnd}>
-                <div className="flex gap-4 overflow-x-auto pb-4 h-full items-start">
-                    {columns.map(col => (
-                        <KanbanColumn
-                            key={col.id}
-                            id={col.id}
-                            title={col.title}
-                            color={col.color}
-                            orders={orders.filter(o => o.status === col.id)}
-                        />
-                    ))}
+                <div className="flex-1 overflow-x-auto min-h-[500px]">
+                    <div className="flex gap-6 h-full items-start px-1 pb-4 min-w-[1000px]">
+                        {columns.map(col => (
+                            <KanbanColumn
+                                key={col.id}
+                                id={col.id}
+                                title={col.title}
+                                color={col.color}
+                                orders={orders.filter(o => o.status === col.id)}
+                            />
+                        ))}
+                    </div>
                 </div>
             </DndContext>
         </div>

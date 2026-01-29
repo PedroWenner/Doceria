@@ -3,8 +3,17 @@
 import { useDraggable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import { Order } from '@/app/types/order';
-import { useLanguage } from '@/app/context/LanguageContext';
 import { displayCurrency } from '@/app/utils/formatters';
+import {
+    User,
+    MapPin,
+    ShoppingBag,
+    Clock,
+    Wallet,
+    StickyNote,
+    GripVertical
+} from 'lucide-react';
+import { useLanguage } from '@/app/context/LanguageContext';
 
 interface Props {
     order: Order;
@@ -17,57 +26,85 @@ export default function OrderCard({ order }: Props) {
         data: { order }
     });
 
+    const style = {
+        transform: CSS.Translate.toString(transform),
+        zIndex: isDragging ? 50 : 1,
+        opacity: isDragging ? 0.9 : 1,
+    };
+
     const translatePayment = (method: string) => {
         // @ts-ignore
         return t(`orders.payment.${method}`) || method;
-    };
-
-    const style = {
-        transform: CSS.Translate.toString(transform),
-        zIndex: isDragging ? 10 : 1,
-        opacity: isDragging ? 0.8 : 1,
     };
 
     return (
         <div
             ref={setNodeRef}
             style={style}
+            className={`
+                group relative bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 mb-3 
+                cursor-grab active:cursor-grabbing hover:shadow-md hover:border-slate-300 dark:hover:border-slate-600 transition-all
+                ${isDragging ? 'shadow-2xl rotate-2 scale-105 ring-2 ring-slate-900 dark:ring-slate-50' : ''}
+            `}
             {...listeners}
             {...attributes}
-            className={`
-                bg-white/60 p-4 rounded-xl shadow-sm border border-brand-gold/20 mb-3 
-                cursor-grab active:cursor-grabbing hover:bg-white/80 transition-all
-                ${isDragging ? 'shadow-2xl rotate-2 scale-105' : ''}
-            `}
         >
-            <div className="flex justify-between items-start mb-2">
-                <span className="font-bold text-brand-choco text-lg">#{order.id}</span>
-                <span className={`text-xs font-bold px-2 py-1 rounded border ${order.delivery_type === 'delivery' ? 'bg-blue-100 text-blue-700 border-blue-200' : 'bg-orange-100 text-orange-700 border-orange-200'}`}>
+            {/* Drag Handle (Visible on Hover) */}
+            <div className="absolute top-3 right-3 text-slate-300 dark:text-slate-600 opacity-0 group-hover:opacity-100 transition-opacity">
+                <GripVertical size={16} />
+            </div>
+
+            {/* Header: ID + Type */}
+            <div className="flex justify-between items-start mb-3 pr-4">
+                <span className="font-mono text-sm font-bold text-slate-500 dark:text-slate-400">#{order.id}</span>
+                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded border uppercase tracking-wide ${order.delivery_type === 'delivery'
+                        ? 'bg-sky-50 dark:bg-sky-900/20 text-sky-700 dark:text-sky-400 border-sky-100 dark:border-sky-900/30'
+                        : 'bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-400 border-orange-100 dark:border-orange-900/30'
+                    }`}>
                     {/* @ts-ignore */}
                     {t(`orders.delivery_type.${order.delivery_type}`)}
                 </span>
             </div>
 
-            <h3 className="font-bold text-brand-choco mb-1">{order.customer_name || 'Guest'}</h3>
-            <span className="text-xs text-brand-choco/50 block mb-2">
-                {new Date(order.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-            </span>
-
-            <div className="text-sm text-brand-choco/80 mb-3 line-clamp-3">
-                {order.items.map(i => `${i.quantity}x ${i.product?.name || 'Product'}`).join(', ')}
+            {/* Customer Info */}
+            <div className="mb-3">
+                <div className="flex items-center gap-2 text-slate-900 dark:text-slate-50 font-bold mb-0.5">
+                    <User size={14} className="text-slate-400" />
+                    <span className="truncate">{order.customer_name || 'Visitante'}</span>
+                </div>
+                <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+                    <Clock size={12} className="text-slate-300 dark:text-slate-600" />
+                    <span>
+                        {new Date(order.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                </div>
             </div>
 
+            {/* Items Summary */}
+            <div className="bg-slate-50 dark:bg-slate-900/50 rounded-lg p-2 mb-3 text-xs text-slate-600 dark:text-slate-300 border border-slate-100 dark:border-slate-800/50">
+                <div className="flex gap-1.5 mb-1">
+                    <ShoppingBag size={12} className="text-slate-400 mt-0.5 flex-shrink-0" />
+                    <div className="line-clamp-2 leading-relaxed">
+                        {order.items.map(i => `${i.quantity}x ${i.product?.name || 'Item'}`).join(', ')}
+                    </div>
+                </div>
+            </div>
+
+            {/* Notes */}
             {order.notes && (
-                <div className="bg-yellow-50 p-2 rounded text-xs text-brand-choco/90 mb-3 border border-yellow-200/50 italic">
-                    <span className="font-bold not-italic">{t('orders.notes')}:</span> {order.notes}
+                <div className="flex gap-1.5 p-2 rounded bg-amber-50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-900/20 text-xs text-amber-700 dark:text-amber-500 mb-3">
+                    <StickyNote size={12} className="mt-0.5 flex-shrink-0" />
+                    <span className="italic">{order.notes}</span>
                 </div>
             )}
 
-            <div className="flex justify-between items-center pt-2 border-t border-brand-choco/10">
-                <span className="text-xs bg-brand-pink/10 px-2 py-1 rounded text-brand-pink font-bold">
-                    {translatePayment(order.payment_method)}
-                </span>
-                <span className="font-bold text-green-700">
+            {/* Footer: Payment + Total */}
+            <div className="flex justify-between items-center pt-3 border-t border-slate-100 dark:border-slate-700/50">
+                <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+                    <Wallet size={12} />
+                    <span>{translatePayment(order.payment_method)}</span>
+                </div>
+                <span className="font-bold text-slate-900 dark:text-emerald-400">
                     {displayCurrency(order.total_amount)}
                 </span>
             </div>

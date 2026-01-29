@@ -110,7 +110,12 @@ export const translations = {
             payment: {
                 'Credit Card': 'Crédito',
                 'Pix': 'Pix',
-                'Cash': 'Dinheiro'
+                'Cash': 'Dinheiro',
+                'pix': 'Pix',
+                'money': 'Dinheiro',
+                'cash': 'Dinheiro',
+                'credit_card': 'Crédito',
+                'debit_card': 'Débito'
             },
             next_update: 'Próxima atualização',
             force_refresh: 'Clique para forçar'
@@ -274,7 +279,12 @@ export const translations = {
             payment: {
                 'Credit Card': 'Credit Card',
                 'Pix': 'Pix',
-                'Cash': 'Cash'
+                'Cash': 'Cash',
+                'pix': 'Pix',
+                'money': 'Cash',
+                'cash': 'Cash',
+                'credit_card': 'Credit Card',
+                'debit_card': 'Debit Card'
             },
             next_update: 'Next update',
             force_refresh: 'Click to force'

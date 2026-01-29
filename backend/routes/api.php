@@ -33,10 +33,12 @@ Route::group(['middleware' => ['api', 'auth:api', 'role:admin']], function () {
     // Audits
     Route::get('audits', [App\Http\Controllers\AuditController::class, 'index']);
 
-    // Orders (Kanban)
-    Route::get('orders', [App\Http\Controllers\OrderController::class, 'index']);
-    Route::put('orders/{order}/status', [App\Http\Controllers\OrderController::class, 'updateStatus']);
-
+    // Orders (Kanban) - Allow Admin and Manager
+    Route::group(['middleware' => ['role:admin,manager']], function () {
+        Route::get('orders', [App\Http\Controllers\OrderController::class, 'index']);
+        Route::put('orders/{order}/status', [App\Http\Controllers\OrderController::class, 'updateStatus']);
+    });
+    
     // Admin Product Management (Write)
     Route::post('/categories', [App\Http\Controllers\CategoryController::class, 'store']);
     Route::put('/categories/{category}', [App\Http\Controllers\CategoryController::class, 'update']);
