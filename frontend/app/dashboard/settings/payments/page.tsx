@@ -1,11 +1,21 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import GlassCard from '@/app/components/GlassCard';
 import LoadingSpinner from '@/app/components/LoadingSpinner';
-import { useAdminAuth } from '@/app/context/AdminAuthContext';
 import Cookies from 'js-cookie';
 import toast from 'react-hot-toast';
+import {
+    CreditCard,
+    Plus,
+    Power,
+    Trash2,
+    Pencil,
+    Search,
+    X,
+    Check,
+    AlertCircle,
+    AlertTriangle
+} from 'lucide-react';
 
 interface PaymentMethod {
     id: number;
@@ -20,6 +30,12 @@ export default function PaymentMethodsPage() {
     const [isSaving, setIsSaving] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingMethod, setEditingMethod] = useState<PaymentMethod | null>(null);
+
+    // Confirmation State
+    const [deleteConfirmation, setDeleteConfirmation] = useState<{ isOpen: boolean, methodId: number | null }>({
+        isOpen: false,
+        methodId: null
+    });
 
     // Form State
     const [name, setName] = useState('');
@@ -64,17 +80,22 @@ export default function PaymentMethodsPage() {
         }
     };
 
-    const handleDelete = async (id: number) => {
-        if (!confirm('Tem certeza? Isso removerá descontos associados a este método.')) return;
+    const confirmDelete = (id: number) => {
+        setDeleteConfirmation({ isOpen: true, methodId: id });
+    };
+
+    const handleDelete = async () => {
+        if (!deleteConfirmation.methodId) return;
 
         try {
-            const res = await fetch(`${apiUrl}/payment-methods/${id}`, {
+            const res = await fetch(`${apiUrl}/payment-methods/${deleteConfirmation.methodId}`, {
                 method: 'DELETE',
                 headers: { Authorization: `Bearer ${token}` }
             });
             if (res.ok) {
                 toast.success('Removido com sucesso');
                 fetchMethods();
+                setDeleteConfirmation({ isOpen: false, methodId: null });
             }
         } catch (error) {
             toast.error('Erro ao remover');
@@ -142,108 +163,170 @@ export default function PaymentMethodsPage() {
     if (isLoading) return <LoadingSpinner />;
 
     return (
-        <div className="max-w-5xl mx-auto pb-10">
-            <div className="flex justify-between items-center mb-6">
-                <h1 className="text-3xl font-bold text-brand-choco flex items-center gap-2">
-                    💳 Meios de Pagamento
-                </h1>
+        <div className="max-w-7xl mx-auto space-y-8 pb-20">
+            {/* Header */}
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-50 tracking-tight flex items-center gap-3">
+                        <CreditCard size={32} className="text-slate-400" />
+                        Meios de Pagamento
+                    </h1>
+                    <p className="text-slate-500 dark:text-slate-400 mt-1 text-sm ml-11">Configure as formas de pagamento disponíveis no checkout.</p>
+                </div>
                 <button
                     onClick={() => openModal()}
-                    className="bg-brand-choco text-white px-4 py-2 rounded-xl font-bold shadow hover:bg-brand-choco/90 transition-all"
+                    className="flex items-center gap-2 bg-slate-900 dark:bg-slate-50 text-white dark:text-slate-900 px-5 py-2.5 rounded-lg font-semibold hover:bg-slate-800 dark:hover:bg-slate-200 transition-all shadow-sm"
                 >
-                    + Novo Meio
+                    <Plus size={20} />
+                    <span>Novo Meio</span>
                 </button>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {/* Methods Grid */}
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {methods.map(method => (
-                    <GlassCard key={method.id} className="p-5 flex flex-col justify-between group">
-                        <div>
-                            <div className="flex justify-between items-start mb-2">
-                                <h3 className="text-xl font-bold text-brand-choco">{method.name}</h3>
-                                <div className={`px-2 py-0.5 rounded text-xs font-bold ${method.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                    <div key={method.id} className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden flex flex-col justify-between group hover:shadow-md transition-shadow">
+                        <div className="p-6">
+                            <div className="flex justify-between items-start mb-4">
+                                <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
+                                    <CreditCard size={24} className="text-slate-600 dark:text-slate-400" />
+                                </div>
+                                <div className={`px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wide flex items-center gap-1.5 ${method.is_active ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/30' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700'}`}>
+                                    <span className={`w-1.5 h-1.5 rounded-full ${method.is_active ? 'bg-emerald-500' : 'bg-slate-400'}`} />
                                     {method.is_active ? 'Ativo' : 'Inativo'}
                                 </div>
                             </div>
-                            <p className="text-xs text-brand-choco/60 font-mono bg-white/50 inline-block px-2 py-1 rounded mb-4">
+
+                            <h3 className="text-lg font-bold text-slate-900 dark:text-slate-50 mb-1">{method.name}</h3>
+                            <div className="inline-block px-2 py-0.5 bg-slate-100 dark:bg-slate-800 rounded text-slate-500 dark:text-slate-400 font-mono text-xs">
                                 {method.slug}
-                            </p>
+                            </div>
                         </div>
 
-                        <div className="flex gap-2 mt-4 pt-4 border-t border-brand-gold/10">
+                        <div className="border-t border-slate-100 dark:border-slate-800 p-4 flex gap-2 bg-slate-50/50 dark:bg-slate-900/50">
                             <button
                                 onClick={() => handleToggle(method.id)}
-                                className="flex-1 text-sm font-bold text-brand-choco/70 hover:text-brand-choco bg-white/40 hover:bg-white/60 py-2 rounded transition-colors"
+                                className={`flex-1 flex items-center justify-center gap-2 text-sm font-semibold py-2 rounded-lg transition-colors border ${method.is_active
+                                    ? 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                                    : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-emerald-600 dark:text-emerald-400 shadow-sm'}`}
                             >
+                                <Power size={16} />
                                 {method.is_active ? 'Desativar' : 'Ativar'}
                             </button>
                             <button
                                 onClick={() => openModal(method)}
-                                className="px-3 text-brand-choco/70 hover:text-brand-pink bg-white/40 hover:bg-white/60 rounded transition-colors"
+                                className="p-2 text-slate-500 hover:text-slate-900 dark:hover:text-slate-50 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors border border-transparent hover:border-slate-200 dark:hover:border-slate-600"
+                                title="Editar"
                             >
-                                ✏️
+                                <Pencil size={18} />
                             </button>
                             <button
-                                onClick={() => handleDelete(method.id)}
-                                className="px-3 text-brand-choco/70 hover:text-red-600 bg-white/40 hover:bg-white/60 rounded transition-colors"
+                                onClick={() => confirmDelete(method.id)}
+                                className="p-2 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg transition-colors border border-transparent hover:border-rose-100 dark:hover:border-rose-900/30"
+                                title="Excluir"
                             >
-                                🗑️
+                                <Trash2 size={18} />
                             </button>
                         </div>
-                    </GlassCard>
+                    </div>
                 ))}
             </div>
 
             {/* Modal */}
             {isModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-                    <GlassCard className="w-full max-w-md p-6 animate-scaleIn">
-                        <h2 className="text-2xl font-bold text-brand-choco mb-4">
-                            {editingMethod ? 'Editar Meio' : 'Novo Meio'}
-                        </h2>
+                <div className="fixed inset-0 bg-slate-950/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fadeIn">
+                    <div className="w-full max-w-md bg-white dark:bg-slate-950 rounded-2xl shadow-xl overflow-hidden flex flex-col border border-slate-200 dark:border-slate-800 animate-scaleIn">
+                        {/* Modal Header */}
+                        <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/50">
+                            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-50 flex items-center gap-2">
+                                {editingMethod ? <Pencil size={18} /> : <Plus size={18} />}
+                                {editingMethod ? 'Editar Meio' : 'Novo Meio'}
+                            </h2>
+                            <button onClick={() => setIsModalOpen(false)} className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 transition-colors">
+                                <X size={20} />
+                            </button>
+                        </div>
 
-                        <form onSubmit={handleSubmit} className="space-y-4">
+                        {/* Modal Body */}
+                        <form onSubmit={handleSubmit} className="p-6 space-y-5">
                             <div>
-                                <label className="block text-sm font-bold text-brand-choco mb-1">Nome</label>
+                                <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1.5">Nome do Meio</label>
                                 <input
                                     value={name}
                                     onChange={(e) => handleNameChange(e.target.value)}
-                                    className="w-full p-3 rounded-xl bg-white/50 border border-brand-gold/30 outline-none focus:ring-2 focus:ring-brand-pink/50"
+                                    className="w-full p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-50 focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-50 outline-none transition-all placeholder:text-slate-400"
                                     placeholder="Ex: Pix"
                                     required
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-bold text-brand-choco mb-1">Slug (Código)</label>
-                                <input
-                                    value={slug}
-                                    onChange={(e) => setSlug(e.target.value)}
-                                    className="w-full p-3 rounded-xl bg-white/50 border border-brand-gold/30 outline-none focus:ring-2 focus:ring-brand-pink/50 font-mono text-sm"
-                                    placeholder="Ex: pix"
-                                    required
-                                />
-                                <p className="text-xs text-brand-choco/50 mt-1">Identificador único usado pelo sistema.</p>
+                                <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1.5">Slug (Código Interno)</label>
+                                <div className="relative">
+                                    <input
+                                        value={slug}
+                                        onChange={(e) => setSlug(e.target.value)}
+                                        className="w-full p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-50 focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-50 outline-none transition-all font-mono text-sm pl-9"
+                                        placeholder="pix"
+                                        required
+                                    />
+                                    <span className="absolute left-3 top-2.5 text-slate-400 font-mono text-sm">#</span>
+                                </div>
+                                <p className="text-xs text-slate-500 mt-2 flex items-center gap-1">
+                                    <AlertCircle size={12} />
+                                    Identificador único usado pelo sistema.
+                                </p>
                             </div>
 
-                            <div className="flex justify-end gap-2 mt-6">
+                            <div className="pt-4 flex justify-end gap-3">
                                 <button
                                     type="button"
                                     onClick={() => setIsModalOpen(false)}
-                                    className="px-4 py-2 rounded-xl text-brand-choco hover:bg-white/40 transition-colors"
+                                    className="px-4 py-2 rounded-lg text-slate-600 dark:text-slate-400 font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                                 >
                                     Cancelar
                                 </button>
                                 <button
                                     type="submit"
                                     disabled={isSaving}
-                                    className="bg-brand-choco text-white px-6 py-2 rounded-xl font-bold shadow hover:bg-brand-choco/90 transition-all disabled:opacity-50"
+                                    className="px-5 py-2 rounded-lg bg-slate-900 dark:bg-slate-50 text-white dark:text-slate-900 font-bold hover:bg-slate-800 dark:hover:bg-slate-200 transition-all shadow-sm disabled:opacity-70 disabled:cursor-wait flex items-center gap-2"
                                 >
-                                    {isSaving ? 'Salvando...' : 'Salvar'}
+                                    {isSaving ? <LoadingSpinner /> : <><Check size={18} /> Salvar</>}
                                 </button>
                             </div>
                         </form>
-                    </GlassCard>
+                    </div>
+                </div>
+            )}
+
+            {/* Delete Confirmation Modal */}
+            {deleteConfirmation.isOpen && (
+                <div className="fixed inset-0 bg-slate-950/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fadeIn">
+                    <div className="w-full max-w-sm bg-white dark:bg-slate-950 rounded-2xl shadow-xl overflow-hidden flex flex-col border border-slate-200 dark:border-slate-800 animate-scaleIn">
+                        <div className="p-6 text-center">
+                            <div className="w-16 h-16 bg-rose-50 dark:bg-rose-900/20 rounded-full flex items-center justify-center mx-auto mb-4 text-rose-500 dark:text-rose-400">
+                                <AlertTriangle size={32} />
+                            </div>
+                            <h3 className="text-xl font-bold text-slate-900 dark:text-slate-50 mb-2">Tem certeza?</h3>
+                            <p className="text-slate-500 dark:text-slate-400 text-sm">
+                                Isso removerá este meio de pagamento permanentemente. Descontos associados podem ser perdidos.
+                            </p>
+                        </div>
+                        <div className="p-4 bg-slate-50 dark:bg-slate-900/50 flex gap-3 justify-center border-t border-slate-100 dark:border-slate-800">
+                            <button
+                                onClick={() => setDeleteConfirmation({ isOpen: false, methodId: null })}
+                                className="px-4 py-2 rounded-lg text-slate-600 dark:text-slate-400 font-medium hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                onClick={handleDelete}
+                                className="px-5 py-2 rounded-lg bg-rose-500 text-white font-bold hover:bg-rose-600 transition-all shadow-sm shadow-rose-500/20"
+                            >
+                                Sim, Remover
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
         </div>
