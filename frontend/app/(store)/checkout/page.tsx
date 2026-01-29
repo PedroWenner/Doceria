@@ -1,31 +1,95 @@
 'use client';
 
 import { useCart } from '@/app/context/CartContext';
-import { useStoreAuth } from '@/app/context/StoreAuthContext'; // Updated import
+import { useStoreAuth } from '@/app/context/StoreAuthContext';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import Link from 'next/link';
 import jsCookie from 'js-cookie';
+import LoadingSpinner from '@/app/components/LoadingSpinner';
+
+interface PaymentMethod {
+    id: number;
+    name: string;
+    slug: string;
+    is_active: boolean;
+}
 
 export default function CheckoutPage() {
     const { items, cartTotal, clearCart } = useCart();
-    const { user } = useStoreAuth(); // Use store auth
+    const { user } = useStoreAuth();
     const router = useRouter();
 
     // States
-    const [paymentMethod, setPaymentMethod] = useState<'pix' | 'money'>('pix');
+    const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
+    const [selectedMethodId, setSelectedMethodId] = useState<number | null>(null);
     const [changeFor, setChangeFor] = useState<string>('');
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [apiUrl] = useState(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api');
+    const [isLoadingMethods, setIsLoadingMethods] = useState(true);
+    const [discountAmount, setDiscountAmount] = useState(0);
+    const [finalTotal, setFinalTotal] = useState(cartTotal);
+
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 
     // Protect Route
     useEffect(() => {
-        const token = jsCookie.get('store_token'); // Check store_token
+        const token = jsCookie.get('store_token');
         if (!token) {
             router.push('/signin?redirect=/checkout');
         }
     }, [router]);
+
+    // Fetch Payment Methods
+    useEffect(() => {
+        const fetchMethods = async () => {
+            try {
+                const res = await fetch(`${apiUrl}/payment-methods`);
+                if (res.ok) {
+                    const response = await res.json();
+                    const activeMethods = response.data.filter((m: PaymentMethod) => m.is_active);
+                    setPaymentMethods(activeMethods);
+
+                    // Select first method by default if available
+                    if (activeMethods.length > 0) {
+                        setSelectedMethodId(activeMethods[0].id);
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching payment methods', error);
+                toast.error('Erro ao carregar formas de pagamento');
+            } finally {
+                setIsLoadingMethods(false);
+            }
+        };
+
+        if (items.length > 0) {
+            fetchMethods();
+        }
+    }, [apiUrl, items.length]);
+
+    // Calculate Discount
+    useEffect(() => {
+        if (!selectedMethodId) return;
+
+        let totalDiscount = 0;
+
+        items.forEach(item => {
+            // Find discount for this product and selected payment method
+            const discountRule = item.product.discounts?.find(
+                d => d.payment_method_id === selectedMethodId
+            );
+
+            if (discountRule) {
+                const itemTotal = parseFloat(item.product.price) * item.quantity;
+                totalDiscount += itemTotal * (Number(discountRule.percentage) / 100);
+            }
+        });
+
+        setDiscountAmount(totalDiscount);
+        setFinalTotal(cartTotal - totalDiscount);
+
+    }, [selectedMethodId, items, cartTotal]);
 
     if (items.length === 0) {
         return (
@@ -42,9 +106,13 @@ export default function CheckoutPage() {
         );
     }
 
+    if (isLoadingMethods) return <LoadingSpinner />;
+
     const handleFinishOrder = async () => {
-        if (!user) return;
+        if (!user || !selectedMethodId) return;
         setIsSubmitting(true);
+
+        const selectedMethod = paymentMethods.find(m => m.id === selectedMethodId);
 
         const orderData = {
             items: items.map(item => ({
@@ -52,21 +120,18 @@ export default function CheckoutPage() {
                 quantity: item.quantity,
                 unit_price: parseFloat(item.product.price)
             })),
-            total_amount: paymentMethod === 'pix' ? cartTotal * 0.95 : cartTotal, // Apply discount to total stored in DB? Or store raw total? 
-            // Better to store the actual amount to be paid. Logic:
-            // If pix, 5% off. So total_amount should reflect that.
-            // Let's keep consistency with the UI display.
-            payment_method: paymentMethod,
-            delivery_type: 'pickup', // Hardcoded for this version
+            total_amount: finalTotal,
+            payment_method: selectedMethod?.slug,
+            delivery_type: 'pickup',
             delivery_address: null,
             notes: JSON.stringify({
-                change_for: paymentMethod === 'money' ? changeFor : null,
+                change_for: selectedMethod?.slug === 'money' || selectedMethod?.slug === 'dinheiro' ? changeFor : null,
                 pickup_info: 'Retirada em Rua das Gostosuras, 123'
             })
         };
 
         try {
-            const token = jsCookie.get('store_token'); // Use store_token
+            const token = jsCookie.get('store_token');
             const res = await fetch(`${apiUrl}/orders`, {
                 method: 'POST',
                 headers: {
@@ -160,75 +225,67 @@ export default function CheckoutPage() {
                             </h3>
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                {/* Pix Option */}
-                                <label className={`relative group p-5 rounded-xl border-2 transition-all cursor-pointer flex flex-col gap-2`}
-                                    style={{
-                                        borderColor: paymentMethod === 'pix' ? 'var(--store-text)' : 'var(--store-border)',
-                                        backgroundColor: paymentMethod === 'pix' ? 'var(--store-bg)' : 'transparent'
-                                    }}>
-                                    <input
-                                        type="radio"
-                                        name="payment"
-                                        className="sr-only"
-                                        checked={paymentMethod === 'pix'}
-                                        onChange={() => setPaymentMethod('pix')}
-                                    />
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-2xl grayscale">💠</span>
-                                        {paymentMethod === 'pix' && (
-                                            <div className="w-4 h-4 rounded-full flex items-center justify-center"
-                                                style={{ backgroundColor: 'var(--store-text)' }}>
-                                                <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
-                                            </div>
-                                        )}
-                                    </div>
-                                    <div>
-                                        <span className="font-bold block" style={{ color: paymentMethod === 'pix' ? 'var(--store-text)' : 'var(--store-text-muted)' }}>Pix</span>
-                                        <span className="text-xs font-medium" style={{ color: 'var(--store-text-muted)' }}>Aprovação imediata</span>
-                                    </div>
-                                    {paymentMethod === 'pix' && (
-                                        <span className="absolute top-3 right-3 text-[10px] font-bold px-2 py-1 rounded-full border"
-                                            style={{
-                                                backgroundColor: 'rgba(34, 197, 94, 0.1)',
-                                                color: 'rgb(21, 128, 61)',
-                                                borderColor: 'rgba(34, 197, 94, 0.2)'
-                                            }}>
-                                            5% OFF
-                                        </span>
-                                    )}
-                                </label>
+                                {paymentMethods.map(method => (
+                                    <label key={method.id} className={`relative group p-5 rounded-xl border-2 transition-all cursor-pointer flex flex-col gap-2`}
+                                        style={{
+                                            borderColor: selectedMethodId === method.id ? 'var(--store-text)' : 'var(--store-border)',
+                                            backgroundColor: selectedMethodId === method.id ? 'var(--store-bg)' : 'transparent'
+                                        }}>
+                                        <input
+                                            type="radio"
+                                            name="payment"
+                                            className="sr-only"
+                                            checked={selectedMethodId === method.id}
+                                            onChange={() => setSelectedMethodId(method.id)}
+                                        />
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-2xl grayscale">
+                                                {method.slug.includes('pix') ? '💠' :
+                                                    method.slug.includes('money') || method.slug.includes('dinheiro') ? '💵' :
+                                                        method.slug.includes('card') || method.slug.includes('cartao') ? '💳' : '💰'}
+                                            </span>
+                                            {selectedMethodId === method.id && (
+                                                <div className="w-4 h-4 rounded-full flex items-center justify-center"
+                                                    style={{ backgroundColor: 'var(--store-text)' }}>
+                                                    <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div>
+                                            <span className="font-bold block" style={{ color: selectedMethodId === method.id ? 'var(--store-text)' : 'var(--store-text-muted)' }}>{method.name}</span>
+                                            <span className="text-xs font-medium" style={{ color: 'var(--store-text-muted)' }}>{method.slug.includes('pix') ? 'Aprovação imediata' : 'Pagar na retirada'}</span>
+                                        </div>
 
-                                {/* Money Option */}
-                                <label className={`relative group p-5 rounded-xl border-2 transition-all cursor-pointer flex flex-col gap-2`}
-                                    style={{
-                                        borderColor: paymentMethod === 'money' ? 'var(--store-text)' : 'var(--store-border)',
-                                        backgroundColor: paymentMethod === 'money' ? 'var(--store-bg)' : 'transparent'
-                                    }}>
-                                    <input
-                                        type="radio"
-                                        name="payment"
-                                        className="sr-only"
-                                        checked={paymentMethod === 'money'}
-                                        onChange={() => setPaymentMethod('money')}
-                                    />
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-2xl grayscale">💵</span>
-                                        {paymentMethod === 'money' && (
-                                            <div className="w-4 h-4 rounded-full flex items-center justify-center"
-                                                style={{ backgroundColor: 'var(--store-text)' }}>
-                                                <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
-                                            </div>
-                                        )}
-                                    </div>
-                                    <div>
-                                        <span className="font-bold block" style={{ color: paymentMethod === 'money' ? 'var(--store-text)' : 'var(--store-text-muted)' }}>Dinheiro</span>
-                                        <span className="text-xs font-medium" style={{ color: 'var(--store-text-muted)' }}>Pagar na retirada</span>
-                                    </div>
-                                </label>
+                                        {/* Dynamic Discount Badge Check */}
+                                        {/* Since discounts are per product, we check if total discount > 0 for this method */}
+                                        {(() => {
+                                            const potentialDiscount = items.reduce((acc, item) => {
+                                                const rule = item.product.discounts?.find(d => d.payment_method_id === method.id);
+                                                return rule ? acc + 1 : acc;
+                                            }, 0);
+
+                                            if (potentialDiscount > 0) {
+                                                return (
+                                                    <span className="absolute top-3 right-3 text-[10px] font-bold px-2 py-1 rounded-full border"
+                                                        style={{
+                                                            backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                                                            color: 'rgb(21, 128, 61)',
+                                                            borderColor: 'rgba(34, 197, 94, 0.2)'
+                                                        }}>
+                                                        DESCONTOS
+                                                    </span>
+                                                );
+                                            }
+                                            return null;
+                                        })()}
+                                    </label>
+                                ))}
                             </div>
 
                             {/* Change Input Animation */}
-                            <div className={`overflow-hidden transition-all duration-300 ease-in-out ${paymentMethod === 'money' ? 'max-h-32 opacity-100 mt-5' : 'max-h-0 opacity-0'}`}>
+                            <div className={`overflow-hidden transition-all duration-300 ease-in-out ${(paymentMethods.find(m => m.id === selectedMethodId)?.slug === 'money' ||
+                                    paymentMethods.find(m => m.id === selectedMethodId)?.slug === 'dinheiro')
+                                    ? 'max-h-32 opacity-100 mt-5' : 'max-h-0 opacity-0'}`}>
                                 <div className="p-4 rounded-xl border"
                                     style={{
                                         backgroundColor: 'var(--store-bg)',
@@ -273,16 +330,34 @@ export default function CheckoutPage() {
                             </h3>
 
                             <div className="space-y-4 max-h-[40vh] overflow-y-auto pr-2 custom-scrollbar">
-                                {items.map(item => (
-                                    <div key={item.product.id} className="flex justify-between items-start text-sm group">
-                                        <div className="flex gap-3">
-                                            <span className="font-bold px-2 py-0.5 rounded text-xs h-fit"
-                                                style={{ backgroundColor: 'var(--store-bg)', color: 'var(--store-text)' }}>{item.quantity}x</span>
-                                            <span className="w-32 truncate" style={{ color: 'var(--store-text-muted)' }}>{item.product.name}</span>
+                                {items.map(item => {
+                                    // Calculate discount visual for this item if applicable
+                                    const discountRule = selectedMethodId ? item.product.discounts?.find(d => d.payment_method_id === selectedMethodId) : null;
+                                    const hasDiscount = !!discountRule;
+                                    const itemPrice = parseFloat(item.product.price);
+                                    const discountedPrice = hasDiscount ? itemPrice * (1 - Number(discountRule.percentage) / 100) : itemPrice;
+
+                                    return (
+                                        <div key={item.product.id} className="flex justify-between items-start text-sm group">
+                                            <div className="flex gap-3">
+                                                <span className="font-bold px-2 py-0.5 rounded text-xs h-fit"
+                                                    style={{ backgroundColor: 'var(--store-bg)', color: 'var(--store-text)' }}>{item.quantity}x</span>
+                                                <div className="flex flex-col">
+                                                    <span className="w-32 truncate" style={{ color: 'var(--store-text-muted)' }}>{item.product.name}</span>
+                                                    {hasDiscount && (
+                                                        <span className="text-[10px] text-green-600 font-bold">{Number(discountRule.percentage)}% OFF</span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                            <div className="text-right">
+                                                {hasDiscount && (
+                                                    <span className="block text-[10px] line-through text-red-400">R$ {(itemPrice * item.quantity).toFixed(2).replace('.', ',')}</span>
+                                                )}
+                                                <span className="font-medium whitespace-nowrap" style={{ color: 'var(--store-text)' }}>R$ {(discountedPrice * item.quantity).toFixed(2).replace('.', ',')}</span>
+                                            </div>
                                         </div>
-                                        <span className="font-medium whitespace-nowrap" style={{ color: 'var(--store-text)' }}>R$ {(parseFloat(item.product.price) * item.quantity).toFixed(2).replace('.', ',')}</span>
-                                    </div>
-                                ))}
+                                    );
+                                })}
                             </div>
 
                             <div className="my-6 border-t border-dashed" style={{ borderColor: 'var(--store-border)' }}></div>
@@ -293,9 +368,9 @@ export default function CheckoutPage() {
                                     <span className="font-medium">R$ {cartTotal.toFixed(2).replace('.', ',')}</span>
                                 </div>
                                 <div className="flex justify-between text-sm" style={{ color: 'var(--store-text-muted)' }}>
-                                    <span>Desconto (Pix)</span>
-                                    {paymentMethod === 'pix' ? (
-                                        <span className="font-bold" style={{ color: 'rgb(22, 163, 74)' }}>- R$ {(cartTotal * 0.05).toFixed(2).replace('.', ',')}</span>
+                                    <span>Descontos</span>
+                                    {discountAmount > 0 ? (
+                                        <span className="font-bold" style={{ color: 'rgb(22, 163, 74)' }}>- R$ {discountAmount.toFixed(2).replace('.', ',')}</span>
                                     ) : (
                                         <span className="text-gray-300">-</span>
                                     )}
@@ -303,15 +378,15 @@ export default function CheckoutPage() {
                                 <div className="flex justify-between text-xl font-extrabold mt-6 pt-4 border-t"
                                     style={{ color: 'var(--store-text)', borderColor: 'var(--store-border)' }}>
                                     <span>Total</span>
-                                    <span>R$ {(paymentMethod === 'pix' ? cartTotal * 0.95 : cartTotal).toFixed(2).replace('.', ',')}</span>
+                                    <span>R$ {finalTotal.toFixed(2).replace('.', ',')}</span>
                                 </div>
                             </div>
 
                             <button
                                 onClick={handleFinishOrder}
-                                disabled={isSubmitting}
+                                disabled={isSubmitting || !selectedMethodId}
                                 className={`w-full py-4 rounded-xl font-bold text-base shadow-xl flex items-center justify-center gap-3 transition-all mt-8 group hover:opacity-90 active:scale-[0.98]
-                                    ${isSubmitting ? 'opacity-70 cursor-not-allowed' : ''}
+                                    ${(isSubmitting || !selectedMethodId) ? 'opacity-70 cursor-not-allowed' : ''}
                                 `}
                                 style={{
                                     backgroundColor: 'var(--store-primary)',

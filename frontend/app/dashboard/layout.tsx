@@ -73,6 +73,7 @@ function DashboardInnerLayout({
         { icon: '👥', label: 'sidebar.users', href: '/dashboard/users', roles: ['admin'] },
         { icon: '🧁', label: 'sidebar.products', href: '/dashboard/products', roles: ['admin', 'manager'] },
         { icon: '📋', label: 'sidebar.audit', href: '/dashboard/audit', roles: ['admin'] },
+        { icon: '💳', label: 'Meios de Pagamento', href: '/dashboard/settings/payments', roles: ['admin'] },
         { icon: '⚙️', label: 'settings.title', href: '/dashboard/settings', roles: ['admin'] },
     ];
 

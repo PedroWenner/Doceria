@@ -10,6 +10,12 @@ interface Product {
     price: string;
     image_url: string;
     category_id: number;
+    discounts?: {
+        id?: number;
+        payment_method_id: number;
+        percentage: number;
+        payment_method?: { name: string; slug: string };
+    }[];
 }
 
 interface CartItem {

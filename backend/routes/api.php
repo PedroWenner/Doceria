@@ -48,6 +48,13 @@ Route::group(['middleware' => ['api', 'auth:api', 'role:admin']], function () {
 
     // System Settings (Write)
     Route::put('settings', [App\Http\Controllers\CompanySettingController::class, 'update']);
+
+    // Payment Methods (Admin)
+    Route::get('payment-methods/admin', [App\Http\Controllers\PaymentMethodController::class, 'indexAdmin']);
+    Route::post('payment-methods', [App\Http\Controllers\PaymentMethodController::class, 'store']);
+    Route::put('payment-methods/{id}', [App\Http\Controllers\PaymentMethodController::class, 'update']);
+    Route::post('payment-methods/{id}/toggle', [App\Http\Controllers\PaymentMethodController::class, 'toggle']);
+    Route::delete('payment-methods/{id}', [App\Http\Controllers\PaymentMethodController::class, 'destroy']);
 });
 
 // Public Routes (Storefront)
@@ -55,7 +62,9 @@ Route::group(['middleware' => ['api']], function () {
     Route::get('/categories', [App\Http\Controllers\CategoryController::class, 'index']);
     Route::get('products', [App\Http\Controllers\ProductController::class, 'index']);
     Route::get('products/{product}', [App\Http\Controllers\ProductController::class, 'show']);
+    Route::get('products/{product}', [App\Http\Controllers\ProductController::class, 'show']);
     Route::get('settings', [App\Http\Controllers\CompanySettingController::class, 'show']);
+    Route::get('payment-methods', [App\Http\Controllers\PaymentMethodController::class, 'index']);
 });
 
 // Authenticated Routes (Customers & Admins)

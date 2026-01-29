@@ -17,7 +17,7 @@ class ProductController extends Controller
      */
     public function index()
     {
-        $products = Product::with('category')->latest()->paginate(10);
+        $products = Product::with(['category', 'discounts.paymentMethod'])->latest()->paginate(10);
         return $this->success($products);
     }
 
@@ -35,7 +35,10 @@ class ProductController extends Controller
             'sku' => 'required|string|unique:products,sku',
             'status' => 'required|in:active,draft',
             'description' => 'nullable|string',
-            'image' => 'nullable|image|max:2048' // Max 2MB
+            'image' => 'nullable|image|max:2048', // Max 2MB
+            'discounts' => 'nullable|array',
+            'discounts.*.payment_method_id' => 'required_with:discounts|exists:payment_methods,id',
+            'discounts.*.percentage' => 'required_with:discounts|numeric|min:0|max:100',
         ]);
 
         if ($request->hasFile('image')) {
@@ -45,7 +48,16 @@ class ProductController extends Controller
 
         $product = Product::create($validated);
 
-        return $this->success($product, 'Product created successfully', 201);
+        if ($request->has('discounts')) {
+            foreach ($request->discounts as $discount) {
+                $product->discounts()->create([
+                    'payment_method_id' => $discount['payment_method_id'],
+                    'percentage' => $discount['percentage'],
+                ]);
+            }
+        }
+
+        return $this->success($product->load('discounts'), 'Product created successfully', 201);
     }
 
     /**
@@ -53,7 +65,7 @@ class ProductController extends Controller
      */
     public function show(Product $product)
     {
-        return $this->success($product->load('category'));
+        return $this->success($product->load(['category', 'discounts.paymentMethod']));
     }
 
     /**
@@ -70,7 +82,10 @@ class ProductController extends Controller
             'sku' => 'sometimes|string|unique:products,sku,' . $product->id,
             'status' => 'sometimes|in:active,draft',
             'description' => 'nullable|string',
-            'image' => 'nullable|image|max:2048'
+            'image' => 'nullable|image|max:2048',
+            'discounts' => 'nullable|array',
+            'discounts.*.payment_method_id' => 'required_with:discounts|exists:payment_methods,id',
+            'discounts.*.percentage' => 'required_with:discounts|numeric|min:0|max:100',
         ]);
 
         if ($request->hasFile('image')) {
@@ -84,7 +99,19 @@ class ProductController extends Controller
 
         $product->update($validated);
 
-        return $this->success($product, 'Product updated successfully');
+        if ($request->has('discounts')) {
+            // Clear existing and re-create (simplest strategy for sync)
+            $product->discounts()->delete();
+            
+            foreach ($request->discounts as $discount) {
+                $product->discounts()->create([
+                    'payment_method_id' => $discount['payment_method_id'],
+                    'percentage' => $discount['percentage'],
+                ]);
+            }
+        }
+
+        return $this->success($product->load('discounts'), 'Product updated successfully');
     }
 
     /**

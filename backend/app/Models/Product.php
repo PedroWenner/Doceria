@@ -27,4 +27,9 @@ class Product extends Model implements Auditable
     {
         return $this->belongsTo(Category::class);
     }
+
+    public function discounts()
+    {
+        return $this->hasMany(ProductPaymentDiscount::class);
+    }
 }
