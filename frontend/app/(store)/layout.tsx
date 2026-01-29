@@ -36,7 +36,7 @@ export default function StoreLayout({ children }: { children: React.ReactNode })
                 </div>
                 <div className="flex items-center gap-3">
                     {!user ? (
-                        <Link href="/login" className="text-xs font-bold text-brand-pink bg-brand-pink/10 px-3 py-1.5 rounded-full">Entrar</Link>
+                        <Link href="/signin" className="text-xs font-bold text-brand-pink bg-brand-pink/10 px-3 py-1.5 rounded-full">Entrar</Link>
                     ) : (
                         <Link href="/profile" className="w-8 h-8 bg-brand-pink/20 rounded-full flex items-center justify-center text-brand-choco font-bold text-xs border border-brand-pink/30 shadow-sm">
                             {user.name.charAt(0)}
@@ -77,7 +77,7 @@ export default function StoreLayout({ children }: { children: React.ReactNode })
 
                     {/* User Profile / Login */}
                     {!user ? (
-                        <Link href="/login" className="flex items-center gap-2 text-gray-400 hover:text-brand-pink transition-colors font-bold text-sm">
+                        <Link href="/signin" className="flex items-center gap-2 text-gray-400 hover:text-brand-pink transition-colors font-bold text-sm">
                             <span>Entrar</span>
                             <span className="text-xl">👤</span>
                         </Link>
@@ -124,7 +124,7 @@ export default function StoreLayout({ children }: { children: React.ReactNode })
                     </span>
                     <span className={`text-[10px] font-bold mt-1 ${pathname === '/cart' ? 'opacity-100' : 'opacity-0'}`}>Cesta</span>
                 </Link>
-                <Link href={user ? "/profile" : "/login"} className={`flex flex-col items-center justify-center w-16 transition-all duration-300 ${pathname === '/profile' ? 'text-brand-pink -translate-y-1' : 'text-gray-400'}`}>
+                <Link href={user ? "/profile" : "/signin"} className={`flex flex-col items-center justify-center w-16 transition-all duration-300 ${pathname === '/profile' ? 'text-brand-pink -translate-y-1' : 'text-gray-400'}`}>
                     <span className="text-2xl drop-shadow-sm">{pathname === '/profile' ? '👤' : '👽'}</span>
                     <span className={`text-[10px] font-bold mt-1 ${pathname === '/profile' ? 'opacity-100' : 'opacity-0'}`}>Perfil</span>
                 </Link>

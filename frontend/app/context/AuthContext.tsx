@@ -14,7 +14,7 @@ interface User {
 interface AuthContextType {
     user: User | null;
     isLoading: boolean;
-    login: (token: string, user: User) => void;
+    login: (token: string, user: User, redirectPath?: string) => void;
     logout: () => void;
     checkAuth: () => Promise<void>;
 }
@@ -60,10 +60,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
     };
 
-    const login = (token: string, userData: User) => {
+    const login = (token: string, userData: User, redirectPath?: string) => {
         Cookies.set('auth_token', token, { expires: 7 }); // 7 days
         setUser(userData);
-        router.push('/dashboard');
+
+        if (redirectPath) {
+            router.push(redirectPath);
+        } else if (userData.role === 'customer') {
+            router.push('/');
+        } else {
+            router.push('/dashboard');
+        }
     };
 
     const logout = () => {

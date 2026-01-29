@@ -1,12 +1,15 @@
 'use client';
 
 import { useCart } from '@/app/context/CartContext';
+import { useAuth } from '@/app/context/AuthContext';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { toast } from 'react-hot-toast';
 
 export default function CartPage() {
     const { items, removeFromCart, updateQuantity, cartTotal, clearCart } = useCart();
+    const { user } = useAuth();
     const router = useRouter();
     const [apiUrl] = useState(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api');
 
@@ -94,11 +97,6 @@ export default function CartPage() {
                                         +
                                     </button>
                                 </div>
-
-                                {/* Remove Button (Optional if -1 does it) */}
-                                {/* <button onClick={() => removeFromCart(item.product.id)} className="text-gray-300 hover:text-red-400 text-xs">
-                                    Remover
-                                </button> */}
                             </div>
                         </div>
                     </div>
@@ -125,7 +123,14 @@ export default function CartPage() {
             {/* Bottom Floating Action */}
             <div className="fixed bottom-20 md:bottom-8 left-0 right-0 px-4 md:px-0 max-w-5xl mx-auto z-20">
                 <button
-                    onClick={() => toast.success("Indo para checkout...")}
+                    onClick={() => {
+                        if (!user) {
+                            toast.error("Entre para continuar", { icon: '🔐' });
+                            router.push('/signin?redirect=/checkout');
+                        } else {
+                            router.push('/checkout');
+                        }
+                    }}
                     className="w-full bg-brand-pink text-white py-4 rounded-2xl font-bold text-lg shadow-xl shadow-brand-pink/30 flex items-center justify-between px-6 hover:scale-[1.02] active:scale-[0.98] transition-all"
                 >
                     <span>Ir para pagamento</span>
@@ -138,6 +143,3 @@ export default function CartPage() {
         </div>
     );
 }
-
-// Only simple toast stub for now, need import from hot-toast if using it
-import { toast } from 'react-hot-toast';

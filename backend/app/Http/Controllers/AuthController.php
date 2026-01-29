@@ -18,7 +18,7 @@ class AuthController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth:api', ['except' => ['login']]);
+        $this->middleware('auth:api', ['except' => ['login', 'register']]);
     }
 
     /**
@@ -39,6 +39,57 @@ class AuthController extends Controller
         if (! $token = auth('api')->attempt($credentials)) {
             return $this->error('Unauthorized', 401);
         }
+
+        return $this->respondWithToken($token);
+    }
+
+    /**
+     * Register a new user.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function register()
+    {
+        $validator = \Illuminate\Support\Facades\Validator::make(request()->all(), [
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:6|confirmed',
+            'role' => 'nullable|in:customer,admin,manager'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        // Create User
+        // Note: We include 'role' column if it exists, as suggested by User model fillable
+        $user = \App\Models\User::create([
+            'name' => request('name'),
+            'email' => request('email'),
+            'password' => \Illuminate\Support\Facades\Hash::make(request('password')),
+            'role' => request('role', 'customer'),
+        ]);
+
+        // Attach Role Relation (Critical for hasRole check)
+        $roleSlug = request('role', 'customer');
+        $role = \App\Models\Role::where('slug', $roleSlug)->first();
+        
+        if ($role) {
+            $user->roles()->attach($role);
+        } else {
+            // Fallback: Create customer role if missing (prevent broken auth)
+            if ($roleSlug === 'customer') {
+                $newRole = \App\Models\Role::create([
+                    'name' => 'Customer',
+                    'slug' => 'customer',
+                    'description' => 'Cliente da loja'
+                ]);
+                $user->roles()->attach($newRole);
+            }
+        }
+
+        // Auto login
+        $token = auth('api')->login($user);
 
         return $this->respondWithToken($token);
     }
