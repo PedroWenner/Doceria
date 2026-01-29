@@ -74,9 +74,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
 
     const logout = () => {
+        // Cleaning all possible auth cookies
         Cookies.remove('auth_token');
+        Cookies.remove('token');
+
+        const wasCustomer = user?.role === 'customer';
         setUser(null);
-        router.push('/login');
+
+        if (wasCustomer) {
+            router.push('/signin');
+        } else {
+            router.push('/login');
+        }
     };
 
     useEffect(() => {

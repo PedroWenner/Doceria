@@ -9,10 +9,11 @@ import { useCart } from '@/app/context/CartContext';
 
 export default function StoreLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
-    const { user } = useAuth();
+    const { user, logout } = useAuth(); // Destructure logout
     const { cartCount } = useCart();
     const [apiUrl] = useState(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api');
     const [logoUrl, setLogoUrl] = useState<string | null>(null);
+    const [showProfileMenu, setShowProfileMenu] = useState(false); // State
 
     useEffect(() => {
         // Fetch public settings for Logo
@@ -26,6 +27,14 @@ export default function StoreLayout({ children }: { children: React.ReactNode })
 
     return (
         <div className="min-h-screen bg-gray-50 pb-24 md:pb-0">
+            {/* Backdrop for Menu */}
+            {showProfileMenu && (
+                <div
+                    className="fixed inset-0 z-40 bg-transparent"
+                    onClick={() => setShowProfileMenu(false)}
+                />
+            )}
+
             {/* Mobile Header - App Like */}
             <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md shadow-sm px-4 py-3 flex items-center justify-between md:hidden transition-all duration-300">
                 <div className="flex flex-col">
@@ -38,11 +47,29 @@ export default function StoreLayout({ children }: { children: React.ReactNode })
                     {!user ? (
                         <Link href="/signin" className="text-xs font-bold text-brand-pink bg-brand-pink/10 px-3 py-1.5 rounded-full">Entrar</Link>
                     ) : (
-                        <Link href="/profile" className="w-8 h-8 bg-brand-pink/20 rounded-full flex items-center justify-center text-brand-choco font-bold text-xs border border-brand-pink/30 shadow-sm">
+                        <button
+                            onClick={() => setShowProfileMenu(!showProfileMenu)}
+                            className="w-8 h-8 bg-brand-pink/20 rounded-full flex items-center justify-center text-brand-choco font-bold text-xs border border-brand-pink/30 shadow-sm relative z-50"
+                        >
                             {user.name.charAt(0)}
-                        </Link>
+                        </button>
                     )}
                 </div>
+
+                {/* Mobile Profile Dropdown (Absolute to header) */}
+                {showProfileMenu && user && (
+                    <div className="absolute top-full right-4 mt-2 w-48 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden py-2 animate-slideDown z-50 md:hidden">
+                        <div className="px-4 py-2 border-b border-gray-50 mb-1">
+                            <p className="text-xs text-gray-400">Olá, {user.name.split(' ')[0]}</p>
+                        </div>
+                        <button
+                            onClick={() => { setShowProfileMenu(false); logout(); }}
+                            className="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-red-50 font-bold transition-colors flex items-center gap-2"
+                        >
+                            <span>🚪</span> Sair
+                        </button>
+                    </div>
+                )}
             </header>
 
             {/* Desktop Navbar (Simple) */}
@@ -82,11 +109,32 @@ export default function StoreLayout({ children }: { children: React.ReactNode })
                             <span className="text-xl">👤</span>
                         </Link>
                     ) : (
-                        <Link href="/profile" className="flex items-center gap-2 cursor-pointer group">
-                            <div className="w-9 h-9 rounded-full bg-brand-gold/20 flex items-center justify-center text-brand-choco font-bold text-sm border-2 border-transparent group-hover:border-brand-pink/30 transition-all">
-                                {user.name.charAt(0)}
-                            </div>
-                        </Link>
+                        <div className="relative z-50">
+                            <button
+                                onClick={() => setShowProfileMenu(!showProfileMenu)}
+                                className="flex items-center gap-2 cursor-pointer group"
+                            >
+                                <div className="w-9 h-9 rounded-full bg-brand-gold/20 flex items-center justify-center text-brand-choco font-bold text-sm border-2 border-transparent group-hover:border-brand-pink/30 transition-all">
+                                    {user.name.charAt(0)}
+                                </div>
+                            </button>
+
+                            {/* Desktop Menu */}
+                            {showProfileMenu && (
+                                <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden py-2 animate-fadeIn">
+                                    <div className="px-4 py-2 border-b border-gray-50 mb-1">
+                                        <p className="text-xs text-gray-400">Logado como</p>
+                                        <p className="font-bold text-brand-choco truncate text-sm">{user.name}</p>
+                                    </div>
+                                    <button
+                                        onClick={() => { setShowProfileMenu(false); logout(); }}
+                                        className="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-red-50 font-bold transition-colors flex items-center gap-2"
+                                    >
+                                        <span>🚪</span> Sair
+                                    </button>
+                                </div>
+                            )}
+                        </div>
                     )}
                 </div>
             </header>
@@ -120,15 +168,51 @@ export default function StoreLayout({ children }: { children: React.ReactNode })
                 <Link href="/cart" className={`flex flex-col items-center justify-center w-16 transition-all duration-300 ${pathname === '/cart' ? 'text-brand-pink -translate-y-1' : 'text-gray-400'}`}>
                     <span className="text-2xl drop-shadow-sm relative">
                         🛍️
-                        {/* Badge could go here */}
+                        {cartCount > 0 && (
+                            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[8px] w-4 h-4 rounded-full flex items-center justify-center font-bold">
+                                {cartCount}
+                            </span>
+                        )}
                     </span>
                     <span className={`text-[10px] font-bold mt-1 ${pathname === '/cart' ? 'opacity-100' : 'opacity-0'}`}>Cesta</span>
                 </Link>
-                <Link href={user ? "/profile" : "/signin"} className={`flex flex-col items-center justify-center w-16 transition-all duration-300 ${pathname === '/profile' ? 'text-brand-pink -translate-y-1' : 'text-gray-400'}`}>
-                    <span className="text-2xl drop-shadow-sm">{pathname === '/profile' ? '👤' : '👽'}</span>
-                    <span className={`text-[10px] font-bold mt-1 ${pathname === '/profile' ? 'opacity-100' : 'opacity-0'}`}>Perfil</span>
-                </Link>
+
+                {/* Mobile Bottom Click uses toggle if user exists? Or just redirect? */}
+                {/* For consistency with Header, let's keep this one as redirect to profile page if we had one. 
+                    But user asked for dropdown. 
+                    If I add click handler here it might conflict with Link.
+                    I will Change Link to Div if user is logged in.
+                */}
+                {!user ? (
+                    <Link href="/signin" className={`flex flex-col items-center justify-center w-16 transition-all duration-300 ${pathname === '/profile' ? 'text-brand-pink -translate-y-1' : 'text-gray-400'}`}>
+                        <span className="text-2xl drop-shadow-sm">👽</span>
+                        <span className={`text-[10px] font-bold mt-1 ${pathname === '/signin' ? 'opacity-100' : 'opacity-0'}`}>Entrar</span>
+                    </Link>
+                ) : (
+                    <button
+                        onClick={() => setShowProfileMenu(!showProfileMenu)}
+                        className={`flex flex-col items-center justify-center w-16 transition-all duration-300 ${showProfileMenu ? 'text-brand-pink -translate-y-1' : 'text-gray-400'}`}
+                    >
+                        <span className="text-2xl drop-shadow-sm">👤</span>
+                        <span className={`text-[10px] font-bold mt-1 ${showProfileMenu ? 'opacity-100' : 'opacity-0'}`}>Perfil</span>
+                    </button>
+                )}
             </nav>
+
+            {/* Mobile Bottom Menu (Absolute to Bottom Nav) */}
+            {showProfileMenu && user && (
+                <div className="fixed bottom-24 right-4 w-48 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden py-2 animate-slideUp z-50 md:hidden">
+                    <div className="px-4 py-2 border-b border-gray-50 mb-1">
+                        <p className="text-xs text-gray-400">Olá, {user.name.split(' ')[0]}</p>
+                    </div>
+                    <button
+                        onClick={() => { setShowProfileMenu(false); logout(); }}
+                        className="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-red-50 font-bold transition-colors flex items-center gap-2"
+                    >
+                        <span>🚪</span> Sair
+                    </button>
+                </div>
+            )}
         </div>
     );
 }
