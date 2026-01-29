@@ -75,9 +75,9 @@ export default function ProductModal({ product, isOpen, onClose, getImageUrl }: 
 
             {/* Modal Content */}
             <div className={`
-                relative bg-white w-full h-full md:h-auto md:max-h-[85vh] md:w-[500px] md:rounded-3xl shadow-2xl flex flex-col overflow-hidden
+                relative w-full h-full md:h-auto md:max-h-[85vh] md:w-[500px] md:rounded-3xl shadow-2xl flex flex-col overflow-hidden
                 ${isClosing ? 'animate-slideDown' : 'animate-slideUp'}
-            `}>
+            `} style={{ backgroundColor: 'var(--store-card)' }}>
 
                 {/* Close Button (Absolute) */}
                 <button
@@ -88,7 +88,7 @@ export default function ProductModal({ product, isOpen, onClose, getImageUrl }: 
                 </button>
 
                 {/* Header Image */}
-                <div className="h-64 md:h-72 bg-gray-100 relative shrink-0">
+                <div className="h-64 md:h-72 relative shrink-0" style={{ backgroundColor: 'var(--store-secondary)' }}>
                     {getImageUrl(product.image_url) ? (
                         <img
                             src={getImageUrl(product.image_url)!}
@@ -98,23 +98,30 @@ export default function ProductModal({ product, isOpen, onClose, getImageUrl }: 
                     ) : (
                         <div className="w-full h-full flex items-center justify-center text-6xl grayscale opacity-30">🍰</div>
                     )}
-                    <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-white to-transparent md:from-white/0"></div>
+                    <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t to-transparent md:from-white/0"
+                        style={{ '--tw-gradient-from': 'var(--store-card)' } as React.CSSProperties}></div>
                 </div>
 
                 {/* Body */}
-                <div className="flex-1 overflow-y-auto p-6 md:p-8 -mt-6 relative z-10 bg-white md:bg-transparent md:mt-0 rounded-t-3xl md:rounded-none">
-                    <h2 className="text-2xl font-bold text-gray-900 mb-2">{product.name}</h2>
-                    <p className="text-gray-500 text-sm leading-relaxed mb-6">{product.description}</p>
+                <div className="flex-1 overflow-y-auto p-6 md:p-8 -mt-6 relative z-10 md:bg-transparent md:mt-0 rounded-t-3xl md:rounded-none"
+                    style={{ backgroundColor: 'var(--store-card)' }}>
+                    <h2 className="text-2xl font-bold mb-2" style={{ color: 'var(--store-text)' }}>{product.name}</h2>
+                    <p className="text-sm leading-relaxed mb-6" style={{ color: 'var(--store-text-muted)' }}>{product.description}</p>
 
                     <div className="mb-6">
-                        <span className="text-gray-900 font-bold text-xl">R$ {parseFloat(product.price).toFixed(2).replace('.', ',')}</span>
+                        <span className="font-bold text-xl" style={{ color: 'var(--store-text)' }}>R$ {parseFloat(product.price).toFixed(2).replace('.', ',')}</span>
                     </div>
 
                     {/* Observation Input (Mockup for now) */}
                     <div className="space-y-2 mb-8">
-                        <label className="text-sm font-bold text-gray-900">Alguma observação?</label>
+                        <label className="text-sm font-bold" style={{ color: 'var(--store-text)' }}>Alguma observação?</label>
                         <textarea
-                            className="w-full bg-gray-50 border border-gray-100 rounded-xl p-3 text-sm focus:ring-2 focus:ring-gray-900/10 outline-none resize-none placeholder-gray-400 text-gray-900"
+                            className="w-full border rounded-xl p-3 text-sm focus:ring-2 outline-none resize-none"
+                            style={{
+                                backgroundColor: 'var(--store-bg)',
+                                borderColor: 'var(--store-border)',
+                                color: 'var(--store-text)',
+                            }}
                             placeholder="Ex: Tirar a cebola, caprichar no molho..."
                             rows={3}
                         ></textarea>
@@ -122,26 +129,29 @@ export default function ProductModal({ product, isOpen, onClose, getImageUrl }: 
                 </div>
 
                 {/* Footer Action */}
-                <div className="p-4 md:p-6 border-t border-gray-50 bg-white shrink-0">
+                <div className="p-4 md:p-6 border-t shrink-0" style={{ backgroundColor: 'var(--store-card)', borderColor: 'var(--store-border)' }}>
                     <div className="flex items-center gap-4">
                         {/* Quantity */}
-                        <div className="flex items-center gap-3 border border-gray-200 rounded-xl p-2 px-3">
+                        <div className="flex items-center gap-3 border rounded-xl p-2 px-3" style={{ borderColor: 'var(--store-border)' }}>
                             <button
                                 onClick={() => setQuantity(q => Math.max(1, q - 1))}
-                                className={`text-xl font-bold w-6 h-6 flex items-center justify-center ${quantity === 1 ? 'text-gray-300' : 'text-gray-900'}`}
+                                className={`text-xl font-bold w-6 h-6 flex items-center justify-center`}
+                                style={{ color: quantity === 1 ? 'var(--store-text-muted)' : 'var(--store-text)' }}
                                 disabled={quantity === 1}
                             >-</button>
-                            <span className="text-lg font-bold w-6 text-center text-gray-900">{quantity}</span>
+                            <span className="text-lg font-bold w-6 text-center" style={{ color: 'var(--store-text)' }}>{quantity}</span>
                             <button
                                 onClick={() => setQuantity(q => q + 1)}
-                                className="text-gray-900 text-xl font-bold w-6 h-6 flex items-center justify-center hover:bg-gray-100 rounded-full transition-colors"
+                                className="text-xl font-bold w-6 h-6 flex items-center justify-center rounded-full transition-colors hover:opacity-80"
+                                style={{ color: 'var(--store-text)' }}
                             >+</button>
                         </div>
 
                         {/* Add Button */}
                         <button
                             onClick={handleAddToCart}
-                            className="flex-1 bg-gray-900 text-white h-12 rounded-xl font-bold flex items-center justify-between px-6 shadow-xl shadow-gray-900/10 hover:bg-black active:scale-[0.98] transition-all"
+                            className="flex-1 h-12 rounded-xl font-bold flex items-center justify-between px-6 shadow-xl transition-all hover:opacity-90 active:scale-[0.98]"
+                            style={{ backgroundColor: 'var(--store-primary)', color: 'var(--store-primary-fg)' }}
                         >
                             <span>Adicionar</span>
                             <span>R$ {totalPrice}</span>

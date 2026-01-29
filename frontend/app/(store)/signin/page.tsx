@@ -47,22 +47,34 @@ export default function SigninPage() {
     };
 
     return (
-        <div className="min-h-[80vh] flex items-center justify-center p-4 bg-gray-50/50">
-            <div className="bg-white p-10 rounded-2xl shadow-xl w-full max-w-sm border border-gray-100">
+        <div className="min-h-[80vh] flex items-center justify-center p-4 transition-colors duration-500"
+            style={{ backgroundColor: 'var(--store-bg)' }}>
+            <div className="p-10 rounded-2xl shadow-xl w-full max-w-sm border transition-all"
+                style={{
+                    backgroundColor: 'var(--store-card)',
+                    borderColor: 'var(--store-border)'
+                }}>
                 <div className="text-center mb-8">
-                    <div className="w-16 h-16 bg-pink-50 rounded-2xl flex items-center justify-center mx-auto mb-4 rotate-3 hover:rotate-6 transition-transform">
-                        <span className="text-3xl">🍩</span>
+                    <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 rotate-3 hover:rotate-6 transition-transform group"
+                        style={{ backgroundColor: 'var(--store-bg)' }}>
+                        <span className="text-3xl filter grayscale group-hover:grayscale-0 transition-all">🍩</span>
                     </div>
-                    <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Bem-vindo de volta!</h1>
-                    <p className="text-gray-500 text-sm mt-2">Acesse sua conta para continuar.</p>
+                    <h1 className="text-2xl font-bold tracking-tight" style={{ color: 'var(--store-text)' }}>Bem-vindo de volta!</h1>
+                    <p className="text-sm mt-2" style={{ color: 'var(--store-text-muted)' }}>Acesse sua conta para continuar.</p>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-5">
                     <div className="space-y-1.5">
-                        <label className="block text-xs font-bold text-gray-900 uppercase tracking-wide ml-1">Email</label>
+                        <label className="block text-xs font-bold uppercase tracking-wide ml-1" style={{ color: 'var(--store-text)' }}>Email</label>
                         <input
                             type="email"
-                            className="w-full bg-gray-50 border border-gray-200 text-gray-900 p-3.5 rounded-xl outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all font-medium placeholder:text-gray-400"
+                            className="w-full border p-3.5 rounded-xl outline-none focus:ring-2 transition-all font-medium placeholder:text-gray-400"
+                            style={{
+                                backgroundColor: 'var(--store-bg)',
+                                borderColor: 'var(--store-border)',
+                                color: 'var(--store-text)',
+                                '--tw-ring-color': 'var(--store-primary)'
+                            } as React.CSSProperties}
                             placeholder="exemplo@email.com"
                             value={email}
                             onChange={e => setEmail(e.target.value)}
@@ -70,10 +82,16 @@ export default function SigninPage() {
                         />
                     </div>
                     <div className="space-y-1.5">
-                        <label className="block text-xs font-bold text-gray-900 uppercase tracking-wide ml-1">Senha</label>
+                        <label className="block text-xs font-bold uppercase tracking-wide ml-1" style={{ color: 'var(--store-text)' }}>Senha</label>
                         <input
                             type="password"
-                            className="w-full bg-gray-50 border border-gray-200 text-gray-900 p-3.5 rounded-xl outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all font-medium placeholder:text-gray-400"
+                            className="w-full border p-3.5 rounded-xl outline-none focus:ring-2 transition-all font-medium placeholder:text-gray-400"
+                            style={{
+                                backgroundColor: 'var(--store-bg)',
+                                borderColor: 'var(--store-border)',
+                                color: 'var(--store-text)',
+                                '--tw-ring-color': 'var(--store-primary)'
+                            } as React.CSSProperties}
                             placeholder="••••••••"
                             value={password}
                             onChange={e => setPassword(e.target.value)}
@@ -84,7 +102,12 @@ export default function SigninPage() {
                     <button
                         type="submit"
                         disabled={isLoading}
-                        className="w-full bg-gray-900 hover:bg-black text-white py-3.5 rounded-xl font-bold text-base transition-all transform active:scale-95 flex items-center justify-center gap-2 mt-2 shadow-lg shadow-gray-900/10"
+                        className="w-full py-3.5 rounded-xl font-bold text-base transition-all transform active:scale-95 flex items-center justify-center gap-2 mt-2 shadow-lg hover:opacity-90"
+                        style={{
+                            backgroundColor: 'var(--store-primary)',
+                            color: 'var(--store-primary-fg)',
+                            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
+                        }}
                     >
                         {isLoading ? (
                             <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -94,10 +117,11 @@ export default function SigninPage() {
                     </button>
                 </form>
 
-                <div className="mt-8 pt-6 border-t border-gray-50 text-center">
-                    <p className="text-sm text-gray-500">
+                <div className="mt-8 pt-6 border-t text-center" style={{ borderColor: 'var(--store-border)' }}>
+                    <p className="text-sm" style={{ color: 'var(--store-text-muted)' }}>
                         Não possui uma conta?{' '}
-                        <Link href={`/signup${redirectUrl ? `?redirect=${redirectUrl}` : ''}`} className="text-pink-600 font-bold hover:text-pink-700 hover:underline transition-colors">
+                        <Link href={`/signup${redirectUrl ? `?redirect=${redirectUrl}` : ''}`} className="font-bold hover:underline transition-colors"
+                            style={{ color: 'var(--store-text)' }}>
                             Cadastre-se
                         </Link>
                     </p>

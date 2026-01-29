@@ -49,6 +49,49 @@
   --glass-border: rgba(255, 248, 225, 0.1);
 }
 
+/* --- STOREFRONT THEMES --- */
+
+/* Default: Luxury Minimalist (Gray/Black/White) */
+:root {
+  --store-bg: #F9FAFB;
+  /* gray-50 */
+  --store-card: #FFFFFF;
+  /* white */
+  --store-text: #111827;
+  /* gray-900 */
+  --store-text-muted: #6B7280;
+  /* gray-500 */
+  --store-primary: #111827;
+  /* gray-900 (Black button) */
+  --store-primary-fg: #FFFFFF;
+  /* white text */
+  --store-secondary: #F3F4F6;
+  /* gray-100 */
+  --store-border: #E5E7EB;
+  /* gray-200 */
+  --store-ring: rgba(17, 24, 39, 0.1);
+}
+
+/* Colorful Playful (Old SweetStore Style) */
+[data-store-theme='colorful'] {
+  --store-bg: #F9FAFB;
+  /* brand-cream/20 roughly */
+  --store-card: #FFFFFF;
+  --store-text: #2D1B18;
+  /* brand-choco */
+  --store-text-muted: #795548;
+  /* lighter brown */
+  --store-primary: #FFC0CB;
+  /* brand-pink */
+  --store-primary-fg: #2D1B18;
+  /* brand-choco */
+  --store-secondary: #FFFDD0;
+  /* brand-cream */
+  --store-border: #FFE4E1;
+  /* misty rose */
+  --store-ring: rgba(255, 192, 203, 0.5);
+}
+
 body {
   background: var(--background);
   color: var(--foreground);

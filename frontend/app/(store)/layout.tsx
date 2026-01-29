@@ -6,11 +6,13 @@ import { Toaster } from 'react-hot-toast';
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/app/context/AuthContext';
 import { useCart } from '@/app/context/CartContext';
+import { useTheme } from '@/app/context/ThemeContext';
 
 export default function StoreLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
     const { user, logout } = useAuth(); // Destructure logout
     const { cartCount } = useCart();
+    const { storeTheme, toggleStoreTheme } = useTheme();
     const [apiUrl] = useState(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api');
     const [logoUrl, setLogoUrl] = useState<string | null>(null);
     const [showProfileMenu, setShowProfileMenu] = useState(false); // State
@@ -88,11 +90,26 @@ export default function StoreLayout({ children }: { children: React.ReactNode })
                     </nav>
                 </div>
                 <div className="flex items-center gap-6">
+                    {/* Theme Switcher (Desktop) */}
+                    <button
+                        onClick={toggleStoreTheme}
+                        className="hidden md:flex items-center gap-2 text-xs font-bold px-3 py-1.5 rounded-lg border transition-all hover:scale-105"
+                        style={{
+                            backgroundColor: 'var(--store-card)',
+                            color: 'var(--store-text)',
+                            borderColor: 'var(--store-border)'
+                        }}
+                        title={storeTheme === 'minimalist' ? 'Mudar para Colorido' : 'Mudar para Minimalista'}
+                    >
+                        <span>{storeTheme === 'minimalist' ? '🎨' : '🖤'}</span>
+                    </button>
+
                     {/* Cart Icon */}
                     <Link href="/cart" className="relative group hover:scale-105 transition-transform">
                         <span className="text-2xl opacity-80 group-hover:opacity-100 transition-opacity">🛍️</span>
                         {cartCount > 0 && (
-                            <span className="absolute -top-1.5 -right-1.5 bg-gray-900 text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-bold shadow-sm border-2 border-white">
+                            <span className="absolute -top-1.5 -right-1.5 text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-bold shadow-sm border-2 border-white"
+                                style={{ backgroundColor: 'var(--store-primary)', color: 'var(--store-primary-fg)' }}>
                                 {cartCount}
                             </span>
                         )}
@@ -100,7 +117,8 @@ export default function StoreLayout({ children }: { children: React.ReactNode })
 
                     {/* User Profile / Login */}
                     {!user ? (
-                        <Link href="/signin" className="flex items-center gap-2 text-gray-900 hover:text-black transition-colors font-bold text-sm bg-gray-100 px-4 py-2 rounded-lg hover:bg-gray-200">
+                        <Link href="/signin" className="flex items-center gap-2 font-bold text-sm px-4 py-2 rounded-lg transition-colors hover:opacity-90"
+                            style={{ backgroundColor: 'var(--store-secondary)', color: 'var(--store-text)' }}>
                             <span>Entrar</span>
                         </Link>
                     ) : (
@@ -109,23 +127,30 @@ export default function StoreLayout({ children }: { children: React.ReactNode })
                                 onClick={() => setShowProfileMenu(!showProfileMenu)}
                                 className="flex items-center gap-2 cursor-pointer group"
                             >
-                                <div className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center text-gray-900 font-bold text-sm border border-gray-200 group-hover:border-gray-300 transition-all">
+                                <div className="w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm border group-hover:opacity-80 transition-all"
+                                    style={{
+                                        backgroundColor: 'var(--store-secondary)',
+                                        color: 'var(--store-text)',
+                                        borderColor: 'var(--store-border)'
+                                    }}>
                                     {user.name.charAt(0)}
                                 </div>
                             </button>
 
                             {/* Desktop Menu */}
                             {showProfileMenu && (
-                                <div className="absolute top-full right-0 mt-3 w-48 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden py-2 animate-fadeIn ring-1 ring-black/5">
-                                    <div className="px-4 py-3 border-b border-gray-50 mb-1">
-                                        <p className="text-xs text-gray-400 mb-0.5">Logado como</p>
-                                        <p className="font-bold text-gray-900 truncate text-sm">{user.name}</p>
+                                <div className="absolute top-full right-0 mt-3 w-48 bg-white rounded-xl shadow-xl border overflow-hidden py-2 animate-fadeIn ring-1"
+                                    style={{ borderColor: 'var(--store-border)', ringColor: 'var(--store-ring)' }}>
+                                    <div className="px-4 py-3 border-b mb-1" style={{ borderColor: 'var(--store-border)' }}>
+                                        <p className="text-xs mb-0.5" style={{ color: 'var(--store-text-muted)' }}>Logado como</p>
+                                        <p className="font-bold truncate text-sm" style={{ color: 'var(--store-text)' }}>{user.name}</p>
                                     </div>
                                     <button
                                         onClick={() => {
                                             logout();
                                         }}
-                                        className="w-full text-left px-4 py-2.5 text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-900 font-medium transition-colors flex items-center gap-2"
+                                        className="w-full text-left px-4 py-2.5 text-sm font-medium transition-colors flex items-center gap-2 hover:bg-gray-50"
+                                        style={{ color: 'var(--store-text-muted)' }}
                                     >
                                         <span>🚪</span> Sair
                                     </button>
@@ -154,31 +179,45 @@ export default function StoreLayout({ children }: { children: React.ReactNode })
             </main>
 
             {/* Mobile Bottom Navigation - Floating */}
-            <nav className="fixed bottom-6 left-6 right-6 bg-white/90 backdrop-blur-xl border border-gray-200 shadow-xl shadow-gray-200/50 rounded-2xl flex justify-around py-3 z-40 md:hidden">
+            <nav className="fixed bottom-6 left-6 right-6 bg-white/90 backdrop-blur-xl border shadow-xl rounded-2xl flex justify-around py-3 z-40 md:hidden"
+                style={{ borderColor: 'var(--store-border)', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)' }}>
                 <Link href="/" className={`flex flex-col items-center justify-center w-16 transition-all duration-300 group`}>
                     <span className={`text-2xl drop-shadow-sm transition-transform group-active:scale-90 ${pathname === '/' ? 'grayscale-0 opacity-100' : 'grayscale opacity-50'}`}>🏠</span>
-                    <span className={`text-[10px] font-bold mt-1 transition-opacity ${pathname === '/' ? 'text-gray-900 opacity-100' : 'text-gray-400 opacity-0 h-0'}`}>Início</span>
+                    <span className={`text-[10px] font-bold mt-1 transition-opacity ${pathname === '/' ? 'opacity-100' : 'opacity-0 h-0'}`} style={{ color: 'var(--store-text)' }}>Início</span>
                 </Link>
                 <Link href="/menu" className={`flex flex-col items-center justify-center w-16 transition-all duration-300 group`}>
                     <span className={`text-2xl drop-shadow-sm transition-transform group-active:scale-90 ${pathname === '/menu' ? 'grayscale-0 opacity-100' : 'grayscale opacity-50'}`}>🍔</span>
-                    <span className={`text-[10px] font-bold mt-1 transition-opacity ${pathname === '/menu' ? 'text-gray-900 opacity-100' : 'text-gray-400 opacity-0 h-0'}`}>Menu</span>
+                    <span className={`text-[10px] font-bold mt-1 transition-opacity ${pathname === '/menu' ? 'opacity-100' : 'opacity-0 h-0'}`} style={{ color: 'var(--store-text)' }}>Menu</span>
                 </Link>
+
+                {/* Mobile Theme Toggle (Center) */}
+                <button
+                    onClick={toggleStoreTheme}
+                    className="flex flex-col items-center justify-center w-16 transition-all duration-300 group active:scale-90"
+                >
+                    <span className={`text-2xl drop-shadow-sm transition-transform ${storeTheme === 'minimalist' ? 'grayscale opacity-80' : 'grayscale-0 opacity-100'}`}>
+                        {storeTheme === 'minimalist' ? '🎨' : '🖤'}
+                    </span>
+                    <span className="text-[10px] font-bold mt-1" style={{ color: 'var(--store-text)' }}>Tema</span>
+                </button>
+
                 <Link href="/cart" className={`flex flex-col items-center justify-center w-16 transition-all duration-300 group`}>
                     <div className="relative">
                         <span className={`text-2xl drop-shadow-sm transition-transform group-active:scale-90 ${pathname === '/cart' ? 'grayscale-0 opacity-100' : 'grayscale opacity-50'}`}>🛍️</span>
                         {cartCount > 0 && (
-                            <span className="absolute -top-1 -right-1 bg-gray-900 text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-bold border border-white">
+                            <span className="absolute -top-1 -right-1 text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-bold border border-white"
+                                style={{ backgroundColor: 'var(--store-primary)' }}>
                                 {cartCount}
                             </span>
                         )}
                     </div>
-                    <span className={`text-[10px] font-bold mt-1 transition-opacity ${pathname === '/cart' ? 'text-gray-900 opacity-100' : 'text-gray-400 opacity-0 h-0'}`}>Cesta</span>
+                    <span className={`text-[10px] font-bold mt-1 transition-opacity ${pathname === '/cart' ? 'opacity-100' : 'opacity-0 h-0'}`} style={{ color: 'var(--store-text)' }}>Cesta</span>
                 </Link>
 
                 {!user ? (
                     <Link href="/signin" className={`flex flex-col items-center justify-center w-16 transition-all duration-300 group`}>
                         <span className={`text-2xl drop-shadow-sm transition-transform group-active:scale-90 ${pathname === '/signin' ? 'grayscale-0 opacity-100' : 'grayscale opacity-50'}`}>👤</span>
-                        <span className={`text-[10px] font-bold mt-1 transition-opacity ${pathname === '/signin' ? 'text-gray-900 opacity-100' : 'text-gray-400 opacity-0 h-0'}`}>Entrar</span>
+                        <span className={`text-[10px] font-bold mt-1 transition-opacity ${pathname === '/signin' ? 'opacity-100' : 'opacity-0 h-0'}`} style={{ color: 'var(--store-text)' }}>Entrar</span>
                     </Link>
                 ) : (
                     <button
@@ -186,7 +225,7 @@ export default function StoreLayout({ children }: { children: React.ReactNode })
                         className={`flex flex-col items-center justify-center w-16 transition-all duration-300 group`}
                     >
                         <span className={`text-2xl drop-shadow-sm transition-transform group-active:scale-90 ${showProfileMenu ? 'grayscale-0 opacity-100' : 'grayscale opacity-50'}`}>👤</span>
-                        <span className={`text-[10px] font-bold mt-1 transition-opacity ${showProfileMenu ? 'text-gray-900 opacity-100' : 'text-gray-400 opacity-0 h-0'}`}>Perfil</span>
+                        <span className={`text-[10px] font-bold mt-1 transition-opacity ${showProfileMenu ? 'opacity-100' : 'opacity-0 h-0'}`} style={{ color: 'var(--store-text)' }}>Perfil</span>
                     </button>
                 )}
             </nav>

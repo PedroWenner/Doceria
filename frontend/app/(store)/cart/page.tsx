@@ -43,14 +43,15 @@ export default function CartPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 pb-32 animate-fadeIn">
+        <div className="min-h-screen pb-32 animate-fadeIn transition-colors duration-500" style={{ backgroundColor: 'var(--store-bg)' }}>
             <div className="max-w-6xl mx-auto px-4 pt-8">
 
                 <div className="flex items-center justify-between mb-8">
-                    <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Sua Cesta <span className="text-gray-400 text-lg ml-2 font-normal">({items.length} itens)</span></h1>
+                    <h1 className="text-2xl font-bold tracking-tight" style={{ color: 'var(--store-text)' }}>Sua Cesta <span className="text-lg ml-2 font-normal" style={{ color: 'var(--store-text-muted)' }}>({items.length} itens)</span></h1>
                     <button
                         onClick={clearCart}
-                        className="text-xs font-bold text-gray-400 hover:text-red-500 hover:bg-red-50 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1"
+                        className="text-xs font-bold px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1 hover:text-red-500 hover:bg-red-50"
+                        style={{ color: 'var(--store-text-muted)' }}
                     >
                         <span>🗑️</span> Limpar
                     </button>
@@ -63,10 +64,18 @@ export default function CartPage() {
                         {items.map((item) => (
                             <div
                                 key={item.product.id}
-                                className="group bg-white p-5 rounded-xl shadow-sm border border-gray-100 flex gap-5 transition-all hover:border-gray-200 relative overflow-hidden"
+                                className="group p-5 rounded-xl shadow-sm border flex gap-5 transition-all relative overflow-hidden"
+                                style={{
+                                    backgroundColor: 'var(--store-card)',
+                                    borderColor: 'var(--store-border)',
+                                }}
                             >
                                 {/* Image */}
-                                <div className="w-24 h-24 bg-gray-50 rounded-lg flex-shrink-0 overflow-hidden relative border border-gray-100">
+                                <div className="w-24 h-24 rounded-lg flex-shrink-0 overflow-hidden relative border"
+                                    style={{
+                                        backgroundColor: 'var(--store-bg)',
+                                        borderColor: 'var(--store-border)'
+                                    }}>
                                     {getImageUrl(item.product.image_url) ? (
                                         <img src={getImageUrl(item.product.image_url)!} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                                     ) : (
@@ -78,12 +87,13 @@ export default function CartPage() {
                                 <div className="flex-1 flex flex-col justify-between py-1">
                                     <div className="flex justify-between items-start">
                                         <div>
-                                            <h3 className="font-bold text-gray-900 text-lg leading-tight mb-1">{item.product.name}</h3>
-                                            <p className="text-gray-400 text-xs line-clamp-1">{item.product.description || 'Uma delícia feita com amor'}</p>
+                                            <h3 className="font-bold text-lg leading-tight mb-1" style={{ color: 'var(--store-text)' }}>{item.product.name}</h3>
+                                            <p className="text-xs line-clamp-1" style={{ color: 'var(--store-text-muted)' }}>{item.product.description || 'Uma delícia feita com amor'}</p>
                                         </div>
                                         <button
                                             onClick={() => updateQuantity(item.product.id, -item.quantity)} // Remove item
-                                            className="text-gray-300 hover:text-gray-900 transition-colors p-1"
+                                            className="transition-colors p-1 hover:opacity-100 opacity-60"
+                                            style={{ color: 'var(--store-text)' }}
                                             title="Remover item"
                                         >
                                             ✕
@@ -91,28 +101,34 @@ export default function CartPage() {
                                     </div>
 
                                     <div className="flex items-end justify-between mt-3">
-                                        <div className="flex items-center gap-3 bg-gray-50 rounded-lg p-1 border border-gray-100">
+                                        <div className="flex items-center gap-3 rounded-lg p-1 border"
+                                            style={{
+                                                backgroundColor: 'var(--store-bg)',
+                                                borderColor: 'var(--store-border)'
+                                            }}>
                                             <button
                                                 onClick={() => updateQuantity(item.product.id, -1)}
-                                                className={`w-7 h-7 rounded-md flex items-center justify-center font-bold text-sm transition-all ${item.quantity === 1 ? 'text-gray-400 hover:text-red-500 hover:bg-white' : 'text-gray-700 hover:bg-white hover:text-gray-900'}`}
+                                                className={`w-7 h-7 rounded-md flex items-center justify-center font-bold text-sm transition-all hover:bg-white hover:text-red-500`}
+                                                style={{ color: item.quantity === 1 ? 'var(--store-text-muted)' : 'var(--store-text)' }}
                                             >
                                                 {item.quantity === 1 ? '🗑️' : '-'}
                                             </button>
-                                            <span className="font-bold text-gray-900 w-6 text-center text-sm">{item.quantity}</span>
+                                            <span className="font-bold w-6 text-center text-sm" style={{ color: 'var(--store-text)' }}>{item.quantity}</span>
                                             <button
                                                 onClick={() => updateQuantity(item.product.id, 1)}
-                                                className="w-7 h-7 rounded-md text-gray-700 hover:bg-white hover:text-gray-900 flex items-center justify-center font-bold text-sm transition-all"
+                                                className="w-7 h-7 rounded-md hover:bg-white flex items-center justify-center font-bold text-sm transition-all"
+                                                style={{ color: 'var(--store-text)' }}
                                             >
                                                 +
                                             </button>
                                         </div>
 
                                         <div className="text-right">
-                                            <p className="font-bold text-gray-900 text-lg">
+                                            <p className="font-bold text-lg" style={{ color: 'var(--store-text)' }}>
                                                 R$ {(parseFloat(item.product.price) * item.quantity).toFixed(2).replace('.', ',')}
                                             </p>
                                             {item.quantity > 1 && (
-                                                <p className="text-[10px] text-gray-400 font-medium">
+                                                <p className="text-[10px] font-medium" style={{ color: 'var(--store-text-muted)' }}>
                                                     R$ {parseFloat(item.product.price).toFixed(2).replace('.', ',')} un
                                                 </p>
                                             )}
@@ -125,28 +141,34 @@ export default function CartPage() {
 
                     {/* Summary / Totals */}
                     <div className="md:col-span-1">
-                        <div className="bg-white p-6 rounded-xl shadow-lg shadow-gray-200/50 border border-gray-100 sticky top-24">
-                            <h3 className="font-bold text-gray-900 text-lg mb-6 pb-4 border-b border-gray-50">Resumo do Pedido</h3>
+                        <div className="p-6 rounded-xl shadow-lg border sticky top-24"
+                            style={{
+                                backgroundColor: 'var(--store-card)',
+                                borderColor: 'var(--store-border)',
+                                boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
+                            }}>
+                            <h3 className="font-bold text-lg mb-6 pb-4 border-b" style={{ color: 'var(--store-text)', borderColor: 'var(--store-border)' }}>Resumo do Pedido</h3>
 
                             <div className="space-y-4">
-                                <div className="flex justify-between text-gray-500 text-sm">
+                                <div className="flex justify-between text-sm" style={{ color: 'var(--store-text-muted)' }}>
                                     <span>Subtotal</span>
                                     <span className="font-medium">R$ {cartTotal.toFixed(2).replace('.', ',')}</span>
                                 </div>
-                                <div className="flex justify-between text-gray-500 text-sm">
+                                <div className="flex justify-between text-sm" style={{ color: 'var(--store-text-muted)' }}>
                                     <div className="flex flex-col">
                                         <span>Entrega</span>
-                                        <span className="text-[10px] text-green-700 bg-green-50 px-2 py-0.5 rounded-full w-fit mt-0.5">Retirada Grátis</span>
+                                        <span className="text-[10px] text-green-700 bg-green-50 px-2 py-0.5 rounded-full w-fit mt-0.5"
+                                            style={{ backgroundColor: 'rgba(34, 197, 94, 0.1)', color: 'rgb(21, 128, 61)' }}>Retirada Grátis</span>
                                     </div>
-                                    <span className="text-green-600 font-bold">R$ 0,00</span>
+                                    <span className="font-bold" style={{ color: 'rgb(22, 163, 74)' }}>R$ 0,00</span>
                                 </div>
                             </div>
 
-                            <div className="my-6 border-t border-dashed border-gray-200"></div>
+                            <div className="my-6 border-t border-dashed" style={{ borderColor: 'var(--store-border)' }}></div>
 
                             <div className="flex justify-between items-end mb-8">
-                                <span className="text-gray-900 font-bold">Total</span>
-                                <span className="text-2xl font-extrabold text-gray-900">R$ {cartTotal.toFixed(2).replace('.', ',')}</span>
+                                <span className="font-bold" style={{ color: 'var(--store-text)' }}>Total</span>
+                                <span className="text-2xl font-extrabold" style={{ color: 'var(--store-text)' }}>R$ {cartTotal.toFixed(2).replace('.', ',')}</span>
                             </div>
 
                             <button
@@ -158,13 +180,18 @@ export default function CartPage() {
                                         router.push('/checkout');
                                     }
                                 }}
-                                className="w-full bg-gray-900 text-white py-4 rounded-xl font-bold text-base shadow-xl shadow-gray-900/10 flex items-center justify-center gap-3 hover:bg-black active:scale-[0.98] transition-all group"
+                                className="w-full py-4 rounded-xl font-bold text-base shadow-xl flex items-center justify-center gap-3 transition-all hover:opacity-90 active:scale-[0.98] group"
+                                style={{
+                                    backgroundColor: 'var(--store-primary)',
+                                    color: 'var(--store-primary-fg)',
+                                    boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)'
+                                }}
                             >
                                 <span>Ir para Pagamento</span>
                                 <span className="group-hover:translate-x-1 transition-transform">➜</span>
                             </button>
 
-                            <p className="text-center text-[10px] text-gray-400 mt-4 leading-normal">
+                            <p className="text-center text-[10px] mt-4 leading-normal" style={{ color: 'var(--store-text-muted)' }}>
                                 O pagamento será realizado apenas na retirada.
                             </p>
                         </div>
@@ -184,10 +211,14 @@ export default function CartPage() {
                             router.push('/checkout');
                         }
                     }}
-                    className="w-full bg-gray-900 text-white py-4 rounded-xl font-bold text-base shadow-2xl shadow-gray-900/30 flex items-center justify-between px-6 hover:bg-black active:scale-[0.98] transition-all border border-white/10"
+                    className="w-full py-4 rounded-xl font-bold text-base shadow-2xl flex items-center justify-between px-6 transition-all border border-white/10"
+                    style={{
+                        backgroundColor: 'var(--store-primary)',
+                        color: 'var(--store-primary-fg)',
+                    }}
                 >
                     <span>Ir para pagamento</span>
-                    <span className="bg-white/20 px-3 py-1 rounded-lg text-sm">R$ {cartTotal.toFixed(2).replace('.', ',')}</span>
+                    <span className="px-3 py-1 rounded-lg text-sm" style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)' }}>R$ {cartTotal.toFixed(2).replace('.', ',')}</span>
                 </button>
             </div>
         </div>
