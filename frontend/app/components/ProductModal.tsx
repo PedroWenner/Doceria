@@ -82,7 +82,7 @@ export default function ProductModal({ product, isOpen, onClose, getImageUrl }: 
                 {/* Close Button (Absolute) */}
                 <button
                     onClick={handleClose}
-                    className="absolute top-4 right-4 z-20 w-10 h-10 bg-black/20 text-white rounded-full flex items-center justify-center backdrop-blur-md hover:bg-black/30 transition-colors"
+                    className="absolute top-4 right-4 z-20 w-10 h-10 bg-black/20 text-white rounded-full flex items-center justify-center backdrop-blur-md hover:bg-black/40 transition-colors"
                 >
                     ✕
                 </button>
@@ -96,25 +96,25 @@ export default function ProductModal({ product, isOpen, onClose, getImageUrl }: 
                             className="w-full h-full object-cover"
                         />
                     ) : (
-                        <div className="w-full h-full flex items-center justify-center text-6xl bg-brand-cream/30">🍰</div>
+                        <div className="w-full h-full flex items-center justify-center text-6xl grayscale opacity-30">🍰</div>
                     )}
                     <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-white to-transparent md:from-white/0"></div>
                 </div>
 
                 {/* Body */}
                 <div className="flex-1 overflow-y-auto p-6 md:p-8 -mt-6 relative z-10 bg-white md:bg-transparent md:mt-0 rounded-t-3xl md:rounded-none">
-                    <h2 className="text-2xl font-bold text-brand-choco mb-2">{product.name}</h2>
+                    <h2 className="text-2xl font-bold text-gray-900 mb-2">{product.name}</h2>
                     <p className="text-gray-500 text-sm leading-relaxed mb-6">{product.description}</p>
 
                     <div className="mb-6">
-                        <span className="text-brand-pink font-bold text-xl">R$ {parseFloat(product.price).toFixed(2).replace('.', ',')}</span>
+                        <span className="text-gray-900 font-bold text-xl">R$ {parseFloat(product.price).toFixed(2).replace('.', ',')}</span>
                     </div>
 
                     {/* Observation Input (Mockup for now) */}
                     <div className="space-y-2 mb-8">
-                        <label className="text-sm font-bold text-gray-700">Alguma observação?</label>
+                        <label className="text-sm font-bold text-gray-900">Alguma observação?</label>
                         <textarea
-                            className="w-full bg-gray-50 border border-gray-100 rounded-xl p-3 text-sm focus:ring-2 focus:ring-brand-pink/20 outline-none resize-none"
+                            className="w-full bg-gray-50 border border-gray-100 rounded-xl p-3 text-sm focus:ring-2 focus:ring-gray-900/10 outline-none resize-none placeholder-gray-400 text-gray-900"
                             placeholder="Ex: Tirar a cebola, caprichar no molho..."
                             rows={3}
                         ></textarea>
@@ -128,20 +128,20 @@ export default function ProductModal({ product, isOpen, onClose, getImageUrl }: 
                         <div className="flex items-center gap-3 border border-gray-200 rounded-xl p-2 px-3">
                             <button
                                 onClick={() => setQuantity(q => Math.max(1, q - 1))}
-                                className={`text-xl font-bold w-6 h-6 flex items-center justify-center ${quantity === 1 ? 'text-gray-300' : 'text-brand-choco'}`}
+                                className={`text-xl font-bold w-6 h-6 flex items-center justify-center ${quantity === 1 ? 'text-gray-300' : 'text-gray-900'}`}
                                 disabled={quantity === 1}
                             >-</button>
-                            <span className="text-lg font-bold w-6 text-center">{quantity}</span>
+                            <span className="text-lg font-bold w-6 text-center text-gray-900">{quantity}</span>
                             <button
                                 onClick={() => setQuantity(q => q + 1)}
-                                className="text-brand-pink text-xl font-bold w-6 h-6 flex items-center justify-center"
+                                className="text-gray-900 text-xl font-bold w-6 h-6 flex items-center justify-center hover:bg-gray-100 rounded-full transition-colors"
                             >+</button>
                         </div>
 
                         {/* Add Button */}
                         <button
                             onClick={handleAddToCart}
-                            className="flex-1 bg-brand-pink text-white h-12 rounded-xl font-bold flex items-center justify-between px-6 shadow-lg shadow-brand-pink/20 hover:bg-brand-pink/90 active:scale-[0.98] transition-all"
+                            className="flex-1 bg-gray-900 text-white h-12 rounded-xl font-bold flex items-center justify-between px-6 shadow-xl shadow-gray-900/10 hover:bg-black active:scale-[0.98] transition-all"
                         >
                             <span>Adicionar</span>
                             <span>R$ {totalPrice}</span>
