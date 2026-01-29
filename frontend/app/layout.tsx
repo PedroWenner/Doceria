@@ -20,6 +20,7 @@ export const metadata: Metadata = {
 import { ThemeProvider } from "./context/ThemeContext";
 import { LanguageProvider } from "./context/LanguageContext";
 import { AuthProvider } from "./context/AuthContext";
+import { CartProvider } from "./context/CartContext";
 
 export default function RootLayout({
   children,
@@ -33,9 +34,11 @@ export default function RootLayout({
       >
         <ThemeProvider>
           <AuthProvider>
-            <LanguageProvider>
-              {children}
-            </LanguageProvider>
+            <CartProvider>
+              <LanguageProvider>
+                {children}
+              </LanguageProvider>
+            </CartProvider>
           </AuthProvider>
         </ThemeProvider>
       </body>
