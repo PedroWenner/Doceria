@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import LoadingSpinner from '@/app/components/LoadingSpinner';
 import Cookies from 'js-cookie';
+import { useLanguage } from '@/app/context/LanguageContext';
 import toast from 'react-hot-toast';
 import {
     CreditCard,
@@ -41,6 +42,8 @@ export default function PaymentMethodsPage() {
     const [name, setName] = useState('');
     const [slug, setSlug] = useState('');
 
+    const { t } = useLanguage();
+
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
     const token = Cookies.get('admin_token');
 
@@ -59,7 +62,7 @@ export default function PaymentMethodsPage() {
             }
         } catch (error) {
             console.error(error);
-            toast.error('Erro ao carregar meios de pagamento');
+            toast.error(t('payment_methods.load_error'));
         } finally {
             setIsLoading(false);
         }
@@ -72,11 +75,11 @@ export default function PaymentMethodsPage() {
                 headers: { Authorization: `Bearer ${token}` }
             });
             if (res.ok) {
-                toast.success('Status atualizado');
+                toast.success(t('payment_methods.update_status_success'));
                 fetchMethods();
             }
         } catch (error) {
-            toast.error('Erro ao atualizar status');
+            toast.error(t('payment_methods.update_status_error'));
         }
     };
 
@@ -93,12 +96,12 @@ export default function PaymentMethodsPage() {
                 headers: { Authorization: `Bearer ${token}` }
             });
             if (res.ok) {
-                toast.success('Removido com sucesso');
+                toast.success(t('payment_methods.delete_success'));
                 fetchMethods();
                 setDeleteConfirmation({ isOpen: false, methodId: null });
             }
         } catch (error) {
-            toast.error('Erro ao remover');
+            toast.error(t('payment_methods.delete_error'));
         }
     };
 
@@ -136,15 +139,15 @@ export default function PaymentMethodsPage() {
             });
 
             if (res.ok) {
-                toast.success(editingMethod ? 'Atualizado!' : 'Criado!');
+                toast.success(t('payment_methods.save_success'));
                 setIsModalOpen(false);
                 fetchMethods();
             } else {
                 const err = await res.json();
-                toast.error(err.message || 'Erro ao salvar');
+                toast.error(err.message || t('payment_methods.save_error'));
             }
         } catch (error) {
-            toast.error('Erro de conexão');
+            toast.error(t('common.error'));
         } finally {
             setIsSaving(false);
         }
@@ -169,16 +172,16 @@ export default function PaymentMethodsPage() {
                 <div>
                     <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-50 tracking-tight flex items-center gap-3">
                         <CreditCard size={32} className="text-slate-400" />
-                        Meios de Pagamento
+                        {t('payment_methods.title')}
                     </h1>
-                    <p className="text-slate-500 dark:text-slate-400 mt-1 text-sm ml-11">Configure as formas de pagamento disponíveis no checkout.</p>
+                    <p className="text-slate-500 dark:text-slate-400 mt-1 text-sm ml-11">{t('payment_methods.subtitle')}</p>
                 </div>
                 <button
                     onClick={() => openModal()}
                     className="flex items-center gap-2 bg-slate-900 dark:bg-slate-50 text-white dark:text-slate-900 px-5 py-2.5 rounded-lg font-semibold hover:bg-slate-800 dark:hover:bg-slate-200 transition-all shadow-sm"
                 >
                     <Plus size={20} />
-                    <span>Novo Meio</span>
+                    <span>{t('payment_methods.new_method')}</span>
                 </button>
             </div>
 
@@ -193,7 +196,7 @@ export default function PaymentMethodsPage() {
                                 </div>
                                 <div className={`px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wide flex items-center gap-1.5 ${method.is_active ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/30' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700'}`}>
                                     <span className={`w-1.5 h-1.5 rounded-full ${method.is_active ? 'bg-emerald-500' : 'bg-slate-400'}`} />
-                                    {method.is_active ? 'Ativo' : 'Inativo'}
+                                    {method.is_active ? t('payment_methods.active') : t('payment_methods.inactive')}
                                 </div>
                             </div>
 
@@ -211,7 +214,7 @@ export default function PaymentMethodsPage() {
                                     : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-emerald-600 dark:text-emerald-400 shadow-sm'}`}
                             >
                                 <Power size={16} />
-                                {method.is_active ? 'Desativar' : 'Ativar'}
+                                {method.is_active ? t('payment_methods.disable') : t('payment_methods.enable')}
                             </button>
                             <button
                                 onClick={() => openModal(method)}
@@ -240,7 +243,7 @@ export default function PaymentMethodsPage() {
                         <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/50">
                             <h2 className="text-lg font-bold text-slate-900 dark:text-slate-50 flex items-center gap-2">
                                 {editingMethod ? <Pencil size={18} /> : <Plus size={18} />}
-                                {editingMethod ? 'Editar Meio' : 'Novo Meio'}
+                                {editingMethod ? t('payment_methods.edit_method') : t('payment_methods.new_method')}
                             </h2>
                             <button onClick={() => setIsModalOpen(false)} className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 transition-colors">
                                 <X size={20} />
@@ -250,7 +253,7 @@ export default function PaymentMethodsPage() {
                         {/* Modal Body */}
                         <form onSubmit={handleSubmit} className="p-6 space-y-5">
                             <div>
-                                <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1.5">Nome do Meio</label>
+                                <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1.5">{t('payment_methods.name')}</label>
                                 <input
                                     value={name}
                                     onChange={(e) => handleNameChange(e.target.value)}
@@ -261,7 +264,7 @@ export default function PaymentMethodsPage() {
                             </div>
 
                             <div>
-                                <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1.5">Slug (Código Interno)</label>
+                                <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1.5">{t('payment_methods.slug')}</label>
                                 <div className="relative">
                                     <input
                                         value={slug}
@@ -274,7 +277,7 @@ export default function PaymentMethodsPage() {
                                 </div>
                                 <p className="text-xs text-slate-500 mt-2 flex items-center gap-1">
                                     <AlertCircle size={12} />
-                                    Identificador único usado pelo sistema.
+                                    {t('payment_methods.slug_hint')}
                                 </p>
                             </div>
 
@@ -284,14 +287,14 @@ export default function PaymentMethodsPage() {
                                     onClick={() => setIsModalOpen(false)}
                                     className="px-4 py-2 rounded-lg text-slate-600 dark:text-slate-400 font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                                 >
-                                    Cancelar
+                                    {t('common.cancel')}
                                 </button>
                                 <button
                                     type="submit"
                                     disabled={isSaving}
                                     className="px-5 py-2 rounded-lg bg-slate-900 dark:bg-slate-50 text-white dark:text-slate-900 font-bold hover:bg-slate-800 dark:hover:bg-slate-200 transition-all shadow-sm disabled:opacity-70 disabled:cursor-wait flex items-center gap-2"
                                 >
-                                    {isSaving ? <LoadingSpinner /> : <><Check size={18} /> Salvar</>}
+                                    {isSaving ? <LoadingSpinner /> : <><Check size={18} /> {t('common.save')}</>}
                                 </button>
                             </div>
                         </form>
@@ -307,9 +310,9 @@ export default function PaymentMethodsPage() {
                             <div className="w-16 h-16 bg-rose-50 dark:bg-rose-900/20 rounded-full flex items-center justify-center mx-auto mb-4 text-rose-500 dark:text-rose-400">
                                 <AlertTriangle size={32} />
                             </div>
-                            <h3 className="text-xl font-bold text-slate-900 dark:text-slate-50 mb-2">Tem certeza?</h3>
+                            <h3 className="text-xl font-bold text-slate-900 dark:text-slate-50 mb-2">{t('payment_methods.delete_title')}</h3>
                             <p className="text-slate-500 dark:text-slate-400 text-sm">
-                                Isso removerá este meio de pagamento permanentemente. Descontos associados podem ser perdidos.
+                                {t('payment_methods.delete_message')}
                             </p>
                         </div>
                         <div className="p-4 bg-slate-50 dark:bg-slate-900/50 flex gap-3 justify-center border-t border-slate-100 dark:border-slate-800">
@@ -317,13 +320,13 @@ export default function PaymentMethodsPage() {
                                 onClick={() => setDeleteConfirmation({ isOpen: false, methodId: null })}
                                 className="px-4 py-2 rounded-lg text-slate-600 dark:text-slate-400 font-medium hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors"
                             >
-                                Cancelar
+                                {t('common.cancel')}
                             </button>
                             <button
                                 onClick={handleDelete}
                                 className="px-5 py-2 rounded-lg bg-rose-500 text-white font-bold hover:bg-rose-600 transition-all shadow-sm shadow-rose-500/20"
                             >
-                                Sim, Remover
+                                {t('payment_methods.confirm_delete')}
                             </button>
                         </div>
                     </div>

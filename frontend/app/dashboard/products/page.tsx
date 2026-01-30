@@ -252,8 +252,8 @@ export default function ProductsPage() {
             {/* Header */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-50 tracking-tight">Produtos</h1>
-                    <p className="text-slate-500 dark:text-slate-400 mt-1 text-sm">Gerencie o inventário e preços da sua loja.</p>
+                    <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-50 tracking-tight">{t('products.title')}</h1>
+                    <p className="text-slate-500 dark:text-slate-400 mt-1 text-sm">{t('products.subtitle')}</p>
                 </div>
                 <div className="flex gap-3">
                     <button className="p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
@@ -264,7 +264,7 @@ export default function ProductsPage() {
                         className="flex items-center gap-2 bg-slate-900 dark:bg-slate-50 text-white dark:text-slate-900 px-5 py-2.5 rounded-lg font-semibold hover:bg-slate-800 dark:hover:bg-slate-200 transition-all shadow-sm"
                     >
                         <Plus size={20} />
-                        <span>Novo Produto</span>
+                        <span>{t('products.new_product')}</span>
                     </button>
                 </div>
             </div>
@@ -273,7 +273,7 @@ export default function ProductsPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between">
                     <div>
-                        <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total de Produtos</p>
+                        <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{t('products.total_products')}</p>
                         <p className="text-3xl font-bold text-slate-900 dark:text-slate-50 mt-1">{totalProducts}</p>
                     </div>
                     <div className="p-3 bg-slate-100 dark:bg-slate-800 rounded-lg text-slate-600 dark:text-slate-400">
@@ -282,7 +282,7 @@ export default function ProductsPage() {
                 </div>
                 <div className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between">
                     <div>
-                        <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Estoque Baixo</p>
+                        <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{t('products.low_stock')}</p>
                         <p className="text-3xl font-bold text-slate-900 dark:text-slate-50 mt-1">{lowStockCount}</p>
                     </div>
                     <div className="p-3 bg-amber-50 dark:bg-amber-900/10 rounded-lg text-amber-600 dark:text-amber-500">
@@ -291,7 +291,7 @@ export default function ProductsPage() {
                 </div>
                 <div className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between">
                     <div>
-                        <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Descontos Ativos</p>
+                        <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{t('products.active_discounts')}</p>
                         <p className="text-3xl font-bold text-slate-900 dark:text-slate-50 mt-1">{activeDiscountsCount}</p>
                     </div>
                     <div className="p-3 bg-emerald-50 dark:bg-emerald-900/10 rounded-lg text-emerald-600 dark:text-emerald-500">
@@ -305,7 +305,7 @@ export default function ProductsPage() {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
                 <input
                     type="text"
-                    placeholder="Buscar produtos por nome ou SKU..."
+                    placeholder={t('products.search_placeholder')}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="w-full pl-10 pr-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-50 focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-50 focus:border-transparent outline-none transition-all placeholder:text-slate-400"
@@ -318,12 +318,12 @@ export default function ProductsPage() {
                     <table className="w-full text-left">
                         <thead className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700">
                             <tr>
-                                <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Produto</th>
-                                <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Categoria</th>
-                                <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Preço</th>
-                                <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Estoque</th>
-                                <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-center">Status</th>
-                                <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-right">Ações</th>
+                                <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{t('products.title').slice(0, -1)}</th>
+                                <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{t('products.category')}</th>
+                                <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{t('products.price')}</th>
+                                <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{t('products.stock')}</th>
+                                <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-center">{t('common.status')}</th>
+                                <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-right">{t('common.actions')}</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -357,11 +357,11 @@ export default function ProductsPage() {
                                         <td className="px-6 py-4">
                                             {product.stock_quantity === 0 ? (
                                                 <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-rose-50 dark:bg-rose-900/20 text-rose-700 dark:text-rose-400 border border-rose-100 dark:border-rose-900/30">
-                                                    <AlertTriangle size={12} /> Esgotado
+                                                    <AlertTriangle size={12} /> {t('products.out_of_stock')}
                                                 </span>
                                             ) : isLowStock ? (
                                                 <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 border border-amber-100 dark:border-amber-900/30">
-                                                    <AlertTriangle size={12} /> Baixo ({product.stock_quantity})
+                                                    <AlertTriangle size={12} /> {t('products.low_stock')} ({product.stock_quantity})
                                                 </span>
                                             ) : (
                                                 <span className="text-sm text-slate-600 dark:text-slate-400">
@@ -391,11 +391,18 @@ export default function ProductsPage() {
                             <div className="w-16 h-16 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
                                 <Search size={24} className="text-slate-300 dark:text-slate-600" />
                             </div>
-                            <h3 className="text-lg font-medium text-slate-900 dark:text-slate-100">Nenhum produto encontrado</h3>
-                            <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Tente ajustar sua busca ou adicione um novo produto.</p>
+                            <h3 className="text-lg font-medium text-slate-900 dark:text-slate-100">{t('products.no_products')}</h3>
+                            <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">{t('products.no_products_hint')}</p>
                         </div>
                     )}
                 </div>
+                <Pagination
+                    currentPage={meta.current_page}
+                    lastPage={meta.last_page}
+                    total={meta.total}
+                    perPage={meta.per_page}
+                    onPageChange={fetchProducts}
+                />
             </div>
 
             {/* Modal */}
@@ -405,7 +412,7 @@ export default function ProductsPage() {
                         {/* Modal Header */}
                         <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/50">
                             <div>
-                                <h2 className="text-lg font-bold text-slate-900 dark:text-slate-50">{editingProduct ? 'Editar Produto' : 'Novo Produto'}</h2>
+                                <h2 className="text-lg font-bold text-slate-900 dark:text-slate-50">{editingProduct ? t('products.edit_product') : t('products.new_product')}</h2>
                             </div>
                             <button onClick={() => setIsModalOpen(false)} className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 transition-colors">
                                 <X size={20} />
@@ -426,7 +433,7 @@ export default function ProductsPage() {
                                             ) : (
                                                 <>
                                                     <ImageIcon size={32} className="mb-2" />
-                                                    <span className="text-xs font-medium">Upload Imagem</span>
+                                                    <span className="text-xs font-medium">{t('products.upload_image')}</span>
                                                 </>
                                             )}
                                             <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={e => setFormData({ ...formData, image: e.target.files?.[0] || null })} />
@@ -436,30 +443,30 @@ export default function ProductsPage() {
                                     {/* Fields */}
                                     <div className="grid grid-cols-2 gap-5">
                                         <div className="col-span-2">
-                                            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1.5">Nome</label>
+                                            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1.5">{t('common.name')}</label>
                                             <input required type="text" className="w-full p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-50 focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-50 dark:focus:border-transparent outline-none transition-all"
-                                                placeholder="Nome do produto" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} />
+                                                placeholder={t('common.name')} value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} />
                                         </div>
                                         <div>
-                                            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1.5">SKU</label>
+                                            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1.5">{t('products.sku')}</label>
                                             <input required type="text" className="w-full p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-50 focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-50 outline-none transition-all font-mono text-sm"
                                                 placeholder="CODE-00" value={formData.sku} onChange={e => setFormData({ ...formData, sku: e.target.value })} />
                                         </div>
                                         <div>
-                                            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1.5">Categoria</label>
+                                            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1.5">{t('products.category')}</label>
                                             <div className="relative">
                                                 <select required className="w-full p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-50 focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-50 outline-none appearance-none cursor-pointer"
                                                     value={formData.category_id} onChange={e => setFormData({ ...formData, category_id: e.target.value })}>
-                                                    <option value="">Selecione...</option>
+                                                    <option value="">{t('products.select_category')}</option>
                                                     {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                                                 </select>
                                                 <ChevronDown size={16} className="absolute right-3 top-3 text-slate-400 pointer-events-none" />
                                             </div>
                                         </div>
                                         <div className="col-span-2">
-                                            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1.5">Descrição</label>
+                                            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1.5">{t('common.description')}</label>
                                             <textarea className="w-full p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-50 focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-50 outline-none resize-none h-24"
-                                                placeholder="Detalhes do produto..." value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} />
+                                                placeholder={t('products.details_placeholder')} value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} />
                                         </div>
                                     </div>
                                 </div>
@@ -471,23 +478,23 @@ export default function ProductsPage() {
                                 <div>
                                     <h3 className="text-sm font-bold text-slate-900 dark:text-slate-50 mb-4 flex items-center gap-2">
                                         <div className="p-1 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400"><Tag size={14} /></div>
-                                        Preço e Estoque
+                                        {t('products.price_stock_section')}
                                     </h3>
                                     <div className="grid grid-cols-3 gap-6">
                                         <div>
-                                            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1.5">Preço (R$)</label>
+                                            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1.5">{t('products.price')} (R$)</label>
                                             <input required type="text" className="w-full p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-50 font-bold focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-50 outline-none"
                                                 placeholder="0,00" value={formData.price} onChange={e => setFormData({ ...formData, price: formatCurrency(e.target.value) })} />
                                         </div>
                                         {stockSettings.enabled && (
                                             <>
                                                 <div>
-                                                    <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1.5">Estoque</label>
+                                                    <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1.5">{t('products.stock')}</label>
                                                     <input required type="number" className="w-full p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-50 focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-50 outline-none"
                                                         value={formData.stock_quantity} onChange={e => setFormData({ ...formData, stock_quantity: e.target.value })} />
                                                 </div>
                                                 <div>
-                                                    <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1.5">Mínimo</label>
+                                                    <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1.5">{t('products.min_stock')}</label>
                                                     <input required type="number" className="w-full p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-50 focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-50 outline-none"
                                                         value={formData.min_stock_level} onChange={e => setFormData({ ...formData, min_stock_level: e.target.value })} />
                                                 </div>
@@ -501,18 +508,18 @@ export default function ProductsPage() {
                                     <div className="flex justify-between items-center mb-4">
                                         <h3 className="text-sm font-bold text-slate-900 dark:text-slate-50 flex items-center gap-2">
                                             <div className="p-1 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400"><Tag size={14} /></div>
-                                            Descontos por Pagamento
+                                            {t('products.discounts_section')}
                                         </h3>
                                         <button type="button" onClick={handleAddDiscount} disabled={formData.discounts.length >= paymentMethods.length}
                                             className="text-xs font-semibold text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50 flex items-center gap-1">
-                                            <Plus size={14} /> Adicionar Regra
+                                            <Plus size={14} /> {t('products.add_rule')}
                                         </button>
                                     </div>
 
                                     <div className="space-y-3">
                                         {formData.discounts.length === 0 ? (
                                             <div className="text-center py-8 bg-slate-50 dark:bg-slate-900 rounded-xl border border-dashed border-slate-200 dark:border-slate-800 text-slate-400 dark:text-slate-600 text-sm">
-                                                Nenhum desconto configurado.
+                                                {t('products.no_discounts')}
                                             </div>
                                         ) : (
                                             formData.discounts.map((discount, index) => (
@@ -520,7 +527,7 @@ export default function ProductsPage() {
                                                     <div className="relative flex-1">
                                                         <select required className="w-full p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-50 focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-50 outline-none appearance-none cursor-pointer"
                                                             value={discount.payment_method_id} onChange={(e) => handleDiscountChange(index, 'payment_method_id', Number(e.target.value))}>
-                                                            <option value={0}>Selecione o Meio...</option>
+                                                            <option value={0}>{t('products.select_method')}</option>
                                                             {paymentMethods.map(pm => {
                                                                 if (formData.discounts.some((d, i) => d.payment_method_id === pm.id && i !== index)) return null;
                                                                 return <option key={pm.id} value={pm.id}>{pm.name}</option>
@@ -546,9 +553,9 @@ export default function ProductsPage() {
 
                         {/* Modal Footer */}
                         <div className="p-6 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex justify-end gap-3">
-                            <button type="button" onClick={() => setIsModalOpen(false)} className="px-5 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">Cancelar</button>
+                            <button type="button" onClick={() => setIsModalOpen(false)} className="px-5 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">{t('common.cancel')}</button>
                             <button form="productForm" type="submit" disabled={isSaving} className="px-6 py-2.5 rounded-lg bg-slate-900 dark:bg-slate-50 text-white dark:text-slate-900 font-bold hover:bg-slate-800 dark:hover:bg-slate-200 transition-all shadow-sm disabled:opacity-70 disabled:cursor-wait flex items-center gap-2">
-                                {isSaving ? <LoadingSpinner /> : <><Check size={18} /> Salvar Produto</>}
+                                {isSaving ? <LoadingSpinner /> : <><Check size={18} /> {t('common.save')}</>}
                             </button>
                         </div>
                     </div>

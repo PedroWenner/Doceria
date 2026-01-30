@@ -56,11 +56,16 @@ export const translations = {
             edit_roles: 'Editar Cargos',
             save_changes: 'Salvar Alterações',
             update_success: 'Cargos atualizados com sucesso',
-            update_error: 'Falha ao atualizar cargos'
+            update_error: 'Falha ao atualizar cargos',
+            subtitle: 'Controle de acesso e permissões do sistema.',
+            search_placeholder: 'Buscar usuários...',
+            no_users: 'Nenhum usuário encontrado.',
+            available_roles: 'Cargos Disponíveis',
+            no_permissions: 'Sem permissões'
         },
         products: {
             title: 'Produtos',
-            new_product: '+ Novo Produto',
+            new_product: 'Novo Produto',
             category: 'Categoria',
             price: 'Preço',
             stock: 'Estoque',
@@ -75,7 +80,20 @@ export const translations = {
             no_img: 'Sem Img',
             save_success: 'Produto salvo com sucesso',
             save_error: 'Erro ao salvar produto',
-            edit_product: 'Editar Produto'
+            edit_product: 'Editar Produto',
+            subtitle: 'Gerencie o inventário e preços da sua loja.',
+            total_products: 'Total de Produtos',
+            active_discounts: 'Descontos Ativos',
+            search_placeholder: 'Buscar produtos por nome ou SKU...',
+            no_products: 'Nenhum produto encontrado',
+            no_products_hint: 'Tente ajustar sua busca ou adicione um novo produto.',
+            upload_image: 'Upload Imagem',
+            details_placeholder: 'Detalhes do produto...',
+            price_stock_section: 'Preço e Estoque',
+            discounts_section: 'Descontos por Pagamento',
+            add_rule: 'Adicionar Regra',
+            no_discounts: 'Nenhum desconto configurado.',
+            select_method: 'Selecione o Meio...'
         },
         audit: {
             title: 'Logs de Auditoria',
@@ -181,6 +199,29 @@ export const translations = {
                 welcome: 'Mensagem de Boas-vindas'
             },
             save_btn: 'Salvar Configurações 💾'
+        },
+        payment_methods: {
+            title: 'Meios de Pagamento',
+            subtitle: 'Configure as formas de pagamento disponíveis no checkout.',
+            new_method: 'Novo Meio',
+            edit_method: 'Editar Meio',
+            active: 'Ativo',
+            inactive: 'Inativo',
+            enable: 'Ativar',
+            disable: 'Desativar',
+            name: 'Nome do Meio',
+            slug: 'Slug (Código Interno)',
+            slug_hint: 'Identificador único usado pelo sistema.',
+            delete_title: 'Tem certeza?',
+            delete_message: 'Isso removerá este meio de pagamento permanentemente. Descontos associados podem ser perdidos.',
+            confirm_delete: 'Sim, Remover',
+            update_status_success: 'Status atualizado',
+            update_status_error: 'Erro ao atualizar status',
+            delete_success: 'Removido com sucesso',
+            delete_error: 'Erro ao remover',
+            load_error: 'Erro ao carregar meios de pagamento',
+            save_success: 'Salvo com sucesso!',
+            save_error: 'Erro ao salvar'
         }
     },
     en: {
@@ -238,11 +279,16 @@ export const translations = {
             edit_roles: 'Edit Roles',
             save_changes: 'Save Changes',
             update_success: 'Roles updated successfully',
-            update_error: 'Failed to update roles'
+            update_error: 'Failed to update roles',
+            subtitle: 'Access control and system permissions.',
+            search_placeholder: 'Search users...',
+            no_users: 'No users found.',
+            available_roles: 'Available Roles',
+            no_permissions: 'No permissions'
         },
         products: {
             title: 'Products',
-            new_product: '+ New Product',
+            new_product: 'New Product',
             category: 'Category',
             price: 'Price',
             stock: 'Stock',
@@ -257,7 +303,20 @@ export const translations = {
             no_img: 'No Img',
             save_success: 'Product saved successfully',
             save_error: 'Error saving product',
-            edit_product: 'Edit Product'
+            edit_product: 'Edit Product',
+            subtitle: 'Manage your store inventory and prices.',
+            total_products: 'Total Products',
+            active_discounts: 'Active Discounts',
+            search_placeholder: 'Search products by name or SKU...',
+            no_products: 'No products found',
+            no_products_hint: 'Try adjusting your search or add a new product.',
+            upload_image: 'Upload Image',
+            details_placeholder: 'Product details...',
+            price_stock_section: 'Price & Stock',
+            discounts_section: 'Payment Discounts',
+            add_rule: 'Add Rule',
+            no_discounts: 'No discounts configured.',
+            select_method: 'Select Method...'
         },
         audit: {
             title: 'Audit Logs',
@@ -364,6 +423,29 @@ export const translations = {
                 welcome: 'Welcome Message'
             },
             save_btn: 'Save Settings 💾'
+        },
+        payment_methods: {
+            title: 'Payment Methods',
+            subtitle: 'Configure payment methods available at checkout.',
+            new_method: 'New Method',
+            edit_method: 'Edit Method',
+            active: 'Active',
+            inactive: 'Inactive',
+            enable: 'Enable',
+            disable: 'Disable',
+            name: 'Method Name',
+            slug: 'Slug (Internal Code)',
+            slug_hint: 'Unique identifier used by the system.',
+            delete_title: 'Are you sure?',
+            delete_message: 'This will permanently remove this payment method. Associated discounts may be lost.',
+            confirm_delete: 'Yes, Remove',
+            update_status_success: 'Status updated',
+            update_status_error: 'Error updating status',
+            delete_success: 'Removed successfully',
+            delete_error: 'Error removing',
+            load_error: 'Error loading payment methods',
+            save_success: 'Saved successfully!',
+            save_error: 'Error saving'
         }
     }
 };

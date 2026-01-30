@@ -73,7 +73,7 @@ export default function UsersPage() {
             }
         } catch (error) {
             console.error('Failed to fetch data', error);
-            toast.error(t('Falha ao carregar dados'));
+            toast.error(t('common.error'));
         } finally {
             setIsLoading(false);
         }
@@ -101,13 +101,13 @@ export default function UsersPage() {
             if (res.ok) {
                 await fetchData();
                 setEditingUser(null);
-                toast.success(t('Usuário atualizado com sucesso'));
+                toast.success(t('users.update_success'));
             } else {
-                toast.error(t('Erro ao atualizar usuário'));
+                toast.error(t('users.update_error'));
             }
         } catch (error) {
             console.error('Update failed', error);
-            toast.error(t('Erro de conexão'));
+            toast.error(t('common.error'));
         } finally {
             setIsSaving(false);
         }
@@ -127,9 +127,9 @@ export default function UsersPage() {
                 <div>
                     <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-50 tracking-tight flex items-center gap-3">
                         <Users size={32} className="text-slate-400" />
-                        {t('Gerenciamento de Usuários')}
+                        {t('users.title')}
                     </h1>
-                    <p className="text-slate-500 dark:text-slate-400 mt-1 text-sm ml-11">Controle de acesso e permissões do sistema.</p>
+                    <p className="text-slate-500 dark:text-slate-400 mt-1 text-sm ml-11">{t('users.subtitle')}</p>
                 </div>
             </div>
 
@@ -138,7 +138,7 @@ export default function UsersPage() {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
                 <input
                     type="text"
-                    placeholder="Buscar usuários..."
+                    placeholder={t('users.search_placeholder')}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-50 focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-50 focus:border-transparent outline-none transition-all placeholder:text-slate-400"
@@ -151,10 +151,10 @@ export default function UsersPage() {
                     <table className="w-full text-left">
                         <thead className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
                             <tr>
-                                <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{t('Nome')}</th>
-                                <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{t('Email')}</th>
-                                <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{t('Permissões')}</th>
-                                <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-right">{t('Ações')}</th>
+                                <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{t('common.name')}</th>
+                                <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{t('users.email')}</th>
+                                <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{t('users.roles')}</th>
+                                <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-right">{t('common.actions')}</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -183,7 +183,7 @@ export default function UsersPage() {
                                                 </span>
                                             ))}
                                             {user.roles.length === 0 && (
-                                                <span className="text-xs text-slate-400 italic">Sem permissões</span>
+                                                <span className="text-xs text-slate-400 italic">{t('users.no_permissions')}</span>
                                             )}
                                         </div>
                                     </td>
@@ -201,13 +201,20 @@ export default function UsersPage() {
                             {filteredUsers.length === 0 && (
                                 <tr>
                                     <td colSpan={4} className="p-12 text-center text-slate-500 dark:text-slate-400">
-                                        <p>Nenhum usuário encontrado.</p>
+                                        <p>{t('users.no_users')}</p>
                                     </td>
                                 </tr>
                             )}
                         </tbody>
                     </table>
                 </div>
+                <Pagination
+                    currentPage={meta.current_page}
+                    lastPage={meta.last_page}
+                    total={meta.total}
+                    perPage={meta.per_page}
+                    onPageChange={fetchData}
+                />
             </div>
 
             {/* Edit Modal */}
@@ -217,7 +224,7 @@ export default function UsersPage() {
                         {/* Modal Header */}
                         <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/50">
                             <div>
-                                <h2 className="text-lg font-bold text-slate-900 dark:text-slate-50">Editar Acessos</h2>
+                                <h2 className="text-lg font-bold text-slate-900 dark:text-slate-50">{t('users.edit_roles')}</h2>
                                 <p className="text-xs text-slate-500 dark:text-slate-400">{editingUser.name}</p>
                             </div>
                             <button onClick={() => setEditingUser(null)} className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 transition-colors">
@@ -227,7 +234,7 @@ export default function UsersPage() {
 
                         {/* Modal Body */}
                         <div className="p-6 space-y-4">
-                            <p className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Cargos Disponíveis</p>
+                            <p className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">{t('users.available_roles')}</p>
                             <div className="space-y-2">
                                 {roles.map(role => {
                                     const isSelected = selectedRoles.includes(role.slug);
@@ -277,14 +284,14 @@ export default function UsersPage() {
                                 onClick={() => setEditingUser(null)}
                                 className="px-4 py-2 rounded-lg text-slate-600 dark:text-slate-400 font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                             >
-                                Cancelar
+                                {t('common.cancel')}
                             </button>
                             <button
                                 onClick={handleSave}
                                 disabled={isSaving}
                                 className="px-5 py-2 rounded-lg bg-slate-900 dark:bg-slate-50 text-white dark:text-slate-900 font-bold hover:bg-slate-800 dark:hover:bg-slate-200 transition-all shadow-sm disabled:opacity-70 disabled:cursor-wait flex items-center gap-2"
                             >
-                                {isSaving ? <LoadingSpinner /> : <><Check size={18} /> Salvar</>}
+                                {isSaving ? <LoadingSpinner /> : <><Check size={18} /> {t('common.save')}</>}
                             </button>
                         </div>
                     </div>
