@@ -168,6 +168,7 @@ export default function CheckoutPage() {
 
         try {
             const token = jsCookie.get('store_token');
+            // 1. Create Order
             const res = await fetch(`${apiUrl}/orders`, {
                 method: 'POST',
                 headers: {
@@ -179,9 +180,48 @@ export default function CheckoutPage() {
             });
 
             if (res.ok) {
-                toast.success("Pedido realizado com sucesso! 🎉");
-                clearCart();
-                router.push('/orders/my');
+                const response = await res.json();
+                const orderId = response.data.id; // Assuming API returns data: { id: ... }
+
+                // 2. Process Payment (if online)
+                if (selectedMethod?.slug.includes('mercadopago') || selectedMethod?.slug.includes('pix') || selectedMethod?.slug.includes('card')) {
+                    toast.loading("Gerando pagamento...");
+
+                    const payRes = await fetch(`${apiUrl}/orders/${orderId}/pay`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`,
+                            'Accept': 'application/json'
+                        }
+                    });
+
+                    if (payRes.ok) {
+                        const payData = await payRes.json();
+                        if (payData.data.type === 'redirect') {
+                            window.location.href = payData.data.data; // Redirect to MP
+                            return; // Stop here, browser will redirect
+                        } else {
+                            // Handle other types (payload, qr_code) later
+                            toast.success("Pedido realizado! Verifique a área de 'Meus Pedidos'.");
+                            clearCart();
+                            router.push('/orders/my');
+                        }
+                    } else {
+                        const errPay = await payRes.json();
+                        toast.error(`Erro no pagamento: ${errPay.message || 'Tente pagar pelo painel de pedidos'}`);
+                        // Navigate to orders anyway so they can try again if we implement that
+                        clearCart();
+                        router.push('/orders/my');
+                    }
+
+                } else {
+                    // Offline payment (Money)
+                    toast.success("Pedido realizado com sucesso! 🎉");
+                    clearCart();
+                    router.push('/orders/my');
+                }
+
             } else {
                 const errorData = await res.json();
                 console.error("Order error", errorData);

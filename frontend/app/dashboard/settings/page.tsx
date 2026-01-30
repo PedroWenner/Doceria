@@ -25,7 +25,8 @@ import {
     Clock,
     Key,
     UserCircle,
-    Image as ImageIcon
+    Image as ImageIcon,
+    CreditCard
 } from 'lucide-react';
 import LocationMap from '@/app/components/LocationMap';
 
@@ -33,7 +34,26 @@ export default function SettingsPage() {
     const { t } = useLanguage();
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
-    const [activeTab, setActiveTab] = useState<'general' | 'operational' | 'fiscal' | 'address' | 'system'>('general');
+    const [activeTab, setActiveTab] = useState<'general' | 'operational' | 'fiscal' | 'address' | 'system' | 'payments'>('general');
+
+    // Payment Settings State
+    interface PaymentGatewaySetting {
+        id: number;
+        payment_method_id: number;
+        mode: 'sandbox' | 'production';
+        is_active: boolean;
+        credentials: any;
+    }
+
+    interface PaymentMethod {
+        id: number;
+        name: string;
+        slug: string;
+        gateway_setting?: PaymentGatewaySetting;
+    }
+
+    const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
+    const [loadingPayments, setLoadingPayments] = useState(false);
 
     // Services Loading States
     const [isSearchingCep, setIsSearchingCep] = useState(false);
@@ -52,7 +72,6 @@ export default function SettingsPage() {
         orders_refresh_rate: 60, auth_token_expiration: 60, pagination_limit: 10,
         // Operational
         enable_stock_control: true, global_min_stock: 5,
-        enable_stock_control: true, global_min_stock: 5,
         whatsapp_number: '', delivery_message: '',
         latitude: '', longitude: ''
     });
@@ -65,7 +84,10 @@ export default function SettingsPage() {
 
     useEffect(() => {
         fetchSettings();
-    }, []);
+        if (activeTab === 'payments') {
+            fetchPaymentSettings();
+        }
+    }, [activeTab]);
 
     const fetchSettings = async () => {
         try {
@@ -98,6 +120,76 @@ export default function SettingsPage() {
             toast.error('Erro de conexão ao carregar configurações.');
         } finally {
             setIsLoading(false);
+        }
+    };
+
+    const fetchPaymentSettings = async () => {
+        setLoadingPayments(true);
+        try {
+            const res = await fetch(`${apiUrl}/payment-gateway-settings`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json'
+                }
+            });
+            if (res.ok) {
+                const response = await res.json();
+                setPaymentMethods(response.data);
+            }
+        } catch (error) {
+            console.error(error);
+            toast.error('Erro ao carregar configurações de pagamento');
+        } finally {
+            setLoadingPayments(false);
+        }
+    };
+
+    const handlePaymentSettingChange = (methodId: number, field: string, value: any) => {
+        setPaymentMethods(prev => prev.map(method => {
+            if (method.id === methodId) {
+                const currentSettings = method.gateway_setting || { mode: 'sandbox', is_active: false, credentials: {} };
+
+                if (field === 'mode' || field === 'is_active') {
+                    return { ...method, gateway_setting: { ...currentSettings, [field]: value } as PaymentGatewaySetting };
+                } else {
+                    // Credentials update
+                    return {
+                        ...method,
+                        gateway_setting: {
+                            ...currentSettings,
+                            credentials: { ...currentSettings.credentials, [field]: value }
+                        } as PaymentGatewaySetting
+                    };
+                }
+            }
+            return method;
+        }));
+    };
+
+    const savePaymentSettings = async (methodId: number) => {
+        const method = paymentMethods.find(m => m.id === methodId);
+        if (!method || !method.gateway_setting) return;
+
+        try {
+            const res = await fetch(`${apiUrl}/payment-gateway-settings/${methodId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(method.gateway_setting)
+            });
+
+            if (res.ok) {
+                toast.success('Configurações de pagamento salvas!');
+                fetchPaymentSettings(); // Refresh to clean state/dirty flags if needed
+            } else {
+                toast.error('Erro ao salvar configurações.');
+            }
+        } catch (error) {
+            console.error(error);
+            toast.error('Erro de conexão.');
         }
     };
 
@@ -242,6 +334,7 @@ export default function SettingsPage() {
         { id: 'operational', label: 'Operacional', icon: Package },
         { id: 'fiscal', label: 'Fiscal', icon: Wallet },
         { id: 'address', label: 'Endereço', icon: MapPin },
+        { id: 'payments', label: 'Pagamentos', icon: CreditCard },
         { id: 'system', label: 'Sistema', icon: Settings },
     ];
 
@@ -693,11 +786,12 @@ export default function SettingsPage() {
                 )}
             </div>
 
-            <div className="flex justify-end pt-4 border-t border-slate-200 dark:border-slate-800">
-                <button
-                    type="submit"
-                    disabled={isSaving}
-                    className="
+            {activeTab !== 'payments' && (
+                <div className="flex justify-end pt-4 border-t border-slate-200 dark:border-slate-800">
+                    <button
+                        type="submit"
+                        disabled={isSaving}
+                        className="
                         bg-slate-900 text-white dark:bg-slate-50 dark:text-slate-900 
                         px-6 py-2.5 rounded-lg font-bold text-sm shadow-md 
                         hover:bg-slate-800 dark:hover:bg-slate-200 
@@ -705,20 +799,21 @@ export default function SettingsPage() {
                         transition-all disabled:opacity-50 disabled:cursor-not-allowed 
                         flex items-center gap-2
                     "
-                >
-                    {isSaving ? (
-                        <>
-                            <Loader2 className="animate-spin" size={16} />
-                            {t('common.saving')}
-                        </>
-                    ) : (
-                        <>
-                            <Save size={16} />
-                            {t('settings.save_btn')}
-                        </>
-                    )}
-                </button>
-            </div>
+                    >
+                        {isSaving ? (
+                            <>
+                                <Loader2 className="animate-spin" size={16} />
+                                {t('common.saving')}
+                            </>
+                        ) : (
+                            <>
+                                <Save size={16} />
+                                {t('settings.save_btn')}
+                            </>
+                        )}
+                    </button>
+                </div>
+            )}
         </form>
     );
 }

@@ -19,4 +19,9 @@ class PaymentMethod extends Model
     {
         return $this->hasMany(ProductPaymentDiscount::class);
     }
+
+    public function gatewaySetting()
+    {
+        return $this->hasOne(PaymentGatewaySetting::class);
+    }
 }
