@@ -26,12 +26,14 @@ Route::group([
 });
 
 Route::group(['middleware' => ['api', 'auth:api', 'role:admin']], function () {
-    Route::get('users', [App\Http\Controllers\UserController::class, 'index']);
-    Route::post('users/{user}/roles', [App\Http\Controllers\UserController::class, 'updateRoles']);
-    Route::get('roles', [App\Http\Controllers\UserController::class, 'roles']);
-    
-    // Audits
-    Route::get('audits', [App\Http\Controllers\AuditController::class, 'index']);
+    // Users & Audits - Allow Admin and Manager (Read)
+    Route::group(['middleware' => ['role:admin,manager']], function () {
+        Route::get('users', [App\Http\Controllers\UserController::class, 'index']);
+        Route::get('audits', [App\Http\Controllers\AuditController::class, 'index']);
+        Route::get('roles', [App\Http\Controllers\UserController::class, 'roles']);
+    });
+
+    Route::post('users/{user}/roles', [App\Http\Controllers\UserController::class, 'updateRoles']); // Keep strict admin for changing roles
 
     // Orders (Kanban) - Allow Admin and Manager
     Route::group(['middleware' => ['role:admin,manager']], function () {
