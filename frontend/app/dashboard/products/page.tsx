@@ -20,6 +20,7 @@ import {
     Check,
     ChevronDown
 } from 'lucide-react';
+import Pagination from '@/app/components/Pagination';
 
 interface Product {
     id: number;
@@ -51,6 +52,7 @@ interface PaymentMethod {
 
 export default function ProductsPage() {
     const [products, setProducts] = useState<Product[]>([]);
+    const [meta, setMeta] = useState({ current_page: 1, last_page: 1, total: 0, per_page: 10 });
     const [isLoading, setIsLoading] = useState(true);
     const { t } = useLanguage();
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
@@ -106,12 +108,20 @@ export default function ProductsPage() {
         } catch (error) { console.error('Failed to fetch settings', error); }
     };
 
-    const fetchProducts = async () => {
+    const fetchProducts = async (page = 1) => {
+        setIsLoading(true);
         try {
-            const res = await fetch(`${apiUrl}/products`, { headers: { Authorization: `Bearer ${token}` } });
+            const res = await fetch(`${apiUrl}/products?page=${page}`, { headers: { Authorization: `Bearer ${token}` } });
             if (res.ok) {
                 const response = await res.json();
                 setProducts(response.data.data);
+                setMeta(prev => ({
+                    ...prev,
+                    current_page: response.data.current_page,
+                    last_page: response.data.last_page,
+                    total: response.data.total,
+                    per_page: response.data.per_page
+                }));
             }
         } catch (error) { console.error('Failed to fetch products', error); }
         finally { setIsLoading(false); }

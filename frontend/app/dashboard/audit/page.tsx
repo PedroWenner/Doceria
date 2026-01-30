@@ -21,6 +21,7 @@ import {
     ArrowRight
 } from 'lucide-react';
 import ProDatePicker from '@/app/components/ProDatePicker';
+import Pagination from '@/app/components/Pagination';
 
 interface Audit {
     id: number;
@@ -49,6 +50,7 @@ interface User {
 
 export default function AuditPage() {
     const [audits, setAudits] = useState<Audit[]>([]);
+    const [meta, setMeta] = useState({ current_page: 1, last_page: 1, total: 0, per_page: 10 });
     const [users, setUsers] = useState<User[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [expandedAudit, setExpandedAudit] = useState<number | null>(null);
@@ -85,10 +87,11 @@ export default function AuditPage() {
         }
     };
 
-    const fetchAudits = async () => {
+    const fetchAudits = async (page = 1) => {
         setIsLoading(true);
         try {
             const params = new URLSearchParams();
+            params.append('page', page.toString());
             if (filterUser) params.append('user_id', filterUser);
             if (filterEvent) params.append('event', filterEvent);
             if (dateFrom) params.append('date_from', dateFrom);
@@ -101,6 +104,13 @@ export default function AuditPage() {
             if (res.ok) {
                 const response = await res.json();
                 setAudits(response.data.data);
+                setMeta(prev => ({
+                    ...prev,
+                    current_page: response.data.current_page,
+                    last_page: response.data.last_page,
+                    total: response.data.total,
+                    per_page: response.data.per_page
+                }));
             }
         } catch (error) {
             console.error('Failed to fetch audits', error);
@@ -328,6 +338,7 @@ export default function AuditPage() {
                                                             </div>
                                                         </div>
                                                     </div>
+
                                                 </td>
                                             </tr>
                                         )}
@@ -337,6 +348,13 @@ export default function AuditPage() {
                         </tbody>
                     </table>
                 </div>
+                <Pagination
+                    currentPage={meta.current_page}
+                    lastPage={meta.last_page}
+                    total={meta.total}
+                    perPage={meta.per_page}
+                    onPageChange={fetchAudits}
+                />
             </div>
         </div>
     );

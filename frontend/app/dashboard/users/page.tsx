@@ -15,6 +15,7 @@ import {
     Check,
     Briefcase
 } from 'lucide-react';
+import Pagination from '@/app/components/Pagination';
 
 interface User {
     id: number;
@@ -31,6 +32,7 @@ interface Role {
 
 export default function UsersPage() {
     const [users, setUsers] = useState<User[]>([]);
+    const [meta, setMeta] = useState({ current_page: 1, last_page: 1, total: 0, per_page: 10 });
     const [roles, setRoles] = useState<Role[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [editingUser, setEditingUser] = useState<User | null>(null);
@@ -47,16 +49,23 @@ export default function UsersPage() {
         fetchData();
     }, []);
 
-    const fetchData = async () => {
+    const fetchData = async (page = 1) => {
         try {
             const [usersRes, rolesRes] = await Promise.all([
-                fetch(`${apiUrl}/users`, { headers: { Authorization: `Bearer ${token}` } }),
+                fetch(`${apiUrl}/users?page=${page}`, { headers: { Authorization: `Bearer ${token}` } }),
                 fetch(`${apiUrl}/roles`, { headers: { Authorization: `Bearer ${token}` } })
             ]);
 
             if (usersRes.ok) {
                 const response = await usersRes.json();
                 setUsers(response.data.data);
+                setMeta(prev => ({
+                    ...prev,
+                    current_page: response.data.current_page,
+                    last_page: response.data.last_page,
+                    total: response.data.total,
+                    per_page: response.data.per_page
+                }));
             }
             if (rolesRes.ok) {
                 const response = await rolesRes.json();
