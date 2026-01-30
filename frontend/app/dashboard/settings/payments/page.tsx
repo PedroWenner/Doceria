@@ -15,8 +15,10 @@ import {
     X,
     Check,
     AlertCircle,
-    AlertTriangle
+    AlertTriangle,
+    Wallet
 } from 'lucide-react';
+import Pagination from '@/app/components/Pagination';
 
 interface PaymentMethod {
     id: number;
@@ -27,10 +29,12 @@ interface PaymentMethod {
 
 export default function PaymentMethodsPage() {
     const [methods, setMethods] = useState<PaymentMethod[]>([]);
+    const [meta, setMeta] = useState({ current_page: 1, last_page: 1, total: 0, per_page: 15 });
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingMethod, setEditingMethod] = useState<PaymentMethod | null>(null);
+    const [searchTerm, setSearchTerm] = useState('');
 
     // Confirmation State
     const [deleteConfirmation, setDeleteConfirmation] = useState<{ isOpen: boolean, methodId: number | null }>({
@@ -51,14 +55,65 @@ export default function PaymentMethodsPage() {
         fetchMethods();
     }, []);
 
-    const fetchMethods = async () => {
+    const fetchMethods = async (page = 1) => {
         try {
-            const res = await fetch(`${apiUrl}/payment-methods/admin`, {
+            setIsLoading(true);
+            const res = await fetch(`${apiUrl}/payment-methods/admin?page=${page}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             const data = await res.json();
+
             if (res.ok) {
-                setMethods(data.data);
+                // Determine if data is paginated or not
+                const responseData = data.data; // Wrapper from ApiResponse
+
+                let items: PaymentMethod[] = [];
+                let pagination = {
+                    current_page: 1,
+                    last_page: 1,
+                    total: 0,
+                    per_page: 15
+                };
+
+                // Case 1: Laravel Standard Pagination (inside ApiResponse data)
+                // Structure: { data: { current_page: 1, data: [...], ... } }
+                if (responseData && typeof responseData === 'object' && 'data' in responseData && Array.isArray(responseData.data)) {
+                    items = responseData.data;
+                    pagination = {
+                        current_page: responseData.current_page,
+                        last_page: responseData.last_page,
+                        total: responseData.total,
+                        per_page: responseData.per_page
+                    };
+                }
+                // Case 2: Simple Array (non-paginated)
+                // Structure: { data: [...] }
+                else if (Array.isArray(responseData)) {
+                    items = responseData;
+                    pagination = {
+                        current_page: 1,
+                        last_page: 1,
+                        total: items.length,
+                        per_page: items.length
+                    };
+                }
+                // Case 3: API Resources (meta at root)
+                // Structure: { data: [...], meta: { current_page: 1, ... } }
+                else if (data.meta) {
+                    items = data.data;
+                    pagination = {
+                        current_page: data.meta.current_page,
+                        last_page: data.meta.last_page,
+                        total: data.meta.total,
+                        per_page: data.meta.per_page
+                    };
+                }
+
+                setMethods(items);
+                setMeta(pagination);
+
+                // If items is empty and page > 1, maybe go back?
+                // Optional logic, but implemented in some tables.
             }
         } catch (error) {
             console.error(error);
@@ -76,7 +131,7 @@ export default function PaymentMethodsPage() {
             });
             if (res.ok) {
                 toast.success(t('payment_methods.update_status_success'));
-                fetchMethods();
+                fetchMethods(meta.current_page);
             }
         } catch (error) {
             toast.error(t('payment_methods.update_status_error'));
@@ -97,7 +152,7 @@ export default function PaymentMethodsPage() {
             });
             if (res.ok) {
                 toast.success(t('payment_methods.delete_success'));
-                fetchMethods();
+                fetchMethods(meta.current_page);
                 setDeleteConfirmation({ isOpen: false, methodId: null });
             }
         } catch (error) {
@@ -141,7 +196,7 @@ export default function PaymentMethodsPage() {
             if (res.ok) {
                 toast.success(t('payment_methods.save_success'));
                 setIsModalOpen(false);
-                fetchMethods();
+                fetchMethods(meta.current_page);
             } else {
                 const err = await res.json();
                 toast.error(err.message || t('payment_methods.save_error'));
@@ -162,6 +217,11 @@ export default function PaymentMethodsPage() {
                 .replace(/ +/g, '_'));
         }
     };
+
+    const filteredMethods = methods.filter(m =>
+        m.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        m.slug.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
     if (isLoading) return <LoadingSpinner />;
 
@@ -185,54 +245,97 @@ export default function PaymentMethodsPage() {
                 </button>
             </div>
 
-            {/* Methods Grid */}
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {methods.map(method => (
-                    <div key={method.id} className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden flex flex-col justify-between group hover:shadow-md transition-shadow">
-                        <div className="p-6">
-                            <div className="flex justify-between items-start mb-4">
-                                <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
-                                    <CreditCard size={24} className="text-slate-600 dark:text-slate-400" />
-                                </div>
-                                <div className={`px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wide flex items-center gap-1.5 ${method.is_active ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/30' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700'}`}>
-                                    <span className={`w-1.5 h-1.5 rounded-full ${method.is_active ? 'bg-emerald-500' : 'bg-slate-400'}`} />
-                                    {method.is_active ? t('payment_methods.active') : t('payment_methods.inactive')}
-                                </div>
-                            </div>
+            {/* Search Bar */}
+            <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+                <input
+                    type="text"
+                    placeholder={t('products.search_placeholder').replace('produtos', 'meios')}
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full pl-10 pr-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-50 focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-50 focus:border-transparent outline-none transition-all placeholder:text-slate-400"
+                />
+            </div>
 
-                            <h3 className="text-lg font-bold text-slate-900 dark:text-slate-50 mb-1">{method.name}</h3>
-                            <div className="inline-block px-2 py-0.5 bg-slate-100 dark:bg-slate-800 rounded text-slate-500 dark:text-slate-400 font-mono text-xs">
-                                {method.slug}
+            {/* Methods Table */}
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden">
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left">
+                        <thead className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700">
+                            <tr>
+                                <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{t('payment_methods.name')}</th>
+                                <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{t('payment_methods.slug')}</th>
+                                <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-center">{t('common.status')}</th>
+                                <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-right">{t('common.actions')}</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                            {filteredMethods.map(method => (
+                                <tr key={method.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                                    <td className="px-6 py-4">
+                                        <div className="flex items-center gap-3">
+                                            <div className="p-2 bg-slate-100 dark:bg-slate-800 rounded-lg text-slate-600 dark:text-slate-400">
+                                                <Wallet size={20} />
+                                            </div>
+                                            <span className="font-semibold text-slate-900 dark:text-slate-100">{method.name}</span>
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <span className="font-mono text-xs text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded">
+                                            {method.slug}
+                                        </span>
+                                    </td>
+                                    <td className="px-6 py-4 text-center">
+                                        <button
+                                            onClick={() => handleToggle(method.id)}
+                                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold transition-all ${method.is_active
+                                                ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/30'
+                                                : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700'
+                                                }`}
+                                        >
+                                            <span className={`w-1.5 h-1.5 rounded-full ${method.is_active ? 'bg-emerald-500' : 'bg-slate-400'}`} />
+                                            {method.is_active ? t('payment_methods.active') : t('payment_methods.inactive')}
+                                        </button>
+                                    </td>
+                                    <td className="px-6 py-4 text-right">
+                                        <div className="flex justify-end gap-2">
+                                            <button
+                                                onClick={() => openModal(method)}
+                                                className="p-2 text-slate-400 hover:text-slate-900 dark:hover:text-slate-50 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+                                                title={t('payment_methods.edit_method')}
+                                            >
+                                                <Pencil size={18} />
+                                            </button>
+                                            <button
+                                                onClick={() => confirmDelete(method.id)}
+                                                className="p-2 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg transition-colors"
+                                                title={t('common.delete')}
+                                            >
+                                                <Trash2 size={18} />
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                    {filteredMethods.length === 0 && (
+                        <div className="p-12 text-center">
+                            <div className="w-16 h-16 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <Search size={24} className="text-slate-300 dark:text-slate-600" />
                             </div>
+                            <h3 className="text-lg font-medium text-slate-900 dark:text-slate-100">{t('payment_methods.load_error').replace('Erro ao carregar', '')}</h3>
+                            <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">{t('payment_methods.save_error').replace('Erro ao salvar', 'Nenhum meio encontrado com este termo.')}</p>
                         </div>
-
-                        <div className="border-t border-slate-100 dark:border-slate-800 p-4 flex gap-2 bg-slate-50/50 dark:bg-slate-900/50">
-                            <button
-                                onClick={() => handleToggle(method.id)}
-                                className={`flex-1 flex items-center justify-center gap-2 text-sm font-semibold py-2 rounded-lg transition-colors border ${method.is_active
-                                    ? 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
-                                    : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-emerald-600 dark:text-emerald-400 shadow-sm'}`}
-                            >
-                                <Power size={16} />
-                                {method.is_active ? t('payment_methods.disable') : t('payment_methods.enable')}
-                            </button>
-                            <button
-                                onClick={() => openModal(method)}
-                                className="p-2 text-slate-500 hover:text-slate-900 dark:hover:text-slate-50 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors border border-transparent hover:border-slate-200 dark:hover:border-slate-600"
-                                title="Editar"
-                            >
-                                <Pencil size={18} />
-                            </button>
-                            <button
-                                onClick={() => confirmDelete(method.id)}
-                                className="p-2 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg transition-colors border border-transparent hover:border-rose-100 dark:hover:border-rose-900/30"
-                                title="Excluir"
-                            >
-                                <Trash2 size={18} />
-                            </button>
-                        </div>
-                    </div>
-                ))}
+                    )}
+                </div>
+                <Pagination
+                    currentPage={meta.current_page}
+                    lastPage={meta.last_page}
+                    total={meta.total}
+                    perPage={meta.per_page}
+                    onPageChange={fetchMethods}
+                />
             </div>
 
             {/* Modal */}
@@ -306,9 +409,20 @@ export default function PaymentMethodsPage() {
             {deleteConfirmation.isOpen && (
                 <div className="fixed inset-0 bg-slate-950/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fadeIn">
                     <div className="w-full max-w-sm bg-white dark:bg-slate-950 rounded-2xl shadow-xl overflow-hidden flex flex-col border border-slate-200 dark:border-slate-800 animate-scaleIn">
+                        {/* Modal Header */}
+                        <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/50">
+                            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-50 flex items-center gap-2">
+                                <AlertTriangle size={24} className="text-rose-500" />
+                                <span className="text-rose-500">{t('payment_methods.delete_title')}</span>
+                            </h2>
+                            <button onClick={() => setDeleteConfirmation({ isOpen: false, methodId: null })} className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 transition-colors">
+                                <X size={20} />
+                            </button>
+                        </div>
+
                         <div className="p-6 text-center">
                             <div className="w-16 h-16 bg-rose-50 dark:bg-rose-900/20 rounded-full flex items-center justify-center mx-auto mb-4 text-rose-500 dark:text-rose-400">
-                                <AlertTriangle size={32} />
+                                <Trash2 size={32} />
                             </div>
                             <h3 className="text-xl font-bold text-slate-900 dark:text-slate-50 mb-2">{t('payment_methods.delete_title')}</h3>
                             <p className="text-slate-500 dark:text-slate-400 text-sm">

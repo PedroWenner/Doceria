@@ -20,7 +20,8 @@ class PaymentMethodController extends Controller
     // Admin: List all
     public function indexAdmin()
     {
-        $methods = PaymentMethod::all();
+        $limit = \App\Models\CompanySetting::first()->pagination_limit ?? 10;
+        $methods = PaymentMethod::paginate($limit);
         return $this->success($methods);
     }
 
