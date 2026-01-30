@@ -34,7 +34,8 @@ class AuditController extends Controller
             $query->whereDate('created_at', '<=', $request->date_to);
         }
 
-        $audits = $query->paginate(20);
+        $limit = \App\Models\CompanySetting::first()->pagination_limit ?? 10;
+        $audits = $query->paginate($limit);
 
         return $this->success($audits);
     }

@@ -17,7 +17,8 @@ class ProductController extends Controller
      */
     public function index()
     {
-        $products = Product::with(['category', 'discounts.paymentMethod'])->latest()->paginate(10);
+        $limit = \App\Models\CompanySetting::first()->pagination_limit ?? 10;
+        $products = Product::with(['category', 'discounts.paymentMethod'])->latest()->paginate($limit);
         return $this->success($products);
     }
 

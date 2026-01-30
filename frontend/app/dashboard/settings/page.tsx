@@ -48,7 +48,7 @@ export default function SettingsPage() {
         // Address
         street: '', number: '', neighborhood: '', city: '', state: '', zip_code: '',
         // System
-        orders_refresh_rate: 60, auth_token_expiration: 60,
+        orders_refresh_rate: 60, auth_token_expiration: 60, pagination_limit: 10,
         // Operational
         enable_stock_control: true, global_min_stock: 5,
         whatsapp_number: '', delivery_message: ''
@@ -78,6 +78,7 @@ export default function SettingsPage() {
                     // Ensure defaults
                     orders_refresh_rate: response.data.orders_refresh_rate || 60,
                     auth_token_expiration: response.data.auth_token_expiration || 60,
+                    pagination_limit: response.data.pagination_limit || 10,
                     enable_stock_control: response.data.enable_stock_control ?? true,
                     global_min_stock: response.data.global_min_stock || 5
                 }));
@@ -587,6 +588,20 @@ export default function SettingsPage() {
                                     className="w-full h-10 px-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-400 transition-all mb-1"
                                 />
                                 <HelperText>{t('settings.system.refresh_rate_hint')}</HelperText>
+
+                                <div className="mt-6">
+                                    <InputLabel icon={Layout}>{t('settings.system.pagination_limit')}</InputLabel>
+                                    <input
+                                        type="number"
+                                        name="pagination_limit"
+                                        value={formData.pagination_limit || ''}
+                                        onChange={handleChange}
+                                        min="1"
+                                        max="100"
+                                        className="w-full h-10 px-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-400 transition-all mb-1"
+                                    />
+                                    <HelperText>Quantidade padrão de itens exibidos por página nas tabelas.</HelperText>
+                                </div>
 
                                 <div className="mt-6">
                                     <InputLabel icon={Key}>{t('settings.system.token_expiration')}</InputLabel>

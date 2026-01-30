@@ -16,7 +16,8 @@ class UserController extends Controller
      */
     public function index()
     {
-        $users = User::with('roles')->paginate(10);
+        $limit = \App\Models\CompanySetting::first()->pagination_limit ?? 10;
+        $users = User::with('roles')->paginate($limit);
         return $this->success($users);
     }
 

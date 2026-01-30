@@ -27,6 +27,7 @@ class CompanySetting extends Model implements Auditable
         'state',
         'zip_code',
         'orders_refresh_rate',
+        'pagination_limit',
         'auth_token_expiration',
         'enable_stock_control',
         'global_min_stock',
@@ -39,5 +40,6 @@ class CompanySetting extends Model implements Auditable
 
     protected $casts = [
         'enable_stock_control' => 'boolean',
+        'pagination_limit' => 'integer',
     ];
 }
