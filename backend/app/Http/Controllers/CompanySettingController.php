@@ -23,7 +23,7 @@ class CompanySettingController extends Controller
     {
         $settings = CompanySetting::firstOrFail();
 
-        $rules = [
+        $validated = $request->validate([
             'system_name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'brand_color' => 'nullable|string|max:20',
@@ -39,12 +39,13 @@ class CompanySettingController extends Controller
             'zip_code' => 'nullable|string|max:20',
             'orders_refresh_rate' => 'nullable|integer|min:10|max:3600',
             'auth_token_expiration' => 'nullable|integer|min:5|max:43200',
+            'pagination_limit' => 'nullable|integer|min:1|max:100',
             
             // Stock & Operations
-            'enable_stock_control' => 'nullable|boolean', // Frontend sends "true"/"false" string in FormData sometimes, boolean validation handles it
+            'enable_stock_control' => 'nullable|boolean', 
             'global_min_stock' => 'nullable|integer|min:0',
             
-            // Visual - Now accepts files OR strings (if keeping old val)
+            // Visual
             'logo_url' => 'nullable', 
             'login_bg_url' => 'nullable',
             'welcome_message' => 'nullable|string|max:255',
@@ -52,9 +53,7 @@ class CompanySettingController extends Controller
             // Integrations
             'whatsapp_number' => 'nullable|string|max:20',
             'delivery_message' => 'nullable|string'
-        ];
-
-        $validated = $request->validate($rules);
+        ]);
         
         // Handle boolean conversion explicitly for stock control if it comes as string
         if ($request->has('enable_stock_control')) {

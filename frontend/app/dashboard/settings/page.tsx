@@ -58,7 +58,7 @@ export default function SettingsPage() {
     const [bgFile, setBgFile] = useState<File | null>(null);
 
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
-    const token = Cookies.get('auth_token');
+    const token = Cookies.get('admin_token');
 
     useEffect(() => {
         fetchSettings();
@@ -67,7 +67,10 @@ export default function SettingsPage() {
     const fetchSettings = async () => {
         try {
             const res = await fetch(`${apiUrl}/settings`, {
-                headers: { Authorization: `Bearer ${token}` }
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json'
+                }
             });
 
             if (res.ok) {
@@ -189,7 +192,8 @@ export default function SettingsPage() {
             const res = await fetch(`${apiUrl}/settings?_method=PUT`, {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${token}`
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json'
                 },
                 body: data
             });

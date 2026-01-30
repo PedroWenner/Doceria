@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('company_settings', function (Blueprint $table) {
-            //
+            $table->integer('pagination_limit')->default(10)->after('orders_refresh_rate');
         });
     }
 
@@ -22,7 +22,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('company_settings', function (Blueprint $table) {
-            //
+            $table->dropColumn('pagination_limit');
         });
     }
 };
