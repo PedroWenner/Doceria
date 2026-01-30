@@ -34,7 +34,6 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 
         for (const key of keys) {
             if (current[key] === undefined) {
-                console.warn(`Translation missing for key: ${path} in language: ${language}`);
                 return path;
             }
             current = current[key];

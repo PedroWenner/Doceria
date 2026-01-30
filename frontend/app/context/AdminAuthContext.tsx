@@ -46,7 +46,6 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
                 if (response.data) {
                     // Start: Security Check - Only Admins/Managers Allowed
                     if (response.data.role === 'customer') {
-                        console.warn('Admin Auth: Customer role detected in Admin Context. Logging out.');
                         logout(); // Kick out
                         return;
                     }

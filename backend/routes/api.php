@@ -54,8 +54,8 @@ Route::group(['middleware' => ['api', 'auth:api', 'role:admin']], function () {
     Route::put('settings', [App\Http\Controllers\CompanySettingController::class, 'update']);
 
     // Payment Gateway Settings
-    Route::get('payment-gateway-settings', [App\Http\Controllers\PaymentGatewaySettingController::class, 'index']);
-    Route::put('payment-gateway-settings/{paymentMethod}', [App\Http\Controllers\PaymentGatewaySettingController::class, 'update']);
+    Route::get('/payment-gateway-settings', [App\Http\Controllers\PaymentGatewaySettingController::class, 'index']);
+    Route::put('/payment-gateway-settings/{paymentMethod}', [App\Http\Controllers\PaymentGatewaySettingController::class, 'update']);
 
     // Payment Methods (Admin)
     Route::get('payment-methods/admin', [App\Http\Controllers\PaymentMethodController::class, 'indexAdmin']);

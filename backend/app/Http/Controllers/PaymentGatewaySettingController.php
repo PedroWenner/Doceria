@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\PaymentGatewaySetting;
 use App\Models\PaymentMethod;
 use App\Traits\ApiResponse;
+use Illuminate\Http\Request;
 
 class PaymentGatewaySettingController extends Controller
 {
@@ -19,7 +20,7 @@ class PaymentGatewaySettingController extends Controller
         // For now, we return all, or we could filter by specific slugs if needed
         $methods = PaymentMethod::with('gatewaySetting')->get();
 
-        return $this->successResponse($methods);
+        return $this->success($methods);
     }
 
     /**
@@ -44,6 +45,6 @@ class PaymentGatewaySettingController extends Controller
             ]
         );
 
-        return $this->successResponse($setting, 'Configurações salvas com sucesso!');
+        return $this->success($setting, 'Configurações salvas com sucesso!');
     }
 }
