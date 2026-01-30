@@ -4,14 +4,14 @@ import { useState, useEffect } from 'react';
 import LoadingSpinner from '@/app/components/LoadingSpinner';
 import Cookies from 'js-cookie';
 import { useLanguage } from '@/app/context/LanguageContext';
-import { 
-    ShieldAlert, 
-    Search, 
-    Filter, 
-    Calendar, 
-    User, 
-    Eye, 
-    ChevronDown, 
+import {
+    ShieldAlert,
+    Search,
+    Filter,
+    Calendar,
+    User,
+    Eye,
+    ChevronDown,
     ChevronUp,
     PlusCircle,
     Edit3,
@@ -20,6 +20,7 @@ import {
     FileJson,
     ArrowRight
 } from 'lucide-react';
+import ProDatePicker from '@/app/components/ProDatePicker';
 
 interface Audit {
     id: number;
@@ -109,12 +110,12 @@ export default function AuditPage() {
     };
 
     const formatDate = (dateString: string) => {
-        return new Date(dateString).toLocaleString([], { 
-            year: 'numeric', 
-            month: '2-digit', 
-            day: '2-digit', 
-            hour: '2-digit', 
-            minute: '2-digit' 
+        return new Date(dateString).toLocaleString([], {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit'
         });
     };
 
@@ -151,7 +152,7 @@ export default function AuditPage() {
                             {JSON.stringify(audit.old_values, null, 2)}
                         </pre>
                     ) : (
-                        <span className="text-xs text-slate-400 italic">No previous data</span>
+                        <span className="text-xs text-slate-400 italic">{t('audit.no_old_data')}</span>
                     )}
                 </div>
                 <div className="bg-emerald-50/50 dark:bg-emerald-900/10 rounded-lg p-3 border border-emerald-100 dark:border-emerald-900/20">
@@ -164,7 +165,7 @@ export default function AuditPage() {
                             {JSON.stringify(audit.new_values, null, 2)}
                         </pre>
                     ) : (
-                        <span className="text-xs text-slate-400 italic">No new data</span>
+                        <span className="text-xs text-slate-400 italic">{t('audit.no_new_data')}</span>
                     )}
                 </div>
             </div>
@@ -180,7 +181,7 @@ export default function AuditPage() {
                     {t('audit.title')}
                 </h1>
                 <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 ml-8">
-                    Rastreamento completo de atividades e segurança do sistema.
+                    {t('audit.subtitle')}
                 </p>
             </div>
 
@@ -197,7 +198,7 @@ export default function AuditPage() {
                             value={filterUser}
                             onChange={e => setFilterUser(e.target.value)}
                         >
-                            <option value="">Todos os usuários</option>
+                            <option value="">{t('audit.all_users')}</option>
                             {users.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
                         </select>
                     </div>
@@ -212,7 +213,7 @@ export default function AuditPage() {
                             value={filterEvent}
                             onChange={e => setFilterEvent(e.target.value)}
                         >
-                            <option value="">Todos os eventos</option>
+                            <option value="">{t('audit.all_events')}</option>
                             <option value="created">{t('audit.created')}</option>
                             <option value="updated">{t('audit.updated')}</option>
                             <option value="deleted">{t('audit.deleted')}</option>
@@ -221,28 +222,20 @@ export default function AuditPage() {
                     </div>
 
                     {/* Date From */}
-                    <div className="space-y-1">
-                        <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 flex items-center gap-1">
-                            <Calendar size={12} /> Data Inicial
-                        </label>
-                        <input
-                            type="date"
-                            className="w-full h-10 px-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-400 transition-all"
+                    <div className="flex-1 min-w-[180px]">
+                        <ProDatePicker
+                            label={t('audit.date_from')}
                             value={dateFrom}
-                            onChange={e => setDateFrom(e.target.value)}
+                            onChange={setDateFrom}
                         />
                     </div>
 
                     {/* Date To */}
-                    <div className="space-y-1">
-                        <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 flex items-center gap-1">
-                            <Calendar size={12} /> Data Final
-                        </label>
-                        <input
-                            type="date"
-                            className="w-full h-10 px-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-400 transition-all"
+                    <div className="flex-1 min-w-[180px]">
+                        <ProDatePicker
+                            label={t('audit.date_to')}
                             value={dateTo}
-                            onChange={e => setDateTo(e.target.value)}
+                            onChange={setDateTo}
                         />
                     </div>
                 </div>
@@ -273,15 +266,15 @@ export default function AuditPage() {
                                     <td colSpan={5} className="text-center py-12 text-slate-400">
                                         <div className="flex flex-col items-center gap-2">
                                             <Search size={32} className="opacity-20" />
-                                            <span>Nenhum registro encontrado</span>
+                                            <span>{t('audit.no_records')}</span>
                                         </div>
                                     </td>
                                 </tr>
                             ) : (
                                 audits.map(audit => (
                                     <>
-                                        <tr 
-                                            key={audit.id} 
+                                        <tr
+                                            key={audit.id}
                                             className={`
                                                 group transition-colors cursor-pointer
                                                 ${expandedAudit === audit.id ? 'bg-slate-50/80 dark:bg-slate-800/50' : 'hover:bg-slate-50 dark:hover:bg-slate-800/30'}
@@ -297,7 +290,7 @@ export default function AuditPage() {
                                                         {(audit.user?.name || 'S')[0].toUpperCase()}
                                                     </div>
                                                     <span className="text-sm font-medium text-slate-900 dark:text-slate-100">
-                                                        {audit.user ? audit.user.name : 'System'}
+                                                        {audit.user ? audit.user.name : t('audit.system')}
                                                     </span>
                                                 </div>
                                             </td>
@@ -306,7 +299,7 @@ export default function AuditPage() {
                                             </td>
                                             <td className="px-6 py-4">
                                                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-mono bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
-                                                    {audit.auditable_type.split('\\').pop()} 
+                                                    {audit.auditable_type.split('\\').pop()}
                                                     <span className="text-slate-400">#</span>
                                                     {audit.auditable_id}
                                                 </span>
@@ -322,16 +315,16 @@ export default function AuditPage() {
                                                 <td colSpan={5} className="px-6 pb-6 pt-2">
                                                     <div className="pl-8 border-l-2 border-slate-200 dark:border-slate-700 ml-3">
                                                         <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3 flex items-center gap-2">
-                                                            <FileJson size={14} /> Detalhes da alteração
+                                                            <FileJson size={14} /> {t('audit.details')}
                                                         </h4>
                                                         {renderChanges(audit)}
-                                                        
+
                                                         <div className="mt-4 flex gap-6 text-xs text-slate-500 font-mono">
                                                             <div>
-                                                                <span className="font-bold text-slate-700 dark:text-slate-300">IP:</span> {audit.ip_address}
+                                                                <span className="font-bold text-slate-700 dark:text-slate-300">{t('audit.ip')}:</span> {audit.ip_address}
                                                             </div>
                                                             <div className="max-w-md truncate" title={audit.user_agent}>
-                                                                <span className="font-bold text-slate-700 dark:text-slate-300">Agent:</span> {audit.user_agent}
+                                                                <span className="font-bold text-slate-700 dark:text-slate-300">{t('audit.agent')}:</span> {audit.user_agent}
                                                             </div>
                                                         </div>
                                                     </div>

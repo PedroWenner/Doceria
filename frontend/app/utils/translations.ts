@@ -79,6 +79,7 @@ export const translations = {
         },
         audit: {
             title: 'Logs de Auditoria',
+            subtitle: 'Rastreamento completo de atividades e segurança do sistema.',
             user: 'Usuário',
             event: 'Evento',
             auditable: 'Recurso',
@@ -90,7 +91,18 @@ export const translations = {
             created: 'Criado',
             updated: 'Atualizado',
             deleted: 'Excluído',
-            restored: 'Restaurado'
+            restored: 'Restaurado',
+            all_users: 'Todos os usuários',
+            all_events: 'Todos os eventos',
+            no_records: 'Nenhum registro encontrado',
+            details: 'Detalhes da alteração',
+            ip: 'IP',
+            agent: 'Agente',
+            system: 'Sistema',
+            no_old_data: 'Sem dados anteriores',
+            no_new_data: 'Sem novos dados',
+            date_from: 'Data Inicial',
+            date_to: 'Data Final'
         },
         orders: {
             title: 'Gestão de Pedidos',
@@ -248,6 +260,7 @@ export const translations = {
         },
         audit: {
             title: 'Audit Logs',
+            subtitle: 'Complete tracking of system activities and security.',
             user: 'User',
             event: 'Event',
             auditable: 'Resource',
@@ -259,7 +272,18 @@ export const translations = {
             created: 'Created',
             updated: 'Updated',
             deleted: 'Deleted',
-            restored: 'Restored'
+            restored: 'Restored',
+            all_users: 'All Users',
+            all_events: 'All Events',
+            no_records: 'No records found',
+            details: 'Change Details',
+            ip: 'IP',
+            agent: 'Agent',
+            system: 'System',
+            no_old_data: 'No previous data',
+            no_new_data: 'No new data',
+            date_from: 'Date From',
+            date_to: 'Date To'
         },
         orders: {
             title: 'Order Management',
