@@ -173,7 +173,9 @@ export const translations = {
                 neighborhood: 'Bairro',
                 city: 'Cidade',
                 state: 'Estado',
-                zip: 'CEP'
+                zip: 'CEP',
+                latitude: 'Latitude',
+                longitude: 'Longitude'
             },
             system: {
                 title: 'Sistema',
@@ -396,7 +398,9 @@ export const translations = {
                 neighborhood: 'Neighborhood',
                 city: 'City',
                 state: 'State',
-                zip: 'Zip Code'
+                zip: 'Zip Code',
+                latitude: 'Latitude',
+                longitude: 'Longitude'
             },
             system: {
                 title: 'System',

@@ -52,7 +52,9 @@ class CompanySettingController extends Controller
             
             // Integrations
             'whatsapp_number' => 'nullable|string|max:20',
-            'delivery_message' => 'nullable|string'
+            'delivery_message' => 'nullable|string',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180'
         ]);
         
         // Handle boolean conversion explicitly for stock control if it comes as string

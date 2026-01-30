@@ -27,6 +27,7 @@ import {
     UserCircle,
     Image as ImageIcon
 } from 'lucide-react';
+import LocationMap from '@/app/components/LocationMap';
 
 export default function SettingsPage() {
     const { t } = useLanguage();
@@ -51,7 +52,9 @@ export default function SettingsPage() {
         orders_refresh_rate: 60, auth_token_expiration: 60, pagination_limit: 10,
         // Operational
         enable_stock_control: true, global_min_stock: 5,
-        whatsapp_number: '', delivery_message: ''
+        enable_stock_control: true, global_min_stock: 5,
+        whatsapp_number: '', delivery_message: '',
+        latitude: '', longitude: ''
     });
 
     const [logoFile, setLogoFile] = useState<File | null>(null);
@@ -83,7 +86,9 @@ export default function SettingsPage() {
                     auth_token_expiration: response.data.auth_token_expiration || 60,
                     pagination_limit: response.data.pagination_limit || 10,
                     enable_stock_control: response.data.enable_stock_control ?? true,
-                    global_min_stock: response.data.global_min_stock || 5
+                    global_min_stock: response.data.global_min_stock || 5,
+                    latitude: response.data.latitude || '',
+                    longitude: response.data.longitude || ''
                 }));
             } else {
                 toast.error(`Erro ao carregar configurações: ${res.status}`);
@@ -128,6 +133,8 @@ export default function SettingsPage() {
             setIsSearchingCep(false);
 
             if (address) {
+                // If we have access to a Geocoding API, we could get coords from address here.
+                // For now, we just fill the address fields.
                 setFormData(prev => ({
                     ...prev,
                     street: address.logradouro,
@@ -140,6 +147,14 @@ export default function SettingsPage() {
                 toast.error('CEP não encontrado.');
             }
         }
+    };
+
+    const handleLocationChange = (lat: number, lng: number) => {
+        setFormData(prev => ({
+            ...prev,
+            latitude: lat.toString(),
+            longitude: lng.toString()
+        }));
     };
 
     const handleBlurCNPJ = async () => {
@@ -571,6 +586,43 @@ export default function SettingsPage() {
                                     maxLength={2}
                                     className="w-full h-10 px-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-400 transition-all uppercase disabled:opacity-50"
                                 />
+                            </div>
+                            <div className="col-span-full mt-6 pt-6 border-t border-slate-100 dark:border-slate-800/50">
+                                <h3 className="font-bold text-slate-800 dark:text-slate-200 mb-4 text-sm uppercase tracking-wide flex items-center gap-2">
+                                    <MapPin size={16} /> Localização Exata
+                                </h3>
+
+                                <div className="mb-6">
+                                    <LocationMap
+                                        lat={formData.latitude ? parseFloat(formData.latitude) : 0}
+                                        lng={formData.longitude ? parseFloat(formData.longitude) : 0}
+                                        onChange={handleLocationChange}
+                                    />
+                                    <HelperText>Clique no mapa ou arraste o marcador para definir a localização exata da loja.</HelperText>
+                                </div>
+
+                                <div className="grid md:grid-cols-2 gap-6 bg-slate-50 dark:bg-slate-950 p-4 rounded-xl border border-slate-100 dark:border-slate-800">
+                                    <div>
+                                        <InputLabel icon={MapPin}>{t('settings.address.latitude')}</InputLabel>
+                                        <input
+                                            name="latitude"
+                                            value={formData.latitude || ''}
+                                            onChange={handleChange}
+                                            placeholder="-23.550520"
+                                            className="w-full h-10 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-400 transition-all font-mono"
+                                        />
+                                    </div>
+                                    <div>
+                                        <InputLabel icon={MapPin}>{t('settings.address.longitude')}</InputLabel>
+                                        <input
+                                            name="longitude"
+                                            value={formData.longitude || ''}
+                                            onChange={handleChange}
+                                            placeholder="-46.633308"
+                                            className="w-full h-10 px-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-400 transition-all font-mono"
+                                        />
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

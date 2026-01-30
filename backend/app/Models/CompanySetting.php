@@ -35,11 +35,15 @@ class CompanySetting extends Model implements Auditable
         'login_bg_url',
         'welcome_message',
         'whatsapp_number',
-        'delivery_message'
+        'delivery_message',
+        'latitude',
+        'longitude'
     ];
 
     protected $casts = [
         'enable_stock_control' => 'boolean',
         'pagination_limit' => 'integer',
+        'latitude' => 'float',
+        'longitude' => 'float',
     ];
 }
