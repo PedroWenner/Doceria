@@ -104,6 +104,7 @@ export default function ProDatePicker({ label, value, onChange, className = '', 
                             selected={selectedDate}
                             onSelect={handleSelect}
                             initialFocus
+                            locale={language === 'pt' ? ptBR : enUS}
                         />
                     </div>
                 )}
