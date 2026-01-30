@@ -8,14 +8,9 @@ import { useTheme } from '@/app/context/ThemeContext';
 interface LocationMapProps {
     lat: number;
     lng: number;
-    onChange: (lat: number, lng: number) => void;
+    onChange?: (lat: number, lng: number) => void;
+    readOnly?: boolean;
 }
-
-const containerStyle = {
-    width: '100%',
-    height: '400px',
-    borderRadius: '12px'
-};
 
 // Default center (São Paulo) if no coordinates provided
 const defaultCenter = {
@@ -31,8 +26,14 @@ const mapOptions: google.maps.MapOptions = {
     fullscreenControl: true,
 };
 
-export default function LocationMap({ lat, lng, onChange }: LocationMapProps) {
-    const { isDark } = useTheme();
+const containerStyle = {
+    width: '100%',
+    height: '400px'
+};
+
+export default function LocationMap({ lat, lng, onChange, readOnly = false }: LocationMapProps) {
+    const { theme } = useTheme();
+    const isDark = theme === 'dark';
     const [center, setCenter] = useState(defaultCenter);
     const [markerPos, setMarkerPos] = useState<google.maps.LatLngLiteral | null>(null);
 
@@ -50,22 +51,25 @@ export default function LocationMap({ lat, lng, onChange }: LocationMapProps) {
     }, [lat, lng]);
 
     const handleMapClick = useCallback((e: google.maps.MapMouseEvent) => {
-        if (e.latLng) {
+        if (readOnly) return;
+        if (e.latLng && onChange) {
             const newLat = e.latLng.lat();
             const newLng = e.latLng.lng();
             setMarkerPos({ lat: newLat, lng: newLng });
             onChange(newLat, newLng);
         }
-    }, [onChange]);
+    }, [onChange, readOnly]);
 
     const handleMarkerDragEnd = useCallback((e: google.maps.MapMouseEvent) => {
-        if (e.latLng) {
+        if (readOnly) return;
+        if (e.latLng && onChange) {
             const newLat = e.latLng.lat();
             const newLng = e.latLng.lng();
             setMarkerPos({ lat: newLat, lng: newLng });
             onChange(newLat, newLng);
         }
-    }, [onChange]);
+    }, [onChange, readOnly]);
+
 
     if (loadError) {
         return (
@@ -100,7 +104,7 @@ export default function LocationMap({ lat, lng, onChange }: LocationMapProps) {
                 {markerPos && (
                     <Marker
                         position={markerPos}
-                        draggable={true}
+                        draggable={!readOnly}
                         onDragEnd={handleMarkerDragEnd}
                         animation={google.maps.Animation.DROP}
                     />
@@ -113,7 +117,7 @@ export default function LocationMap({ lat, lng, onChange }: LocationMapProps) {
                         {markerPos.lat.toFixed(6)}, {markerPos.lng.toFixed(6)}
                     </div>
                 ) : (
-                    <p className="text-sm text-slate-400 italic">Clique no mapa para definir</p>
+                    <p className="text-sm text-slate-400 italic text-red-500">Sem coordenadas</p>
                 )}
             </div>
         </div>

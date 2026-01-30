@@ -8,12 +8,24 @@ import { toast } from 'react-hot-toast';
 import Link from 'next/link';
 import jsCookie from 'js-cookie';
 import LoadingSpinner from '@/app/components/LoadingSpinner';
+import LocationMap from '@/app/components/LocationMap';
+import { MapPin, X } from 'lucide-react';
 
 interface PaymentMethod {
     id: number;
     name: string;
     slug: string;
     is_active: boolean;
+}
+
+interface CompanySettings {
+    street: string;
+    number: string;
+    neighborhood: string;
+    city: string;
+    state: string;
+    latitude: number;
+    longitude: number;
 }
 
 export default function CheckoutPage() {
@@ -29,6 +41,11 @@ export default function CheckoutPage() {
     const [isLoadingMethods, setIsLoadingMethods] = useState(true);
     const [discountAmount, setDiscountAmount] = useState(0);
     const [finalTotal, setFinalTotal] = useState(cartTotal);
+
+    // Settings & Map State
+    const [settings, setSettings] = useState<CompanySettings | null>(null);
+    const [isMapOpen, setIsMapOpen] = useState(false);
+    const [isLoadingSettings, setIsLoadingSettings] = useState(true);
 
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 
@@ -67,6 +84,25 @@ export default function CheckoutPage() {
             fetchMethods();
         }
     }, [apiUrl, items.length]);
+
+    // Fetch Company Settings
+    useEffect(() => {
+        const fetchSettings = async () => {
+            try {
+                const res = await fetch(`${apiUrl}/settings`);
+                if (res.ok) {
+                    const response = await res.json();
+                    setSettings(response.data);
+                }
+            } catch (error) {
+                console.error('Error fetching settings', error);
+            } finally {
+                setIsLoadingSettings(false);
+            }
+        };
+
+        fetchSettings();
+    }, [apiUrl]);
 
     // Calculate Discount
     useEffect(() => {
@@ -191,24 +227,33 @@ export default function CheckoutPage() {
                                     🏪
                                 </div>
                                 <div>
-                                    <h3 className="font-bold text-lg mb-1" style={{ color: 'var(--store-text)' }}>Retirada na Loja</h3>
-                                    <p className="leading-relaxed text-sm" style={{ color: 'var(--store-text-muted)' }}>
-                                        Rua das Gostosuras, 123<br />
-                                        Bairro Doce Vida, São Paulo - SP
-                                    </p>
+                                    <h3 className="font-bold text-lg" style={{ color: 'var(--store-text)' }}>Retirada na Loja</h3>
+                                    <div className="leading-relaxed text-sm mb-4" style={{ color: 'var(--store-text-muted)' }}>
+                                        {settings ? (
+                                            <>
+                                                {settings.street || 'Endereço não configurado'}, {settings.number}<br />
+                                                {settings.neighborhood && <>{settings.neighborhood},</>} {settings.city} {settings.state ? `- ${settings.state}` : ''}
+                                            </>
+                                        ) : (
+                                            <span className="animate-pulse bg-gray-200 h-4 w-32 block rounded"></span>
+                                        )}
+                                    </div>
                                     <div className="mt-4 flex items-center gap-3">
                                         <span className="px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-2"
                                             style={{ backgroundColor: 'var(--store-bg)', color: 'var(--store-text)' }}>
                                             ⏱️ ~20 min
                                         </span>
-                                        <a
-                                            href="https://maps.google.com"
-                                            target="_blank"
-                                            className="text-xs font-bold hover:underline flex items-center gap-1"
+                                        <button
+                                            type="button"
+                                            onClick={() => setIsMapOpen(true)}
+                                            disabled={!settings?.latitude || !settings.longitude}
+                                            className="text-xs font-bold hover:underline flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed group transition-all"
                                             style={{ color: 'var(--store-text)' }}
+                                            title={(!settings?.latitude || !settings.longitude) ? 'Localização não cadastrada' : 'Ver localização exata'}
                                         >
-                                            Ver no mapa ↗
-                                        </a>
+                                            <MapPin size={12} className="group-hover:scale-110 transition-transform" />
+                                            {(!settings?.latitude || !settings.longitude) ? 'Mapa indisponível' : 'Ver no mapa ↗'}
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -284,8 +329,8 @@ export default function CheckoutPage() {
 
                             {/* Change Input Animation */}
                             <div className={`overflow-hidden transition-all duration-300 ease-in-out ${(paymentMethods.find(m => m.id === selectedMethodId)?.slug === 'money' ||
-                                    paymentMethods.find(m => m.id === selectedMethodId)?.slug === 'dinheiro')
-                                    ? 'max-h-32 opacity-100 mt-5' : 'max-h-0 opacity-0'}`}>
+                                paymentMethods.find(m => m.id === selectedMethodId)?.slug === 'dinheiro')
+                                ? 'max-h-32 opacity-100 mt-5' : 'max-h-0 opacity-0'}`}>
                                 <div className="p-4 rounded-xl border"
                                     style={{
                                         backgroundColor: 'var(--store-bg)',
@@ -414,6 +459,46 @@ export default function CheckoutPage() {
                     </div>
                 </div>
             </div>
-        </div>
+
+
+            {/* Map Modal */}
+            {
+                isMapOpen && settings && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fadeIn">
+                        <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl animate-scaleIn relative">
+                            <div className="flex items-center justify-between p-4 border-b dark:border-slate-800">
+                                <h3 className="font-bold text-lg flex items-center gap-2" style={{ color: 'var(--store-text)' }}>
+                                    <MapPin className="text-red-500" />
+                                    Localização da Loja
+                                </h3>
+                                <button
+                                    onClick={() => setIsMapOpen(false)}
+                                    className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors"
+                                >
+                                    <X size={20} className="text-slate-500" />
+                                </button>
+                            </div>
+                            <div className="p-4 bg-slate-50 dark:bg-slate-950">
+                                <LocationMap
+                                    lat={Number(settings.latitude)}
+                                    lng={Number(settings.longitude)}
+                                    readOnly={true}
+                                />
+                                <div className="mt-4 text-center">
+                                    <a
+                                        href={`https://www.google.com/maps/dir/?api=1&destination=${settings.latitude},${settings.longitude}`}
+                                        target="_blank"
+                                        className="inline-flex items-center gap-2 font-bold text-sm px-6 py-3 rounded-xl hover:opacity-90 transition-opacity"
+                                        style={{ backgroundColor: 'var(--store-primary)', color: 'var(--store-primary-fg)' }}
+                                    >
+                                        Abrir no Google Maps 🗺️
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )
+            }
+        </div >
     );
 }
