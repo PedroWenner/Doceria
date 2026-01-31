@@ -857,7 +857,7 @@ export default function SettingsPage() {
                                                     </div>
                                                 </div>
 
-                                                <div className="relative inline-flex items-center cursor-pointer group/toggle">
+                                                <label className="relative inline-flex items-center cursor-pointer group/toggle">
                                                     <input
                                                         type="checkbox"
                                                         className="sr-only peer"
@@ -871,7 +871,7 @@ export default function SettingsPage() {
                                                     after:rounded-full after:h-5.5 after:w-5.5 after:shadow-sm after:transition-all after:duration-300
                                                     peer-checked:after:translate-x-full
                                                 `}></div>
-                                                </div>
+                                                </label>
                                             </div>
 
                                             <div className="space-y-5">

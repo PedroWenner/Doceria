@@ -45,6 +45,11 @@ class PaymentGatewaySettingController extends Controller
             ]
         );
 
+        // Sync parent status
+        if (isset($validated['is_active'])) {
+            $method->update(['is_active' => $validated['is_active']]);
+        }
+
         return $this->success($setting, 'Configurações salvas com sucesso!');
     }
 }
