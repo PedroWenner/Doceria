@@ -2,13 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-
 use App\Models\Order;
 use App\Models\PaymentMethod;
 use App\Services\Payments\MercadoPagoService;
 use App\Traits\ApiResponse;
-use Illuminate\Http\Request;
 use Exception;
 
 class PaymentController extends Controller
@@ -76,10 +73,16 @@ class PaymentController extends Controller
                 $order->save();
             }
 
-            return $this->successResponse($response);
+            return $this->success($response);
 
         } catch (Exception $e) {
-            return $this->errorResponse($e->getMessage(), 500);
+            return response()->json([
+                'error' => true,
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                // 'trace' => $e->getTraceAsString() // Maybe too much for prod but good for debug
+            ], 500);
         }
     }
 }

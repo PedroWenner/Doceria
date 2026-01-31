@@ -203,23 +203,23 @@ export default function CheckoutPage() {
                             return; // Stop here, browser will redirect
                         } else {
                             // Handle other types (payload, qr_code) later
-                            toast.success("Pedido realizado! Verifique a área de 'Meus Pedidos'.");
+                            toast.success("Pedido realizado! Verifique seu email.");
                             clearCart();
-                            router.push('/orders/my');
+                            router.push(`/checkout/success?order_id=${orderId}`);
                         }
                     } else {
                         const errPay = await payRes.json();
-                        toast.error(`Erro no pagamento: ${errPay.message || 'Tente pagar pelo painel de pedidos'}`);
-                        // Navigate to orders anyway so they can try again if we implement that
-                        clearCart();
-                        router.push('/orders/my');
+                        toast.error(`Erro no pagamento: ${errPay.message || 'Tente novamente.'}`);
+                        // Stay on page to retry? Or go to failure?
+                        // For now, let's go to failure to avoid stuck state
+                        router.push(`/checkout/failure?order_id=${orderId}`);
                     }
 
                 } else {
                     // Offline payment (Money)
                     toast.success("Pedido realizado com sucesso! 🎉");
                     clearCart();
-                    router.push('/orders/my');
+                    router.push(`/checkout/success?order_id=${orderId}`);
                 }
 
             } else {

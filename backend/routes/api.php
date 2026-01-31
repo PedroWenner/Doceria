@@ -78,4 +78,5 @@ Route::group(['middleware' => ['api']], function () {
 // Authenticated Routes (Customers & Admins)
 Route::group(['middleware' => ['api', 'auth:api']], function () {
     Route::post('orders', [App\Http\Controllers\OrderController::class, 'store']);
+    Route::post('orders/{order}/pay', [App\Http\Controllers\PaymentController::class, 'store']);
 });
