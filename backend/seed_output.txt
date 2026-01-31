@@ -1,0 +1,26 @@
+
+   INFO  Seeding database.  
+
+  Database\Seeders\RoleSeeder  RUNNING  
+
+   Illuminate\Database\UniqueConstraintViolationException 
+
+  SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry 'admin' for key 'roles.roles_slug_unique' (Connection: mysql, SQL: insert into `roles` (`name`, `slug`, `description`, `updated_at`, `created_at`) values (Admin, admin, System Administrator, 2026-01-31 01:58:29, 2026-01-31 01:58:29))
+
+  at vendor\laravel\framework\src\Illuminate\Database\Connection.php:824
+    820Ôûò         // message to include the bindings with SQL, which will make this exception a
+    821Ôûò         // lot more helpful to the developer instead of just the database's errors.
+    822Ôûò         catch (Exception $e) {
+    823Ôûò             if ($this->isUniqueConstraintError($e)) {
+  Ô×£ 824Ôûò                 throw new UniqueConstraintViolationException(
+    825Ôûò                     $this->getName(), $query, $this->prepareBindings($bindings), $e
+    826Ôûò                 );
+    827Ôûò             }
+    828Ôûò
+
+  1   vendor\laravel\framework\src\Illuminate\Database\MySqlConnection.php:45
+      PDOException::("SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry 'admin' for key 'roles.roles_slug_unique'")
+
+  2   vendor\laravel\framework\src\Illuminate\Database\MySqlConnection.php:45
+      PDOStatement::execute()
+

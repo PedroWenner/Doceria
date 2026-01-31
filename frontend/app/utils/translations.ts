@@ -200,6 +200,9 @@ export const translations = {
                 bg_url: 'URL Fundo Login',
                 welcome: 'Mensagem de Boas-vindas'
             },
+            payments: {
+                title: 'Pagamentos'
+            },
             save_btn: 'Salvar Configurações 💾'
         },
         payment_methods: {
@@ -425,6 +428,9 @@ export const translations = {
                 logo_url: 'Logo URL',
                 bg_url: 'Login Background URL',
                 welcome: 'Welcome Message'
+            },
+            payments: {
+                title: 'Payments'
             },
             save_btn: 'Save Settings 💾'
         },
