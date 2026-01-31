@@ -78,6 +78,11 @@ export default function ProductsPage() {
     const [stockSettings, setStockSettings] = useState({ enabled: true, global_min: 5 });
     const [searchTerm, setSearchTerm] = useState('');
 
+    // Quick Category Creation State
+    const [isCreatingCategory, setIsCreatingCategory] = useState(false);
+    const [newCategoryName, setNewCategoryName] = useState('');
+    const [isSavingCategory, setIsSavingCategory] = useState(false);
+
     // Stats
     const totalProducts = products.length;
     const lowStockCount = products.filter(p => p.stock_quantity <= p.min_stock_level && p.status === 'active').length;
@@ -245,6 +250,39 @@ export default function ProductsPage() {
         finally { setIsSaving(false); }
     };
 
+    const handleCreateCategory = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!newCategoryName.trim()) return;
+
+        setIsSavingCategory(true);
+        try {
+            const res = await fetch(`${apiUrl}/categories`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify({ name: newCategoryName })
+            });
+
+            if (res.ok) {
+                const response = await res.json();
+                const newCat = response.data;
+                setCategories(prev => [...prev, newCat]);
+                setFormData(prev => ({ ...prev, category_id: newCat.id.toString() }));
+                setIsCreatingCategory(false);
+                setNewCategoryName('');
+                toast.success('Categoria criada!');
+            } else {
+                toast.error('Erro ao criar categoria');
+            }
+        } catch (error) {
+            toast.error('Erro de conexão');
+        } finally {
+            setIsSavingCategory(false);
+        }
+    };
+
     if (isLoading) return <LoadingSpinner />;
 
     return (
@@ -406,6 +444,46 @@ export default function ProductsPage() {
             </div>
 
             {/* Modal */}
+            {/* Quick Category Creation Modal */}
+            {isCreatingCategory && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-950/20 backdrop-blur-[2px]">
+                    <div className="bg-white dark:bg-slate-900 rounded-xl shadow-2xl w-full max-w-sm border border-slate-200 dark:border-slate-800 p-6 animate-scaleIn">
+                        <h3 className="text-lg font-bold text-slate-900 dark:text-slate-50 mb-4">{t('products.new_category') || 'Nova Categoria'}</h3>
+                        <form onSubmit={handleCreateCategory}>
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1.5">{t('common.name')}</label>
+                                    <input
+                                        autoFocus
+                                        type="text"
+                                        required
+                                        className="w-full p-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-50 focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-50 outline-none"
+                                        value={newCategoryName}
+                                        onChange={(e) => setNewCategoryName(e.target.value)}
+                                        placeholder="Ex: Bebidas"
+                                    />
+                                </div>
+                                <div className="flex gap-3 justify-end pt-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => { setIsCreatingCategory(false); setNewCategoryName(''); }}
+                                        className="px-4 py-2 text-slate-600 dark:text-slate-400 font-medium hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+                                    >
+                                        Cancelar
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        disabled={!newCategoryName.trim() || isSavingCategory}
+                                        className="px-4 py-2 bg-slate-900 dark:bg-slate-50 text-white dark:text-slate-900 font-bold rounded-lg hover:bg-slate-800 dark:hover:bg-slate-200 transition-colors disabled:opacity-50 flex items-center gap-2"
+                                    >
+                                        {isSavingCategory ? <LoadingSpinner /> : 'Criar'}
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
             {isModalOpen && (
                 <div className="fixed inset-0 bg-slate-950/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fadeIn">
                     <div className="w-full max-w-4xl max-h-[90vh] bg-white dark:bg-slate-950 rounded-2xl shadow-xl overflow-hidden flex flex-col border border-slate-200 dark:border-slate-800 animate-scaleIn">
@@ -456,9 +534,17 @@ export default function ProductsPage() {
                                             <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1.5">{t('products.category')}</label>
                                             <div className="relative">
                                                 <select required className="w-full p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-50 focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-50 outline-none appearance-none cursor-pointer"
-                                                    value={formData.category_id} onChange={e => setFormData({ ...formData, category_id: e.target.value })}>
+                                                    value={formData.category_id}
+                                                    onChange={e => {
+                                                        if (e.target.value === 'NEW') setIsCreatingCategory(true);
+                                                        else setFormData({ ...formData, category_id: e.target.value });
+                                                    }}
+                                                >
                                                     <option value="">{t('products.select_category')}</option>
                                                     {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                                                    <option value="NEW" className="font-bold text-indigo-600 bg-indigo-50 dark:bg-slate-800 dark:text-indigo-400">
+                                                        + {t('products.new_category') || 'Criar Nova Categoria'}
+                                                    </option>
                                                 </select>
                                                 <ChevronDown size={16} className="absolute right-3 top-3 text-slate-400 pointer-events-none" />
                                             </div>

@@ -66,6 +66,7 @@ export const translations = {
         products: {
             title: 'Produtos',
             new_product: 'Novo Produto',
+            new_category: 'Nova Categoria',
             category: 'Categoria',
             price: 'Preço',
             stock: 'Estoque',
@@ -294,6 +295,7 @@ export const translations = {
         products: {
             title: 'Products',
             new_product: 'New Product',
+            new_category: 'New Category',
             category: 'Category',
             price: 'Price',
             stock: 'Stock',
