@@ -6,6 +6,7 @@ use App\Models\Order;
 use App\Models\PaymentMethod;
 use App\Services\Payments\MercadoPagoService;
 use App\Traits\ApiResponse;
+use Illuminate\Http\Request;
 use Exception;
 
 class PaymentController extends Controller
@@ -21,7 +22,7 @@ class PaymentController extends Controller
 
         // Prevent double payment
         if ($order->status === 'paid' || $order->status === 'delivered') {
-            return $this->errorResponse('Pedido já pago ou finalizado.', 400);
+            return $this->error('Pedido já pago ou finalizado.', 400);
         }
 
         // Find Payment Method from Order's payment_method string (slug matches?)
@@ -39,14 +40,14 @@ class PaymentController extends Controller
             // For now, let's try to find by similarity or return error
             // Actually, frontend sends "credit_card" or "pix".
             // Let's assume we have payment methods with these slugs.
-             return $this->errorResponse("Método de pagamento não encontrado: {$methodSlug}", 404);
+             return $this->error("Método de pagamento não encontrado: {$methodSlug}", 404);
         }
 
         // Get Gateway Settings
         $settings = $paymentMethod->gatewaySetting;
 
         if (!$settings || !$settings->is_active) {
-            return $this->errorResponse('Configuração de pagamento indisponível para este método.', 400);
+            return $this->error('Configuração de pagamento indisponível para este método.', 400);
         }
 
         try {
@@ -62,7 +63,7 @@ class PaymentController extends Controller
             }
 
             if (!$service) {
-                return $this->errorResponse('Serviço de pagamento não implementado para este método.', 501);
+                return $this->error('Serviço de pagamento não implementado para este método.', 501);
             }
 
             $response = $service->createPreference($order, $settings);

@@ -29,6 +29,7 @@ import {
     CreditCard
 } from 'lucide-react';
 import LocationMap from '@/app/components/LocationMap';
+import UnifiedPaymentForm from '@/app/components/UnifiedPaymentForm';
 
 export default function SettingsPage() {
     const { t } = useLanguage();
@@ -785,201 +786,15 @@ export default function SettingsPage() {
                     </div>
                 )}
 
-                {/* Payments Section - Pro Grid Layout */}
+                {/* Payments Section - Simplified Unified Form */}
                 {activeTab === 'payments' && (
-                    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                        <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                            <div>
-                                <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Métodos de Pagamento</h2>
-                                <p className="text-sm text-slate-500 dark:text-slate-400">Gerencie as credenciais e status dos gateways de pagamento.</p>
-                            </div>
-                            <div className="flex gap-2">
-                                <span className="text-xs px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300 border border-blue-100 dark:border-blue-900/50 flex items-center gap-1.5 font-medium">
-                                    <Info size={12} />
-                                    Ambiente Seguro (SSL)
-                                </span>
-                            </div>
-                        </div>
-
-                        {loadingPayments ? (
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                {[1, 2].map((i) => (
-                                    <div key={i} className="h-64 rounded-xl bg-slate-100 dark:bg-slate-800 animate-pulse" />
-                                ))}
-                            </div>
-                        ) : paymentMethods.length === 0 ? (
-                            <div className="p-16 text-center bg-white dark:bg-slate-900 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800">
-                                <div className="bg-slate-50 dark:bg-slate-800 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                                    <CreditCard className="h-8 w-8 text-slate-400" />
-                                </div>
-                                <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">Nenhum meio disponível</h3>
-                                <p className="text-slate-500 text-sm mt-2 max-w-sm mx-auto">Parece que os seeders de banco de dados não foram executados ou não há plugins de pagamento instalados.</p>
-                            </div>
-                        ) : (
-                            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-                                {paymentMethods.map((method) => {
-                                    const settings = method.gateway_setting || {
-                                        mode: 'sandbox',
-                                        is_active: false,
-                                        credentials: {}
-                                    };
-                                    const credentials = settings.credentials || {};
-                                    const isPix = method.slug.includes('pix');
-                                    const isCard = method.slug.includes('card') || method.slug.includes('credit');
-
-                                    return (
-                                        <div
-                                            key={method.id}
-                                            className={`
-                                            group relative overflow-hidden bg-white dark:bg-slate-900 rounded-xl p-6 transition-all duration-300
-                                            border-2 ${settings.is_active ? 'border-indigo-500/10 dark:border-indigo-500/20 shadow-lg shadow-indigo-500/5' : 'border-slate-100 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'}
-                                        `}
-                                        >
-                                            <div className="flex items-start justify-between mb-8">
-                                                <div className="flex items-center gap-4">
-                                                    <div className={`
-                                                    p-3.5 rounded-2xl transition-colors duration-300
-                                                    ${settings.is_active ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20' : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'}
-                                                `}>
-                                                        {isPix ? <Building2 size={24} /> : <CreditCard size={24} />}
-                                                    </div>
-                                                    <div>
-                                                        <h3 className="font-bold text-lg text-slate-900 dark:text-slate-50 leading-tight">{method.name}</h3>
-                                                        <div className="flex items-center gap-2 mt-1.5">
-                                                            <span className={`text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-md ${settings.mode === 'production'
-                                                                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-900'
-                                                                : 'bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-900'
-                                                                }`}>
-                                                                {settings.mode === 'production' ? 'PROD' : 'SANDBOX'}
-                                                            </span>
-                                                            <span className="text-xs text-slate-400 font-mono">{method.slug}</span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                <label className="relative inline-flex items-center cursor-pointer group/toggle">
-                                                    <input
-                                                        type="checkbox"
-                                                        className="sr-only peer"
-                                                        checked={settings.is_active}
-                                                        onChange={(e) => handlePaymentSettingChange(method.id, 'is_active', e.target.checked)}
-                                                    />
-                                                    <div className={`
-                                                    w-12 h-7 rounded-full peer peer-focus:ring-2 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 
-                                                    bg-slate-200 dark:bg-slate-700 peer-checked:bg-indigo-600 transition-all duration-300
-                                                    after:content-[''] after:absolute after:top-[3px] after:left-[3px] after:bg-white 
-                                                    after:rounded-full after:h-5.5 after:w-5.5 after:shadow-sm after:transition-all after:duration-300
-                                                    peer-checked:after:translate-x-full
-                                                `}></div>
-                                                </label>
-                                            </div>
-
-                                            <div className="space-y-5">
-                                                {/* Environment Selector */}
-                                                <div className="bg-slate-50 dark:bg-slate-950/50 p-1.5 rounded-lg inline-flex w-full border border-slate-100 dark:border-slate-800">
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => handlePaymentSettingChange(method.id, 'mode', 'sandbox')}
-                                                        className={`flex-1 py-1.5 px-3 rounded-md text-xs font-bold transition-all ${settings.mode === 'sandbox'
-                                                            ? 'bg-white dark:bg-slate-800 text-amber-600 dark:text-amber-400 shadow-sm'
-                                                            : 'text-slate-500 hover:text-slate-700 dark:text-slate-400'
-                                                            }`}
-                                                    >
-                                                        Sandbox (Teste)
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => handlePaymentSettingChange(method.id, 'mode', 'production')}
-                                                        className={`flex-1 py-1.5 px-3 rounded-md text-xs font-bold transition-all ${settings.mode === 'production'
-                                                            ? 'bg-white dark:bg-slate-800 text-emerald-600 dark:text-emerald-400 shadow-sm'
-                                                            : 'text-slate-500 hover:text-slate-700 dark:text-slate-400'
-                                                            }`}
-                                                    >
-                                                        Produção (Real)
-                                                    </button>
-                                                </div>
-
-                                                <div className="space-y-4">
-                                                    {isPix ? (
-                                                        <>
-                                                            <div className="space-y-1.5">
-                                                                <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 pl-1">Chave Pix</label>
-                                                                <div className="relative group/input">
-                                                                    <Key className="absolute left-3 top-2.5 text-slate-400 group-focus-within/input:text-indigo-500 transition-colors" size={16} />
-                                                                    <input
-                                                                        type="text"
-                                                                        value={credentials.pix_key || ''}
-                                                                        onChange={(e) => handlePaymentSettingChange(method.id, 'pix_key', e.target.value)}
-                                                                        className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all outline-none font-mono text-slate-700 dark:text-slate-300"
-                                                                        placeholder="CPF, CNPJ, Email..."
-                                                                    />
-                                                                </div>
-                                                            </div>
-                                                            <div className="space-y-1.5">
-                                                                <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 pl-1">Beneficiário</label>
-                                                                <div className="relative group/input">
-                                                                    <UserCircle className="absolute left-3 top-2.5 text-slate-400 group-focus-within/input:text-indigo-500 transition-colors" size={16} />
-                                                                    <input
-                                                                        type="text"
-                                                                        value={credentials.payee_name || ''}
-                                                                        onChange={(e) => handlePaymentSettingChange(method.id, 'payee_name', e.target.value)}
-                                                                        className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all outline-none text-slate-700 dark:text-slate-300"
-                                                                        placeholder="Nome completo..."
-                                                                    />
-                                                                </div>
-                                                            </div>
-                                                        </>
-                                                    ) : isCard ? (
-                                                        <>
-                                                            <div className="space-y-1.5">
-                                                                <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 pl-1">API Key (Public)</label>
-                                                                <div className="relative group/input">
-                                                                    <Globe className="absolute left-3 top-2.5 text-slate-400 group-focus-within/input:text-indigo-500 transition-colors" size={16} />
-                                                                    <input
-                                                                        type="text"
-                                                                        value={credentials.public_key || ''}
-                                                                        onChange={(e) => handlePaymentSettingChange(method.id, 'public_key', e.target.value)}
-                                                                        className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all outline-none font-mono text-slate-700 dark:text-slate-300"
-                                                                        placeholder="pk_test_..."
-                                                                    />
-                                                                </div>
-                                                            </div>
-                                                            <div className="space-y-1.5">
-                                                                <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 pl-1">Secret Key</label>
-                                                                <div className="relative group/input">
-                                                                    <Key className="absolute left-3 top-2.5 text-slate-400 group-focus-within/input:text-indigo-500 transition-colors" size={16} />
-                                                                    <input
-                                                                        type="password"
-                                                                        value={credentials.secret_key || ''}
-                                                                        onChange={(e) => handlePaymentSettingChange(method.id, 'secret_key', e.target.value)}
-                                                                        className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all outline-none font-mono text-slate-700 dark:text-slate-300"
-                                                                        placeholder="sk_test_..."
-                                                                    />
-                                                                </div>
-                                                            </div>
-                                                        </>
-                                                    ) : (
-                                                        <div className="p-4 bg-slate-50 dark:bg-slate-950/50 rounded-lg border border-dashed border-slate-200 dark:border-slate-800 text-center">
-                                                            <span className="text-sm text-slate-500 italic">Configurações adicionais gerenciadas externamente.</span>
-                                                        </div>
-                                                    )}
-                                                </div>
-
-                                                <button
-                                                    type="button"
-                                                    onClick={() => savePaymentSettings(method.id)}
-                                                    className="w-full flex items-center justify-center gap-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-2.5 rounded-lg font-bold text-sm hover:translate-y-[-1px] active:translate-y-[0px] shadow-lg hover:shadow-xl transition-all duration-200"
-                                                >
-                                                    <Save size={16} />
-                                                    Salvar Alterações
-                                                </button>
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        )}
-                    </div>
+                    <UnifiedPaymentForm
+                        paymentMethods={paymentMethods}
+                        setPaymentMethods={setPaymentMethods}
+                        savePaymentSettings={savePaymentSettings}
+                        loading={loadingPayments}
+                        t={t}
+                    />
                 )}
             </div>
 

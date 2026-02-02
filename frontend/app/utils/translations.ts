@@ -202,7 +202,16 @@ export const translations = {
                 welcome: 'Mensagem de Boas-vindas'
             },
             payments: {
-                title: 'Pagamentos'
+                title: 'Pagamentos',
+                mercado_pago_title: 'Integração Mercado Pago',
+                mercado_pago_desc: 'Configuração global para Pix, Cartão e Boleto.',
+                enable_integration: 'Ativar Integração',
+                enable_hint: 'Habilita pagamentos via Pix e Cartão no checkout.',
+                access_token: 'Token de Acesso',
+                client_id: 'Client ID',
+                client_secret: 'Client Secret',
+                public_key: 'Chave Pública (Opcional)',
+                mode: 'Ambiente'
             },
             save_btn: 'Salvar Configurações 💾'
         },
@@ -432,7 +441,16 @@ export const translations = {
                 welcome: 'Welcome Message'
             },
             payments: {
-                title: 'Payments'
+                title: 'Payments',
+                mercado_pago_title: 'Mercado Pago Integration',
+                mercado_pago_desc: 'Global configuration for Pix, Card, and Boleto.',
+                enable_integration: 'Enable Integration',
+                enable_hint: 'Enables Pix and Card payments at checkout.',
+                access_token: 'Access Token',
+                client_id: 'Client ID',
+                client_secret: 'Client Secret',
+                public_key: 'Public Key (Optional)',
+                mode: 'Environment'
             },
             save_btn: 'Save Settings 💾'
         },
