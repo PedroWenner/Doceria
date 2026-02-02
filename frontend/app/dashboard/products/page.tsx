@@ -144,10 +144,19 @@ export default function ProductsPage() {
 
     const fetchPaymentMethods = async () => {
         try {
-            const res = await fetch(`${apiUrl}/payment-methods/admin`, { headers: { Authorization: `Bearer ${token}` } });
+            console.log('Fetching payment methods...');
+            const res = await fetch(`${apiUrl}/payment-methods`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Accept': 'application/json'
+                }
+            });
             if (res.ok) {
                 const response = await res.json();
-                setPaymentMethods(response.data.filter((m: PaymentMethod) => m.is_active));
+                console.log('Payment methods loaded:', response.data.length);
+                setPaymentMethods(response.data);
+            } else {
+                console.error('Failed response:', res.status);
             }
         } catch (error) { console.error('Failed to fetch payment methods', error); }
     };
@@ -598,7 +607,7 @@ export default function ProductsPage() {
                                         </h3>
                                         <button type="button" onClick={handleAddDiscount} disabled={formData.discounts.length >= paymentMethods.length}
                                             className="text-xs font-semibold text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50 flex items-center gap-1">
-                                            <Plus size={14} /> {t('products.add_rule')}
+                                            <Plus size={14} /> {t('products.add_rule')} ({paymentMethods.length})
                                         </button>
                                     </div>
 
