@@ -49,9 +49,9 @@ class MercadoPagoService implements PaymentGatewayInterface
                 'email' => 'test_user_123@testuser.com', // TODO: Use real customer email
             ],
             'back_urls' => [
-                'success' => config('app.frontend_url') . "/checkout/success?order_id={$order->id}",
-                'failure' => config('app.frontend_url') . "/checkout/failure?order_id={$order->id}",
-                'pending' => config('app.frontend_url') . "/checkout/pending?order_id={$order->id}",
+                'success' => config('app.frontend_url') . "/checkout/status",
+                'failure' => config('app.frontend_url') . "/checkout/status",
+                'pending' => config('app.frontend_url') . "/checkout/status",
             ],
             'auto_return' => 'approved',
             'external_reference' => (string) $order->id,
@@ -77,5 +77,23 @@ class MercadoPagoService implements PaymentGatewayInterface
             'data' => $initPoint,
             'preference_id' => $data['id'] ?? null
         ];
+    }
+
+    public function getPaymentStatus(string $paymentId, PaymentGatewaySetting $settings): array
+    {
+        $accessToken = $settings->credentials['access_token'] ?? null;
+
+        if (!$accessToken) {
+            throw new Exception("Access Token não configurado.");
+        }
+
+        $response = Http::withToken($accessToken)
+            ->get($this->getBaseUrl($settings->mode) . "/v1/payments/{$paymentId}");
+
+        if ($response->failed()) {
+            throw new Exception("Erro ao consultar pagamento no Mercado Pago: " . $response->body());
+        }
+
+        return $response->json();
     }
 }

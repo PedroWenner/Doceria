@@ -78,4 +78,57 @@ class OrderController extends Controller
             return $this->success($order->load('items.product'), 'Order created successfully', 201);
         });
     }
+
+    /**
+     * Verify Payment Status
+     * 
+     * Manually verifies the payment status with Mercado Pago
+     * and updates the order if necessary.
+     */
+    public function verifyPayment(Request $request, Order $order)
+    {
+        $paymentId = $request->input('payment_id');
+
+        if (!$paymentId) {
+            return $this->error('Payment ID required', 400);
+        }
+
+        try {
+            // Pick a payment method to get credentials.
+            // Assumption: All MP methods share the same credentials (unified form).
+            $paymentMethod = \App\Models\PaymentMethod::where('slug', 'carto_de_credito')->first();
+
+            if (!$paymentMethod || !$paymentMethod->gateway_setting) {
+                return $this->error('Payment settings not found', 500);
+            }
+
+            /** @var \App\Services\Payments\MercadoPagoService $mpService */
+            $mpService = app(\App\Services\Payments\MercadoPagoService::class);
+
+            $statusData = $mpService->getPaymentStatus($paymentId, $paymentMethod->gateway_setting);
+
+            $status = $statusData['status'] ?? null;
+
+            // Map status
+            $newStatus = match ($status) {
+                'approved', 'authorized' => 'paid',
+                'in_process', 'pending' => 'pending',
+                'rejected', 'cancelled' => 'failed',
+                'refunded', 'charged_back' => 'canceled',
+                default => 'pending'
+            };
+
+            if ($order->status !== $newStatus) {
+                $order->update(['status' => $newStatus]);
+            }
+
+            return $this->success([
+                'order_status' => $order->status,
+                'payment_status' => $status
+            ], 'Payment status verified');
+
+        } catch (\Exception $e) {
+            return $this->error($e->getMessage(), 500);
+        }
+    }
 }
