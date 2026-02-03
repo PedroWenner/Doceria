@@ -3,6 +3,19 @@
 **Data:** 03/02/2026
 **feature:** Payment Sync
 
+## 🐛 Solução de Problemas Comuns (Sandbox)
+
+### Erro: "Uma das partes com as quais você está tentando efetuar o pagamento é de teste"
+Isso acontece quando o **Email do Comprador** (no seu banco de dados) é igual ao **Email da Conta Mercado Pago** (Vendedor).
+**Solução:** Use uma janela anônima e um email diferente para o comprador (ex: `cliente_teste@gmail.com`).
+
+### Erro: "Não foi possível processar seu pagamento"
+Geralmente é recusa do Sandbox simular negação de crédito.
+**Solução:**
+1.  Verifique se o Ambiente está em **Sandbox** nas configurações.
+2.  Use o cartão de teste `4111 1111 1111 1111` com nome `APRO`.
+3.  Crie um usuário de teste novo no sistema.
+
 ## Visão Geral
 Este documento descreve a implementação do fluxo de sincronização de status de pagamentos utilizando o Mercado Pago. O sistema utiliza uma abordagem híbrida de **Webhooks** (para robustez e atualizações assíncronas) e **Redirect com Verificação** (para feedback imediato ao usuário).
 

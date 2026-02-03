@@ -46,7 +46,7 @@ class MercadoPagoService implements PaymentGatewayInterface
             'items' => $items,
             'payer' => [
                 'name' => $order->customer_name ?? 'Cliente',
-                'email' => 'test_user_123@testuser.com', // TODO: Use real customer email
+                'email' => $order->user?->email ?? 'guest@sweetstore.com',
             ],
             'back_urls' => [
                 'success' => config('app.frontend_url') . "/checkout/status",
@@ -56,6 +56,10 @@ class MercadoPagoService implements PaymentGatewayInterface
             'auto_return' => 'approved',
             'external_reference' => (string) $order->id,
             'statement_descriptor' => 'SWEETSTORE',
+            'payment_methods' => [
+                'excluded_payment_types' => [],
+                'installments' => 12
+            ],
         ];
 
         $response = Http::withToken($accessToken)
