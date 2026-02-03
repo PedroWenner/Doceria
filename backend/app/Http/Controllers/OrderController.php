@@ -131,4 +131,15 @@ class OrderController extends Controller
             return $this->error($e->getMessage(), 500);
         }
     }
+    public function myOrders(Request $request)
+    {
+        $userId = $request->user()->id;
+
+        $orders = Order::where('user_id', $userId)
+            ->with(['items.product'])
+            ->latest()
+            ->get();
+        
+        return $this->success($orders);
+    }
 }

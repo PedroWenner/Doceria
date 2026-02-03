@@ -88,7 +88,7 @@ function StoreLayoutContent({ children }: { children: React.ReactNode }) {
                         {/* Desktop Links */}
                         <Link href="/" className={`font-bold text-sm tracking-wide ${pathname === '/' ? 'text-gray-900' : 'text-gray-500 hover:text-gray-900'} transition-colors`}>INÍCIO</Link>
                         <Link href="/menu" className={`font-bold text-sm tracking-wide ${pathname === '/menu' ? 'text-gray-900' : 'text-gray-500 hover:text-gray-900'} transition-colors`}>CARDÁPIO</Link>
-                        <Link href="/orders/my" className={`font-bold text-sm tracking-wide ${pathname === '/orders/my' ? 'text-gray-900' : 'text-gray-500 hover:text-gray-900'} transition-colors`}>PEDIDOS</Link>
+                        <Link href="/orders" className={`font-bold text-sm tracking-wide ${pathname === '/orders' ? 'text-gray-900' : 'text-gray-500 hover:text-gray-900'} transition-colors`}>PEDIDOS</Link>
                     </nav>
                 </div>
                 <div className="flex items-center gap-6">
