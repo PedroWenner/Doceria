@@ -76,8 +76,8 @@ export default function CartPage() {
                                         backgroundColor: 'var(--store-bg)',
                                         borderColor: 'var(--store-border)'
                                     }}>
-                                    {getImageUrl(item.product.image_url) ? (
-                                        <img src={getImageUrl(item.product.image_url)!} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                                    {getImageUrl(item.product.image_path) ? (
+                                        <img src={getImageUrl(item.product.image_path)!} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                                     ) : (
                                         <div className="w-full h-full flex items-center justify-center text-2xl grayscale opacity-30">🍰</div>
                                     )}
@@ -91,7 +91,7 @@ export default function CartPage() {
                                             <p className="text-xs line-clamp-1" style={{ color: 'var(--store-text-muted)' }}>{item.product.description || 'Uma delícia feita com amor'}</p>
                                         </div>
                                         <button
-                                            onClick={() => updateQuantity(item.product.id, -item.quantity)} // Remove item
+                                            onClick={() => removeFromCart(item.product.id)} // Remove item
                                             className="transition-colors p-1 hover:opacity-100 opacity-60"
                                             style={{ color: 'var(--store-text)' }}
                                             title="Remover item"
@@ -107,7 +107,7 @@ export default function CartPage() {
                                                 borderColor: 'var(--store-border)'
                                             }}>
                                             <button
-                                                onClick={() => updateQuantity(item.product.id, -1)}
+                                                onClick={() => item.quantity === 1 ? removeFromCart(item.product.id) : updateQuantity(item.product.id, -1)}
                                                 className={`w-7 h-7 rounded-md flex items-center justify-center font-bold text-sm transition-all hover:bg-white hover:text-red-500`}
                                                 style={{ color: item.quantity === 1 ? 'var(--store-text-muted)' : 'var(--store-text)' }}
                                             >
