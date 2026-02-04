@@ -145,8 +145,16 @@ export const translations = {
                 'pix': 'Pix',
                 'money': 'Dinheiro',
                 'cash': 'Dinheiro',
+                'cartao_de_credito': 'Crédito',
                 'credit_card': 'Crédito',
                 'debit_card': 'Débito'
+            },
+            payment_status: {
+                paid: 'Pago',
+                pending: 'Pendente pagamento',
+                failed: 'Falhou',
+                canceled: 'Cancelado',
+                refunded: 'Estornado'
             },
             next_update: 'Próxima atualização',
             force_refresh: 'Clique para forçar'
@@ -378,6 +386,7 @@ export const translations = {
             },
             payment: {
                 'Credit Card': 'Credit Card',
+                'cartao_de_credito': 'Credit Card',
                 'Pix': 'Pix',
                 'Cash': 'Cash',
                 'pix': 'Pix',
@@ -385,6 +394,13 @@ export const translations = {
                 'cash': 'Cash',
                 'credit_card': 'Credit Card',
                 'debit_card': 'Debit Card'
+            },
+            payment_status: {
+                paid: 'Paid',
+                pending: 'Payment Pending',
+                failed: 'Failed',
+                canceled: 'Canceled',
+                refunded: 'Refunded'
             },
             next_update: 'Next update',
             force_refresh: 'Click to force'

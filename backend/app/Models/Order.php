@@ -16,6 +16,7 @@ class Order extends Model implements Auditable
         'customer_name',
         'customer_phone',
         'status',
+        'payment_status',
         'total_amount',
         'payment_method',
         'delivery_type',

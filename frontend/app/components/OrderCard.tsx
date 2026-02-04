@@ -58,8 +58,8 @@ export default function OrderCard({ order }: Props) {
             <div className="flex justify-between items-start mb-3 pr-4">
                 <span className="font-mono text-sm font-bold text-slate-500 dark:text-slate-400">#{order.id}</span>
                 <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded border uppercase tracking-wide ${order.delivery_type === 'delivery'
-                        ? 'bg-sky-50 dark:bg-sky-900/20 text-sky-700 dark:text-sky-400 border-sky-100 dark:border-sky-900/30'
-                        : 'bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-400 border-orange-100 dark:border-orange-900/30'
+                    ? 'bg-sky-50 dark:bg-sky-900/20 text-sky-700 dark:text-sky-400 border-sky-100 dark:border-sky-900/30'
+                    : 'bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-400 border-orange-100 dark:border-orange-900/30'
                     }`}>
                     {/* @ts-ignore */}
                     {t(`orders.delivery_type.${order.delivery_type}`)}
@@ -100,9 +100,22 @@ export default function OrderCard({ order }: Props) {
 
             {/* Footer: Payment + Total */}
             <div className="flex justify-between items-center pt-3 border-t border-slate-100 dark:border-slate-700/50">
-                <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
-                    <Wallet size={12} />
-                    <span>{translatePayment(order.payment_method)}</span>
+                <div className="flex flex-col gap-1">
+                    <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+                        <Wallet size={12} />
+                        <span>{translatePayment(order.payment_method)}</span>
+                    </div>
+                    {/* Payment Status Badge */}
+                    <div className={`text-[10px] font-bold px-1.5 py-0.5 rounded border inline-flex items-center w-fit uppercase tracking-wider
+                        ${order.payment_status === 'paid' ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 border-emerald-100 dark:border-emerald-900/30' :
+                            order.payment_status === 'failed' ? 'bg-rose-50 dark:bg-rose-900/20 text-rose-700 dark:text-rose-400 border-rose-100 dark:border-rose-900/30' :
+                                order.payment_status === 'refunded' ? 'bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400 border-purple-100 dark:border-purple-900/30' :
+                                    'bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 border-amber-100 dark:border-amber-900/30' // Pending/Canceled
+                        }
+                    `}>
+                        {/* @ts-ignore */}
+                        {t(`orders.payment_status.${order.payment_status}`) || order.payment_status}
+                    </div>
                 </div>
                 <span className="font-bold text-slate-900 dark:text-emerald-400">
                     {displayCurrency(order.total_amount)}

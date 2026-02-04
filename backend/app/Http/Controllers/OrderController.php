@@ -118,13 +118,13 @@ class OrderController extends Controller
                 default => 'pending'
             };
 
-            if ($order->status !== $newStatus) {
-                $order->update(['status' => $newStatus]);
+            if ($order->payment_status !== $newStatus) {
+                $order->update(['payment_status' => $newStatus]);
             }
 
             return $this->success([
                 'order_status' => $order->status,
-                'payment_status' => $status
+                'payment_status' => $order->payment_status
             ], 'Payment status verified');
 
         } catch (\Exception $e) {

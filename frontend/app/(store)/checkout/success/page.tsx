@@ -35,8 +35,7 @@ export default function CheckoutSuccessPage() {
                         const data = await res.json();
                         setOrder(data.data);
 
-                        // Fire confetti only if approved
-                        if (data.data.status === 'paid' || data.data.status === 'preparing') {
+                        if (data.data.payment_status === 'paid') {
                             confetti({
                                 particleCount: 100,
                                 spread: 70,
@@ -72,7 +71,7 @@ export default function CheckoutSuccessPage() {
     }
 
     // Check if it's Pix and Pending
-    const isPixPending = order && (order.status === 'pending') &&
+    const isPixPending = order && (order.payment_status === 'pending') &&
         (order.payment_method?.toLowerCase().includes('pix'));
 
     if (isPixPending) {
@@ -157,7 +156,7 @@ export default function CheckoutSuccessPage() {
             <h1 className="text-3xl font-bold text-slate-800 mb-2">Pedido Recebido!</h1>
             <p className="text-slate-500 mb-8 max-w-md">
                 Seu pedido #{orderId} foi registrado com sucesso.
-                {order?.status === 'preparing' && <span className="block mt-1 font-medium text-green-600">Pagamento confirmado! Estamos preparando. 🧁</span>}
+                {order?.payment_status === 'paid' && <span className="block mt-1 font-medium text-green-600">Pagamento confirmado! Estamos preparando. 🧁</span>}
             </p>
             <div className="flex gap-4">
                 <Link

@@ -8,6 +8,7 @@ import { Package, Clock, CheckCircle, XCircle, ChevronRight, Info } from 'lucide
 import Link from 'next/link';
 import Cookies from 'js-cookie';
 import { toast } from 'react-hot-toast';
+import { useLanguage } from '@/app/context/LanguageContext';
 
 interface OrderItem {
     id: number;
@@ -23,6 +24,7 @@ interface Order {
     id: number;
     total_amount: number;
     status: string;
+    payment_status: string;
     created_at: string;
     items: OrderItem[];
     payment_method: string;
@@ -35,6 +37,7 @@ interface Order {
             qr_code?: string;
             qr_code_base64?: string;
             ticket_url?: string;
+            ticket_url_base64?: string;
         };
     };
 }
@@ -46,6 +49,7 @@ export default function MyOrdersPage() {
     const [orders, setOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedPixOrder, setSelectedPixOrder] = useState<Order | null>(null);
+    const { t } = useLanguage();
 
     useEffect(() => {
         if (!authLoading && !user) {
@@ -86,18 +90,29 @@ export default function MyOrdersPage() {
 
     const getStatusBadge = (status: string) => {
         switch (status) {
-            case 'paid':
-            case 'preparing': // Added preparing
-            case 'ready': // Added ready
+            case 'preparing':
+                return <span className="px-3 py-1 rounded-full text-xs font-bold bg-sky-100 text-sky-700 flex items-center gap-1 border border-sky-200">👨‍🍳 {t(`orders.${status}`) || status}</span>;
+            case 'ready':
+                return <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700 flex items-center gap-1 border border-emerald-200">✨ {t(`orders.${status}`) || status}</span>;
             case 'delivered':
-                return <span className="px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700 flex items-center gap-1"><CheckCircle size={12} /> Pago</span>;
-            case 'pending':
-                return <span className="px-3 py-1 rounded-full text-xs font-bold bg-yellow-100 text-yellow-700 flex items-center gap-1"><Clock size={12} /> Pendente</span>;
+                return <span className="px-3 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-700 flex items-center gap-1 border border-slate-200">🏁 {t(`orders.${status}`) || status}</span>;
             case 'canceled':
-            case 'failed':
-                return <span className="px-3 py-1 rounded-full text-xs font-bold bg-red-100 text-red-700 flex items-center gap-1"><XCircle size={12} /> Cancelado</span>;
+                return <span className="px-3 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-700 flex items-center gap-1 border border-rose-200">❌ {t(`orders.${status}`) || status}</span>;
             default:
-                return <span className="px-3 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-700">{status}</span>;
+                return <span className="px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-700 flex items-center gap-1 border border-amber-200">⏳ {t(`orders.${status}`) || status}</span>;
+        }
+    };
+
+    const getPaymentStatusBadge = (status: string) => {
+        switch (status) {
+            case 'paid':
+                return <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-100 uppercase tracking-wide">💰 {t(`orders.payment_status.${status}`) || status}</span>;
+            case 'failed':
+                return <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-100 uppercase tracking-wide">⚠️ {t(`orders.payment_status.${status}`) || status}</span>;
+            case 'refunded':
+                return <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-100 uppercase tracking-wide">↩️ {t(`orders.payment_status.${status}`) || status}</span>;
+            default:
+                return <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-50 text-slate-600 border border-slate-200 uppercase tracking-wide">🕒 {t(`orders.payment_status.${status}`) || status}</span>;
         }
     };
 
@@ -125,8 +140,8 @@ export default function MyOrdersPage() {
                         <Package size={32} />
                     </div>
                     <div>
-                        <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">Meus Pedidos</h1>
-                        <p className="text-slate-500 dark:text-slate-400">Acompanhe o histórico e status das suas compras</p>
+                        <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">{t('orders.title')}</h1>
+                        <p className="text-slate-500 dark:text-slate-400">Acompanhe o histórico de seus pedidos</p>
                     </div>
                 </div>
 
@@ -135,9 +150,9 @@ export default function MyOrdersPage() {
                         <div className="bg-slate-50 dark:bg-slate-800 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
                             <Package size={40} className="text-slate-400" />
                         </div>
-                        <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-2">Nenhum pedido encontrado</h3>
+                        <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-2">{t('orders.empty')}</h3>
                         <p className="text-slate-500 dark:text-slate-400 mb-8 max-w-md mx-auto">
-                            Você ainda não realizou nenhuma compra. Explore nosso cardápio e faça seu primeiro pedido!
+                            Você ainda não realizou nenhuma compra.
                         </p>
                         <Link href="/" className="inline-flex items-center gap-2 px-6 py-3 bg-pink-600 hover:bg-pink-700 text-white rounded-xl font-semibold transition-colors">
                             Ver Cardápio
@@ -153,7 +168,10 @@ export default function MyOrdersPage() {
                                             <div className="text-2xl font-bold text-slate-900 dark:text-slate-100">
                                                 #{order.id.toString().padStart(4, '0')}
                                             </div>
-                                            {getStatusBadge(order.status)}
+                                            <div className="flex gap-2">
+                                                {getStatusBadge(order.status)}
+                                                {getPaymentStatusBadge(order.payment_status)}
+                                            </div>
                                         </div>
                                         <div className="text-sm text-slate-500 dark:text-slate-400 flex items-center gap-2">
                                             <Clock size={16} />
@@ -190,7 +208,7 @@ export default function MyOrdersPage() {
                                         </div>
 
                                         {/* Pix QR Code Button */}
-                                        {order.status === 'pending' && order.payment_method.toLowerCase().includes('pix') && (order.payment_metadata?.qr_code || order.payment_metadata?.transaction_data?.qr_code) && (
+                                        {order.payment_status !== 'paid' && order.payment_method.toLowerCase().includes('pix') && (order.payment_metadata?.qr_code || order.payment_metadata?.transaction_data?.qr_code) && (
                                             <button
                                                 onClick={() => setSelectedPixOrder(order)}
                                                 className="px-4 py-2 bg-blue-50 text-blue-600 dark:text-blue-400 dark:bg-blue-900/20 rounded-lg text-sm font-bold hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors flex items-center gap-2"

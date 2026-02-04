@@ -12,6 +12,7 @@ export interface Order {
     id: number;
     customer_name: string;
     status: 'pending' | 'preparing' | 'ready' | 'delivered' | 'canceled';
+    payment_status: 'pending' | 'paid' | 'failed' | 'canceled' | 'refunded';
     total_amount: string;
     payment_method: string;
     delivery_type: 'pickup' | 'delivery';
