@@ -25,6 +25,12 @@ interface Order {
     created_at: string;
     items: OrderItem[];
     payment_method: string;
+    payment_metadata?: {
+        transaction_id?: number;
+        qr_code?: string;
+        qr_code_base64?: string;
+        ticket_url?: string;
+    };
 }
 
 export default function MyOrdersPage() {
@@ -33,6 +39,7 @@ export default function MyOrdersPage() {
     const router = useRouter();
     const [orders, setOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(true);
+    const [selectedPixOrder, setSelectedPixOrder] = useState<Order | null>(null);
 
     useEffect(() => {
         if (!authLoading && !user) {
@@ -44,10 +51,7 @@ export default function MyOrdersPage() {
         if (user) {
             fetchOrders();
         } else if (!authLoading && !user) {
-            // If auth finished and no user, we redirect (above effect), but distinct loading logic here?
-            // Actually if authLoading is false and user is null, we redirect. 
-            // If authLoading is false and user is present, we fetch.
-            // If authLoading is true, we wait.
+            // No action needed, router will push
         }
     }, [user, authLoading]);
 
@@ -64,6 +68,7 @@ export default function MyOrdersPage() {
             });
             const data = await res.json();
             if (data.status === 'success') {
+                console.log('Orders Data:', data.data);
                 setOrders(data.data);
             }
         } catch (error) {
@@ -76,6 +81,8 @@ export default function MyOrdersPage() {
     const getStatusBadge = (status: string) => {
         switch (status) {
             case 'paid':
+            case 'preparing': // Added preparing
+            case 'ready': // Added ready
             case 'delivered':
                 return <span className="px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700 flex items-center gap-1"><CheckCircle size={12} /> Pago</span>;
             case 'pending':
@@ -85,6 +92,14 @@ export default function MyOrdersPage() {
                 return <span className="px-3 py-1 rounded-full text-xs font-bold bg-red-100 text-red-700 flex items-center gap-1"><XCircle size={12} /> Cancelado</span>;
             default:
                 return <span className="px-3 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-700">{status}</span>;
+        }
+    };
+
+    const handleCopyPix = () => {
+        if (selectedPixOrder?.payment_metadata?.qr_code) {
+            navigator.clipboard.writeText(selectedPixOrder.payment_metadata.qr_code);
+            // toast.success("Copiado!"); // Assuming toast is imported or use alerts if not
+            alert("Código Pix copiado!");
         }
     };
 
@@ -168,7 +183,15 @@ export default function MyOrdersPage() {
                                             </span>
                                         </div>
 
-                                        {/* Future: Add 'Details' button or 'Track' button */}
+                                        {/* Pix QR Code Button */}
+                                        {order.status === 'pending' && order.payment_method.toLowerCase().includes('pix') && order.payment_metadata?.qr_code && (
+                                            <button
+                                                onClick={() => setSelectedPixOrder(order)}
+                                                className="px-4 py-2 bg-blue-50 text-blue-600 rounded-lg text-sm font-bold hover:bg-blue-100 transition-colors flex items-center gap-2"
+                                            >
+                                                💠 Ver PIX
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -176,6 +199,63 @@ export default function MyOrdersPage() {
                     </div>
                 )}
             </div>
+
+            {/* Pix Modal */}
+            {selectedPixOrder && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fadeIn">
+                    <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl p-6 max-w-sm w-full relative">
+                        <button
+                            onClick={() => setSelectedPixOrder(null)}
+                            className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                        >
+                            <XCircle size={24} />
+                        </button>
+
+                        <div className="text-center">
+                            <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+                                💠
+                            </div>
+                            <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Pagamento Pix</h3>
+                            <p className="text-sm text-slate-500 mb-6">Escaneie o QR Code ou copie o código.</p>
+
+                            {selectedPixOrder.payment_metadata?.qr_code_base64 && (
+                                <div className="mb-6 p-4 bg-white border rounded-xl shadow-sm inline-block">
+                                    <img
+                                        src={`data:image/jpeg;base64,${selectedPixOrder.payment_metadata.qr_code_base64}`}
+                                        alt="QR Code Pix"
+                                        className="w-48 h-48 object-contain"
+                                    />
+                                </div>
+                            )}
+
+                            <div className="w-full mb-6">
+                                <label className="text-xs font-bold text-slate-400 uppercase mb-2 block text-left">Código Pix Copia e Cola</label>
+                                <div className="flex gap-2">
+                                    <input
+                                        type="text"
+                                        readOnly
+                                        value={selectedPixOrder.payment_metadata?.qr_code}
+                                        className="flex-1 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-600 truncate font-mono"
+                                    />
+                                    <button
+                                        onClick={handleCopyPix}
+                                        className="px-4 py-2 bg-blue-600 text-white text-sm font-bold rounded-lg hover:bg-blue-700 transition-colors"
+                                    >
+                                        Copiar
+                                    </button>
+                                </div>
+                            </div>
+
+                            <button
+                                onClick={() => setSelectedPixOrder(null)}
+                                className="w-full py-3 bg-slate-100 text-slate-700 rounded-xl font-bold hover:bg-slate-200 transition-colors"
+                            >
+                                Fechar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

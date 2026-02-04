@@ -55,7 +55,7 @@ class PaymentController extends Controller
             // If we have more gateways later, we can move this to a dedicated Factory class.
             $service = null;
 
-            if (str_contains($methodSlug, 'mercadopago') || str_contains($methodSlug, 'pix') || str_contains($methodSlug, 'card') || str_contains($methodSlug, 'cartao')) {
+            if (str_contains($methodSlug, 'mercadopago') || str_contains($methodSlug, 'pix') || str_contains($methodSlug, 'card') || str_contains($methodSlug, 'cartao') || str_contains($methodSlug, 'credito')) {
                 // Assuming Mercado Pago handles Pix and Cards for now if associated
                 // Check if it's really Mercado Pago based on settings or name?
                 // For this implementation, we default to MercadoPagoService for these types if settings exist.
@@ -86,12 +86,18 @@ class PaymentController extends Controller
                     $order->transaction_id = $response['id'];
                     $status = $response['status'];
                     $mappedStatus = match ($status) {
-                        'approved' => 'paid',
+                        'approved' => 'preparing',
                         'in_process', 'pending' => 'pending',
                         'rejected' => 'failed', 
                         default => 'pending'
                     };
                     $order->status = $mappedStatus;
+
+                    // Save Metadata (QR Code for Pix)
+                    if (isset($response['point_of_interaction'])) {
+                        $order->payment_metadata = $response['point_of_interaction'];
+                    }
+
                     $order->save();
                     
                     return $this->success([

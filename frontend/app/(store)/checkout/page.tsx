@@ -58,9 +58,12 @@ export default function CheckoutPage() {
     const isCard = selectedSlug.includes('card') || selectedSlug.includes('credito');
 
     const paymentInitialization = useMemo(() => ({
-        amount: finalTotal,
-        payer: user?.email ? { email: user.email } : undefined,
-    }), [finalTotal, user?.email]);
+        amount: finalTotal, // Updates only when total changes
+        preferenceId: '<generated-id>', // In Brick, preferenceId is optional if you use callbacks, but for 'init' we might just need generic data.
+        payer: {
+            email: user?.email || 'guest@sweetstore.com',
+        },
+    }), [finalTotal, user]);
 
     const paymentCustomization = useMemo(() => ({
         paymentMethods: {

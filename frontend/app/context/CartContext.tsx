@@ -62,38 +62,28 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         sessionStorage.setItem('sweet_cart', JSON.stringify(items));
     }, [items]);
 
-    const addToCart = (product: Product, quantity = 1) => {
+    const addToCart = React.useCallback((product: Product, quantity = 1) => {
         setItems(prev => {
             const existing = prev.find(item => item.product.id === product.id);
             if (existing) {
-                // Side effect removed from here
                 return prev.map(item =>
                     item.product.id === product.id
                         ? { ...item, quantity: item.quantity + quantity }
                         : item
                 );
             }
-            // Side effect removed from here
             return [...prev, { product, quantity }];
         });
 
-        // Trigger toast after state update scheduling
-        // Ideally we check if it existed before, but for now generic success message or simple logic
-        // To be precise we can check 'items' but 'items' might be stale inside callback if we used functional update?
-        // Actually, let's use the 'items' from closure since we re-render on change.
-        const existing = items.find(item => item.product.id === product.id);
-        if (existing) {
-            toast.success(`+${quantity} ${product.name}`);
-        } else {
-            toast.success(`${product.name} adicionado!`);
-        }
-    };
+        // Trigger toast (Optimistic UI)
+        toast.success(`${product.name} adicionado!`);
+    }, []);
 
-    const removeFromCart = (productId: number) => {
+    const removeFromCart = React.useCallback((productId: number) => {
         setItems(prev => prev.filter(item => item.product.id !== productId));
-    };
+    }, []);
 
-    const updateQuantity = (productId: number, delta: number) => {
+    const updateQuantity = React.useCallback((productId: number, delta: number) => {
         setItems(prev => prev.map(item => {
             if (item.product.id === productId) {
                 const newQty = item.quantity + delta;
@@ -101,20 +91,30 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             }
             return item;
         }));
-    };
+    }, []);
 
-    const clearCart = () => {
+    const clearCart = React.useCallback(() => {
         setItems([]);
-    };
+    }, []);
 
-    const cartTotal = items.reduce((total, item) => {
+    const cartTotal = React.useMemo(() => items.reduce((total, item) => {
         return total + (parseFloat(item.product.price) * item.quantity);
-    }, 0);
+    }, 0), [items]);
 
-    const cartCount = items.reduce((acc, item) => acc + item.quantity, 0);
+    const cartCount = React.useMemo(() => items.reduce((acc, item) => acc + item.quantity, 0), [items]);
+
+    const value = React.useMemo(() => ({
+        items,
+        addToCart,
+        removeFromCart,
+        updateQuantity,
+        clearCart,
+        cartTotal,
+        cartCount
+    }), [items, addToCart, removeFromCart, updateQuantity, clearCart, cartTotal, cartCount]);
 
     return (
-        <CartContext.Provider value={{ items, addToCart, removeFromCart, updateQuantity, clearCart, cartTotal, cartCount }}>
+        <CartContext.Provider value={value}>
             {children}
         </CartContext.Provider>
     );

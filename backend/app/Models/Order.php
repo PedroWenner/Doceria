@@ -26,6 +26,7 @@ class Order extends Model implements Auditable
 
     protected $casts = [
         'delivery_address' => 'array',
+        'payment_metadata' => 'array',
     ];
 
     public function getNotesAttribute($value)
