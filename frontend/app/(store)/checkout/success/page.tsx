@@ -27,16 +27,12 @@ export default function CheckoutSuccessPage() {
                     if (token) headers['Authorization'] = `Bearer ${token}`;
 
                     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'}/orders/${orderId}`, {
-                        headers
+                        headers,
+                        cache: 'no-store'
                     });
 
                     if (res.ok) {
                         const data = await res.json();
-                        console.log('Order Data:', data.data);
-                        console.log('Status:', data.data.status);
-                        console.log('Metadata:', data.data.payment_metadata);
-                        console.log('Is Pix?', data.data.payment_method?.toLowerCase().includes('pix'));
-
                         setOrder(data.data);
 
                         // Fire confetti only if approved
@@ -60,8 +56,9 @@ export default function CheckoutSuccessPage() {
     }, [orderId, clearCart]);
 
     const handleCopyPix = () => {
-        if (order?.payment_metadata?.qr_code) {
-            navigator.clipboard.writeText(order.payment_metadata.qr_code);
+        const qrCode = order?.payment_metadata?.qr_code || order?.payment_metadata?.transaction_data?.qr_code;
+        if (qrCode) {
+            navigator.clipboard.writeText(qrCode);
             toast.success("Código Pix copiado!");
         }
     };
@@ -78,7 +75,10 @@ export default function CheckoutSuccessPage() {
     const isPixPending = order && (order.status === 'pending') &&
         (order.payment_method?.toLowerCase().includes('pix'));
 
-    if (isPixPending && order?.payment_metadata) {
+    if (isPixPending) {
+        const qrCode = order?.payment_metadata?.qr_code || order?.payment_metadata?.transaction_data?.qr_code;
+        const qrCodeBase64 = order?.payment_metadata?.qr_code_base64 || order?.payment_metadata?.transaction_data?.qr_code_base64;
+
         return (
             <div className="min-h-[60vh] flex flex-col items-center justify-center p-8 text-center animate-fadeIn max-w-lg mx-auto">
                 <div className="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center mb-6 text-3xl">
@@ -90,25 +90,29 @@ export default function CheckoutSuccessPage() {
                 </p>
 
                 {/* QR Code Image */}
-                {order.payment_metadata.qr_code_base64 && (
+                {qrCodeBase64 ? (
                     <div className="mb-6 p-4 bg-white border rounded-xl shadow-sm">
                         <img
-                            src={`data:image/jpeg;base64,${order.payment_metadata.qr_code_base64}`}
+                            src={`data:image/jpeg;base64,${qrCodeBase64}`}
                             alt="QR Code Pix"
                             className="w-48 h-48 object-contain"
                         />
                     </div>
+                ) : (
+                    <div className="mb-6 p-8 bg-gray-50 border rounded-xl text-xs text-gray-400">
+                        QR Code imagem indisponível
+                    </div>
                 )}
 
                 {/* Copy Paste Code */}
-                {order.payment_metadata.qr_code && (
+                {qrCode ? (
                     <div className="w-full mb-8">
                         <label className="text-xs font-bold text-slate-400 uppercase mb-2 block text-left">Código Pix Copia e Cola</label>
                         <div className="flex gap-2">
                             <input
                                 type="text"
                                 readOnly
-                                value={order.payment_metadata.qr_code}
+                                value={qrCode}
                                 className="flex-1 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-600 truncate font-mono"
                             />
                             <button
@@ -118,6 +122,13 @@ export default function CheckoutSuccessPage() {
                                 Copiar
                             </button>
                         </div>
+                    </div>
+                ) : (
+                    <div className="w-full mb-8 p-4 bg-red-50 border border-red-100 rounded-lg text-left">
+                        <p className="text-xs font-bold text-red-600 mb-1">Erro ao carregar código Pix</p>
+                        <pre className="text-[10px] text-red-500 overflow-auto max-h-20">
+                            {JSON.stringify(order.payment_metadata, null, 2)}
+                        </pre>
                     </div>
                 )}
 
@@ -162,6 +173,7 @@ export default function CheckoutSuccessPage() {
                     Voltar para Loja
                 </Link>
             </div>
+
         </div>
     );
 }

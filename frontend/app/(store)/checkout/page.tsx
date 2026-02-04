@@ -59,7 +59,6 @@ export default function CheckoutPage() {
 
     const paymentInitialization = useMemo(() => ({
         amount: finalTotal, // Updates only when total changes
-        preferenceId: '<generated-id>', // In Brick, preferenceId is optional if you use callbacks, but for 'init' we might just need generic data.
         payer: {
             email: user?.email || 'guest@sweetstore.com',
         },
@@ -73,15 +72,6 @@ export default function CheckoutPage() {
             debitCard: isCard ? ['all'] : [],
             mercadoPago: []
         },
-        visual: {
-            style: {
-                theme: 'bootstrap' as const,
-                customVariables: {
-                    baseColor: '#ec4899'
-                }
-            },
-            hidePaymentButton: false
-        }
     }), [isPix, isCard]);
 
     const [isMercadoPagoInitialized, setIsMercadoPagoInitialized] = useState(false);
@@ -261,7 +251,8 @@ export default function CheckoutPage() {
                 const payData = await payRes.json();
                 clearCart();
                 router.push(`/checkout/success?order_id=${orderId}`);
-                return Promise.resolve();
+                // Return a pending promise to prevent the Brick from trying to render its own success view (which might be causing SVG errors) while we redirect.
+                return new Promise(() => { });
             } else {
                 const errPay = await payRes.json();
                 toast.error(`Erro: ${errPay.message}`);

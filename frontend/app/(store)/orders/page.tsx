@@ -30,6 +30,11 @@ interface Order {
         qr_code?: string;
         qr_code_base64?: string;
         ticket_url?: string;
+        transaction_data?: {
+            qr_code?: string;
+            qr_code_base64?: string;
+            ticket_url?: string;
+        };
     };
 }
 
@@ -96,8 +101,9 @@ export default function MyOrdersPage() {
     };
 
     const handleCopyPix = () => {
-        if (selectedPixOrder?.payment_metadata?.qr_code) {
-            navigator.clipboard.writeText(selectedPixOrder.payment_metadata.qr_code);
+        const qrCode = selectedPixOrder?.payment_metadata?.qr_code || selectedPixOrder?.payment_metadata?.transaction_data?.qr_code;
+        if (qrCode) {
+            navigator.clipboard.writeText(qrCode);
             // toast.success("Copiado!"); // Assuming toast is imported or use alerts if not
             alert("Código Pix copiado!");
         }
@@ -184,10 +190,10 @@ export default function MyOrdersPage() {
                                         </div>
 
                                         {/* Pix QR Code Button */}
-                                        {order.status === 'pending' && order.payment_method.toLowerCase().includes('pix') && order.payment_metadata?.qr_code && (
+                                        {order.status === 'pending' && order.payment_method.toLowerCase().includes('pix') && (order.payment_metadata?.qr_code || order.payment_metadata?.transaction_data?.qr_code) && (
                                             <button
                                                 onClick={() => setSelectedPixOrder(order)}
-                                                className="px-4 py-2 bg-blue-50 text-blue-600 rounded-lg text-sm font-bold hover:bg-blue-100 transition-colors flex items-center gap-2"
+                                                className="px-4 py-2 bg-blue-50 text-blue-600 dark:text-blue-400 dark:bg-blue-900/20 rounded-lg text-sm font-bold hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors flex items-center gap-2"
                                             >
                                                 💠 Ver PIX
                                             </button>
@@ -218,10 +224,10 @@ export default function MyOrdersPage() {
                             <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Pagamento Pix</h3>
                             <p className="text-sm text-slate-500 mb-6">Escaneie o QR Code ou copie o código.</p>
 
-                            {selectedPixOrder.payment_metadata?.qr_code_base64 && (
+                            {(selectedPixOrder.payment_metadata?.qr_code_base64 || selectedPixOrder.payment_metadata?.transaction_data?.qr_code_base64) && (
                                 <div className="mb-6 p-4 bg-white border rounded-xl shadow-sm inline-block">
                                     <img
-                                        src={`data:image/jpeg;base64,${selectedPixOrder.payment_metadata.qr_code_base64}`}
+                                        src={`data:image/jpeg;base64,${selectedPixOrder.payment_metadata?.qr_code_base64 || selectedPixOrder.payment_metadata?.transaction_data?.qr_code_base64}`}
                                         alt="QR Code Pix"
                                         className="w-48 h-48 object-contain"
                                     />
@@ -234,7 +240,7 @@ export default function MyOrdersPage() {
                                     <input
                                         type="text"
                                         readOnly
-                                        value={selectedPixOrder.payment_metadata?.qr_code}
+                                        value={selectedPixOrder.payment_metadata?.qr_code || selectedPixOrder.payment_metadata?.transaction_data?.qr_code}
                                         className="flex-1 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-600 truncate font-mono"
                                     />
                                     <button

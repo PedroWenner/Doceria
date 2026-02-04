@@ -90,4 +90,5 @@ Route::group(['middleware' => ['api', 'auth:api']], function () {
     Route::post('orders', [App\Http\Controllers\OrderController::class, 'store']);
     Route::post('orders/{order}/pay', [App\Http\Controllers\PaymentController::class, 'store']);
     Route::post('orders/{order}/verify-payment', [App\Http\Controllers\OrderController::class, 'verifyPayment']);
+    Route::get('orders/{order}', [App\Http\Controllers\OrderController::class, 'show']);
 });
