@@ -103,7 +103,6 @@ export default function CheckoutPage() {
                     setPaymentMethods(activeMethods);
 
                     // Initialize MP if key exists
-                    // Initialize MP if key exists
                     const mpMethod = activeMethods.find((m: PaymentMethod) => m.public_key);
                     if (mpMethod && mpMethod.public_key) {
                         const cleanKey = mpMethod.public_key.trim();
@@ -111,11 +110,9 @@ export default function CheckoutPage() {
                             initMercadoPago(cleanKey, { locale: 'pt-BR' });
                             setIsMercadoPagoInitialized(true);
                         } else {
-                            // If key is empty but method exists (shouldn't happen), safely unblock
                             setIsMercadoPagoInitialized(true);
                         }
                     } else {
-                        // If no MP method, we also set initialized to true to allow other methods
                         setIsMercadoPagoInitialized(true);
                     }
 
@@ -334,7 +331,7 @@ export default function CheckoutPage() {
 
 
     return (
-        <div className="min-h-screen pb-32 animate-fadeIn transition-colors duration-500" style={{ backgroundColor: 'var(--store-bg)' }}>
+        <div className="min-h-screen pb-32 animate-fadeIn" style={{ backgroundColor: 'var(--store-bg)' }}>
             <div className="max-w-6xl mx-auto px-4 pt-8">
                 {/* Header */}
                 <div className="flex items-center gap-4 mb-8">
@@ -377,10 +374,6 @@ export default function CheckoutPage() {
                                         )}
                                     </div>
                                     <div className="mt-4 flex items-center gap-3">
-                                        <span className="px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-2"
-                                            style={{ backgroundColor: 'var(--store-bg)', color: 'var(--store-text)' }}>
-                                            ⏱️ ~20 min
-                                        </span>
                                         <button
                                             type="button"
                                             onClick={() => setIsMapOpen(true)}
@@ -408,60 +401,57 @@ export default function CheckoutPage() {
                             </h3>
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                {paymentMethods.map(method => (
-                                    <label key={method.id} className={`relative group p-5 rounded-xl border-2 transition-all cursor-pointer flex flex-col gap-2`}
-                                        style={{
-                                            borderColor: selectedMethodId === method.id ? 'var(--store-text)' : 'var(--store-border)',
-                                            backgroundColor: selectedMethodId === method.id ? 'var(--store-bg)' : 'transparent'
-                                        }}>
-                                        <input
-                                            type="radio"
-                                            name="payment"
-                                            className="sr-only"
-                                            checked={selectedMethodId === method.id}
-                                            onChange={() => setSelectedMethodId(method.id)}
-                                        />
-                                        <div className="flex justify-between items-center">
-                                            <span className="text-2xl grayscale">
-                                                {method.slug.includes('pix') ? '💠' :
-                                                    method.slug.includes('money') || method.slug.includes('dinheiro') ? '💵' :
-                                                        method.slug.includes('card') || method.slug.includes('cartao') ? '💳' : '💰'}
-                                            </span>
-                                            {selectedMethodId === method.id && (
-                                                <div className="w-4 h-4 rounded-full flex items-center justify-center"
-                                                    style={{ backgroundColor: 'var(--store-text)' }}>
-                                                    <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
-                                                </div>
+                                {paymentMethods.map(method => {
+                                    // Calculate discount just to show badge
+                                    const hasDiscount = items.some(item =>
+                                        item.product.discounts?.some(d => d.payment_method_id === method.id)
+                                    );
+
+                                    return (
+                                        <label key={method.id} className={`relative group p-5 rounded-xl border-2 transition-all cursor-pointer flex flex-col gap-2`}
+                                            style={{
+                                                borderColor: selectedMethodId === method.id ? 'var(--store-text)' : 'var(--store-border)',
+                                                backgroundColor: selectedMethodId === method.id ? 'var(--store-bg)' : 'transparent'
+                                            }}>
+                                            <input
+                                                type="radio"
+                                                name="payment"
+                                                className="sr-only"
+                                                checked={selectedMethodId === method.id}
+                                                onChange={() => setSelectedMethodId(method.id)}
+                                            />
+                                            <div className="flex justify-between items-center">
+                                                <span className="text-2xl grayscale">
+                                                    {method.slug.includes('pix') ? '💠' :
+                                                        method.slug.includes('money') || method.slug.includes('dinheiro') ? '💵' :
+                                                            method.slug.includes('card') || method.slug.includes('cartao') ? '💳' : '💰'}
+                                                </span>
+                                                {selectedMethodId === method.id && (
+                                                    <div className="w-4 h-4 rounded-full flex items-center justify-center"
+                                                        style={{ backgroundColor: 'var(--store-text)' }}>
+                                                        <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div>
+                                                <span className="font-bold block" style={{ color: selectedMethodId === method.id ? 'var(--store-text)' : 'var(--store-text-muted)' }}>{method.name}</span>
+                                                <span className="text-xs font-medium" style={{ color: 'var(--store-text-muted)' }}>{method.slug.includes('pix') ? 'Aprovação imediata' : 'Pagar na retirada'}</span>
+                                            </div>
+
+                                            {/* Dynamic Discount Badge Check */}
+                                            {hasDiscount && (
+                                                <span className="absolute top-3 right-3 text-[10px] font-bold px-2 py-1 rounded-full border"
+                                                    style={{
+                                                        backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                                                        color: 'rgb(21, 128, 61)',
+                                                        borderColor: 'rgba(34, 197, 94, 0.2)'
+                                                    }}>
+                                                    DESCONTOS
+                                                </span>
                                             )}
-                                        </div>
-                                        <div>
-                                            <span className="font-bold block" style={{ color: selectedMethodId === method.id ? 'var(--store-text)' : 'var(--store-text-muted)' }}>{method.name}</span>
-                                            <span className="text-xs font-medium" style={{ color: 'var(--store-text-muted)' }}>{method.slug.includes('pix') ? 'Aprovação imediata' : 'Pagar na retirada'}</span>
-                                        </div>
-
-                                        {/* Dynamic Discount Badge Check */}
-                                        {(() => {
-                                            const potentialDiscount = items.reduce((acc, item) => {
-                                                const rule = item.product.discounts?.find(d => d.payment_method_id === method.id);
-                                                return rule ? acc + 1 : acc;
-                                            }, 0);
-
-                                            if (potentialDiscount > 0) {
-                                                return (
-                                                    <span className="absolute top-3 right-3 text-[10px] font-bold px-2 py-1 rounded-full border"
-                                                        style={{
-                                                            backgroundColor: 'rgba(34, 197, 94, 0.1)',
-                                                            color: 'rgb(21, 128, 61)',
-                                                            borderColor: 'rgba(34, 197, 94, 0.2)'
-                                                        }}>
-                                                        DESCONTOS
-                                                    </span>
-                                                );
-                                            }
-                                            return null;
-                                        })()}
-                                    </label>
-                                ))}
+                                        </label>
+                                    );
+                                })}
                             </div>
 
                             {/* Change Input Animation */}
@@ -490,13 +480,86 @@ export default function CheckoutPage() {
                                             onChange={(e) => setChangeFor(e.target.value)}
                                         />
                                     </div>
-                                    <p className="text-[10px] mt-2 pl-8" style={{ color: 'var(--store-text-muted)' }}>Deixe vazio se tiver o valor exato.</p>
                                 </div>
                             </div>
+
+                            <div className="my-6 border-t border-dashed" style={{ borderColor: 'var(--store-border)' }}></div>
+
+                            <div className="space-y-3">
+                                <div className="flex justify-between text-sm" style={{ color: 'var(--store-text-muted)' }}>
+                                    <span>Subtotal</span>
+                                    <span className="font-medium">R$ {cartTotal.toFixed(2).replace('.', ',')}</span>
+                                </div>
+                                <div className="flex justify-between text-sm" style={{ color: 'var(--store-text-muted)' }}>
+                                    <span>Descontos</span>
+                                    {discountAmount > 0 ? (
+                                        <span className="font-bold" style={{ color: 'rgb(22, 163, 74)' }}>- R$ {discountAmount.toFixed(2).replace('.', ',')}</span>
+                                    ) : (
+                                        <span className="text-gray-300">-</span>
+                                    )}
+                                </div>
+                                <div className="flex justify-between text-xl font-extrabold mt-6 pt-4 border-t"
+                                    style={{ color: 'var(--store-text)', borderColor: 'var(--store-border)' }}>
+                                    <span>Total</span>
+                                    <span>R$ {finalTotal.toFixed(2).replace('.', ',')}</span>
+                                </div>
+                            </div>
+
+                            {/* Conditional Button: Money uses normal button, Online uses Brick */}
+                            {isMoney ? (
+                                <button
+                                    onClick={handleFinishOrder}
+                                    disabled={isSubmitting || !selectedMethodId}
+                                    className={`w-full py-4 rounded-xl font-bold text-base shadow-xl flex items-center justify-center gap-3 transition-all mt-8 group hover:opacity-90 active:scale-[0.98]
+                                        ${(isSubmitting || !selectedMethodId) ? 'opacity-70 cursor-not-allowed' : ''}
+                                    `}
+                                    style={{
+                                        backgroundColor: 'var(--store-primary)',
+                                        color: 'var(--store-primary-fg)',
+                                        boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)'
+                                    }}
+                                >
+                                    {isSubmitting ? (
+                                        <>
+                                            <span className="animate-spin text-xl">🍩</span>
+                                            <span>Processando...</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <span>Confirmar Pedido</span>
+                                            <span>➜</span>
+                                        </>
+                                    )}
+                                </button>
+                            ) : (
+                                <div className="mt-8">
+                                    {isMercadoPagoInitialized && (isPix || isCard) ? (
+                                        <Payment
+                                            key={selectedMethodId}
+                                            initialization={paymentInitialization}
+                                            customization={paymentCustomization}
+                                            onSubmit={handleBrickSubmit}
+                                            onReady={() => console.log('Brick payment ready')}
+                                            onError={(error) => {
+                                                console.error('Brick error:', error);
+                                            }}
+                                        />
+                                    ) : (
+                                        <div className="flex flex-col items-center justify-center h-40 text-slate-400 gap-3 border-2 border-dashed border-slate-200 rounded-xl">
+                                            <span className="animate-pulse text-2xl">⏳</span>
+                                            <span className="text-sm font-medium">Carregando gateway seguro...</span>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            <p className="text-center text-[10px] mt-4 leading-relaxed" style={{ color: 'var(--store-text-muted)' }}>
+                                Ao confirmar, você concorda com nossos <br /><Link href="#" className="underline hover:text-gray-900">termos de serviço</Link>.
+                            </p>
                         </section>
                     </div>
 
-                    {/* Right Column - Summary (Sticky) */}
+                    {/* Right Column - Summary */}
                     <div className="md:col-span-1">
                         <div className="p-6 rounded-xl shadow-lg border sticky top-24"
                             style={{
@@ -562,97 +625,49 @@ export default function CheckoutPage() {
                                     <span>R$ {finalTotal.toFixed(2).replace('.', ',')}</span>
                                 </div>
                             </div>
-
-                            {/* Conditional Button: Money uses normal button, Online uses Brick */}
-                            {isMoney ? (
-                                <button
-                                    onClick={handleFinishOrder}
-                                    disabled={isSubmitting || !selectedMethodId}
-                                    className={`w-full py-4 rounded-xl font-bold text-base shadow-xl flex items-center justify-center gap-3 transition-all mt-8 group hover:opacity-90 active:scale-[0.98]
-                                        ${(isSubmitting || !selectedMethodId) ? 'opacity-70 cursor-not-allowed' : ''}
-                                    `}
-                                    style={{
-                                        backgroundColor: 'var(--store-primary)',
-                                        color: 'var(--store-primary-fg)',
-                                        boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)'
-                                    }}
-                                >
-                                    {isSubmitting ? (
-                                        <>
-                                            <span className="animate-spin text-xl">🍩</span>
-                                            <span>Processando...</span>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <span>Confirmar Pedido</span>
-                                            <span>➜</span>
-                                        </>
-                                    )}
-                                </button>
-                            ) : (
-                                <div className="mt-8">
-                                    {isMercadoPagoInitialized && (isPix || isCard) && (
-                                        <Payment
-                                            key={selectedMethodId}
-                                            initialization={paymentInitialization}
-                                            customization={paymentCustomization}
-                                            onSubmit={handleBrickSubmit}
-                                            onReady={() => console.log('Brick payment ready')}
-                                            onError={(error) => {
-                                                console.error('Brick error:', error);
-                                            }}
-                                        />
-                                    )}
-                                </div>
-                            )}
-
-                            <p className="text-center text-[10px] mt-4 leading-relaxed" style={{ color: 'var(--store-text-muted)' }}>
-                                Ao confirmar, você concorda com nossos <br /><Link href="#" className="underline hover:text-gray-900">termos de serviço</Link>.
-                            </p>
                         </div>
                     </div>
                 </div>
-            </div>
 
-
-            {/* Map Modal */}
-            {
-                isMapOpen && settings && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fadeIn">
-                        <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl animate-scaleIn relative">
-                            <div className="flex items-center justify-between p-4 border-b dark:border-slate-800">
-                                <h3 className="font-bold text-lg flex items-center gap-2" style={{ color: 'var(--store-text)' }}>
-                                    <MapPin className="text-red-500" />
-                                    Localização da Loja
-                                </h3>
-                                <button
-                                    onClick={() => setIsMapOpen(false)}
-                                    className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors"
-                                >
-                                    <X size={20} className="text-slate-500" />
-                                </button>
-                            </div>
-                            <div className="p-4 bg-slate-50 dark:bg-slate-950">
-                                <LocationMap
-                                    lat={Number(settings.latitude)}
-                                    lng={Number(settings.longitude)}
-                                    readOnly={true}
-                                />
-                                <div className="mt-4 text-center">
-                                    <a
-                                        href={`https://www.google.com/maps/dir/?api=1&destination=${settings.latitude},${settings.longitude}`}
-                                        target="_blank"
-                                        className="inline-flex items-center gap-2 font-bold text-sm px-6 py-3 rounded-xl hover:opacity-90 transition-opacity"
-                                        style={{ backgroundColor: 'var(--store-primary)', color: 'var(--store-primary-fg)' }}
+                {/* Map Modal */}
+                {
+                    isMapOpen && settings && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fadeIn">
+                            <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl animate-scaleIn relative">
+                                <div className="flex items-center justify-between p-4 border-b dark:border-slate-800">
+                                    <h3 className="font-bold text-lg flex items-center gap-2" style={{ color: 'var(--store-text)' }}>
+                                        <MapPin className="text-red-500" />
+                                        Localização da Loja
+                                    </h3>
+                                    <button
+                                        onClick={() => setIsMapOpen(false)}
+                                        className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors"
                                     >
-                                        Abrir no Google Maps 🗺️
-                                    </a>
+                                        <X size={20} className="text-slate-500" />
+                                    </button>
+                                </div>
+                                <div className="p-4 bg-slate-50 dark:bg-slate-950">
+                                    <LocationMap
+                                        lat={Number(settings.latitude)}
+                                        lng={Number(settings.longitude)}
+                                        readOnly={true}
+                                    />
+                                    <div className="mt-4 text-center">
+                                        <a
+                                            href={`https://www.google.com/maps/dir/?api=1&destination=${settings.latitude},${settings.longitude}`}
+                                            target="_blank"
+                                            className="inline-flex items-center gap-2 font-bold text-sm px-6 py-3 rounded-xl hover:opacity-90 transition-opacity"
+                                            style={{ backgroundColor: 'var(--store-primary)', color: 'var(--store-primary-fg)' }}
+                                        >
+                                            Abrir no Google Maps 🗺️
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                )
-            }
+                    )
+                }
+            </div>
         </div >
     );
 }
