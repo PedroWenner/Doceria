@@ -241,6 +241,10 @@ export default function ProductsPage() {
                 }
             });
 
+            if (formData.discounts.length === 0) {
+                data.append('clear_discounts', '1');
+            }
+
             const res = await fetch(url, {
                 method: 'POST',
                 headers: { Authorization: `Bearer ${token}` },
@@ -538,6 +542,20 @@ export default function ProductsPage() {
                                             <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1.5">{t('products.sku')}</label>
                                             <input required type="text" className="w-full p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-50 focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-50 outline-none transition-all font-mono text-sm"
                                                 placeholder="CODE-00" value={formData.sku} onChange={e => setFormData({ ...formData, sku: e.target.value })} />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1.5">{t('common.status')}</label>
+                                            <div className="relative">
+                                                <select
+                                                    className="w-full p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-50 focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-50 outline-none appearance-none cursor-pointer"
+                                                    value={formData.status}
+                                                    onChange={(e) => setFormData({ ...formData, status: e.target.value as 'active' | 'draft' })}
+                                                >
+                                                    <option value="active">Ativo</option>
+                                                    <option value="draft">Rascunho</option>
+                                                </select>
+                                                <ChevronDown size={16} className="absolute right-3 top-3 text-slate-400 pointer-events-none" />
+                                            </div>
                                         </div>
                                         <div>
                                             <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1.5">{t('products.category')}</label>

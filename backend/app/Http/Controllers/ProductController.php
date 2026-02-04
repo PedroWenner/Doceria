@@ -100,15 +100,17 @@ class ProductController extends Controller
 
         $product->update($validated);
 
-        if ($request->has('discounts')) {
+        if ($request->has('discounts') || $request->boolean('clear_discounts')) {
             // Clear existing and re-create (simplest strategy for sync)
             $product->discounts()->delete();
             
-            foreach ($request->discounts as $discount) {
-                $product->discounts()->create([
-                    'payment_method_id' => $discount['payment_method_id'],
-                    'percentage' => $discount['percentage'],
-                ]);
+            if ($request->has('discounts') && is_array($request->discounts)) {
+                foreach ($request->discounts as $discount) {
+                    $product->discounts()->create([
+                        'payment_method_id' => $discount['payment_method_id'],
+                        'percentage' => $discount['percentage'],
+                    ]);
+                }
             }
         }
 
