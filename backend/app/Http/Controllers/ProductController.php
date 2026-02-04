@@ -15,10 +15,20 @@ class ProductController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $limit = \App\Models\CompanySetting::first()->pagination_limit ?? 10;
-        $products = Product::with(['category', 'discounts.paymentMethod'])->latest()->paginate($limit);
+        $query = Product::with(['category', 'discounts.paymentMethod']);
+
+        if ($request->has('status')) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->input('limit') === 'all') {
+            return $this->success($query->latest()->get());
+        }
+
+        $limit = $request->input('limit', \App\Models\CompanySetting::first()->pagination_limit ?? 10);
+        $products = $query->latest()->paginate($limit);
         return $this->success($products);
     }
 

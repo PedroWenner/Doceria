@@ -35,7 +35,7 @@ export default function StoreHome() {
         const fetchStoreData = async () => {
             try {
                 const [prodRes, catRes] = await Promise.all([
-                    fetch(`${apiUrl}/products`),
+                    fetch(`${apiUrl}/products?status=active&limit=all`),
                     fetch(`${apiUrl}/categories`)
                 ]);
 
