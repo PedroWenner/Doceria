@@ -42,10 +42,7 @@ class WebhookController extends Controller
             }
 
             try {
-                // We need the credentials. Since they are global for Mercado Pago, 
-                // we can pick any method that uses MP credentials (e.g., 'carto_de_credito' or 'pix').
-                // Ideally, we should check which method was used for the Order, but we don't have the Order ID yet.
-                // So we fetch the 'carto_de_credito' method as a "config provider" since they are synced.
+                // Fetch credentials
                 $paymentMethod = PaymentMethod::where('slug', 'carto_de_credito')->first();
                 
                 if (!$paymentMethod || !$paymentMethod->gateway_setting) {
@@ -57,37 +54,34 @@ class WebhookController extends Controller
                 $paymentData = $this->mercadoPagoService->getPaymentStatus($paymentId, $paymentMethod->gateway_setting);
                 
                 $orderId = $paymentData['external_reference'] ?? null;
-                $status = $paymentData['status'] ?? null;
+                $status = $paymentData['status'] ?? 'pending';
+                $amount = $paymentData['transaction_amount'] ?? 0;
+                $method = $paymentData['payment_method_id'] ?? 'unknown';
 
-                if (!$orderId) {
-                    Log::error("Webhook: Order ID (external_reference) not found for payment $paymentId");
-                    return response()->json(['error' => 'Order ID not found'], 404);
-                }
+                // Update or Create Payment Record
+                $payment = \App\Models\Payment::updateOrCreate(
+                    ['external_id' => $paymentId],
+                    [
+                        'order_id' => $orderId, // Nullable if not found
+                        'method' => $method,
+                        'status' => $this->mapStatus($status),
+                        'amount' => $amount,
+                        'metadata' => $paymentData
+                    ]
+                );
 
-                $order = Order::find($orderId);
-                if (!$order) {
-                    Log::error("Webhook: Order $orderId not found");
-                    return response()->json(['error' => 'Order not found'], 404);
-                }
+                Log::info("Payment {$payment->id} updated to {$payment->status}");
 
-                // Map MP status to System status
-                $newStatus = match ($status) {
-                    'approved' => 'paid',
-                    'authorized' => 'paid', // Sometimes used for cards
-                    'in_process', 'pending' => 'pending',
-                    'rejected', 'cancelled' => 'failed',
-                    'refunded', 'charged_back' => 'canceled',
-                    default => 'pending'
-                };
-
-                // Update Order if status changed
-                if ($order->status !== $newStatus) {
-                    $order->update(['status' => $newStatus]);
-                    
-                    // If paid, ensure we record the payment method used if not already
-                    // (Optional logic here)
-                    
-                    Log::info("Webhook: Order $orderId updated to $newStatus");
+                // Sync with Order if exists
+                if ($orderId) {
+                    $order = Order::find($orderId);
+                    if ($order) {
+                        // We only update order payment_status if it changed
+                        if ($order->payment_status !== $payment->status) {
+                            $order->update(['payment_status' => $payment->status]);
+                            Log::info("Order {$order->id} payment_status updated to {$payment->status}");
+                        }
+                    }
                 }
 
                 return response()->json(['status' => 'ok']);
@@ -99,5 +93,16 @@ class WebhookController extends Controller
         }
 
         return response()->json(['status' => 'ignored']);
+    }
+
+    private function mapStatus($mpStatus)
+    {
+        return match ($mpStatus) {
+            'approved', 'authorized' => 'paid',
+            'in_process', 'pending' => 'pending',
+            'rejected', 'cancelled' => 'failed',
+            'refunded', 'charged_back' => 'canceled',
+            default => 'pending'
+        };
     }
 }

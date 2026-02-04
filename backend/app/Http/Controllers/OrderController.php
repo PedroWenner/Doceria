@@ -106,29 +106,47 @@ class OrderController extends Controller
 
             $statusData = $mpService->getPaymentStatus($paymentId, $paymentMethod->gateway_setting);
 
-            $status = $statusData['status'] ?? null;
+            $status = $statusData['status'] ?? 'pending';
+            $amount = $statusData['transaction_amount'] ?? 0;
+            $method = $statusData['payment_method_id'] ?? 'unknown';
 
-            // Map status
-            $newStatus = match ($status) {
-                'approved', 'authorized' => 'paid',
-                'in_process', 'pending' => 'pending',
-                'rejected', 'cancelled' => 'failed',
-                'refunded', 'charged_back' => 'canceled',
-                default => 'pending'
-            };
+            // Update or Create Payment Record
+            $payment = \App\Models\Payment::updateOrCreate(
+                ['external_id' => $paymentId],
+                [
+                    'order_id' => $order->id,
+                    'method' => $method,
+                    'status' => $this->mapStatus($status),
+                    'amount' => $amount,
+                    'metadata' => $statusData
+                ]
+            );
 
-            if ($order->payment_status !== $newStatus) {
-                $order->update(['payment_status' => $newStatus]);
+            // Update Order Payment Status if changed
+            if ($order->payment_status !== $payment->status) {
+                $order->update(['payment_status' => $payment->status]);
             }
 
             return $this->success([
                 'order_status' => $order->status,
-                'payment_status' => $order->payment_status
+                'payment_status' => $order->payment_status,
+                'payment_id' => $payment->id
             ], 'Payment status verified');
 
         } catch (\Exception $e) {
             return $this->error($e->getMessage(), 500);
         }
+    }
+
+    private function mapStatus($mpStatus)
+    {
+        return match ($mpStatus) {
+            'approved', 'authorized' => 'paid',
+            'in_process', 'pending' => 'pending',
+            'rejected', 'cancelled' => 'failed',
+            'refunded', 'charged_back' => 'canceled',
+            default => 'pending'
+        };
     }
     public function myOrders(Request $request)
     {
