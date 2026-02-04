@@ -84,7 +84,7 @@ export default function ProductsPage() {
     const [isSavingCategory, setIsSavingCategory] = useState(false);
 
     // Stats
-    const totalProducts = products.length;
+    const totalProducts = meta.total;
     const lowStockCount = products.filter(p => p.stock_quantity <= p.min_stock_level && p.status === 'active').length;
     const activeDiscountsCount = products.reduce((acc, p) => acc + (p.discounts?.length || 0), 0);
 
@@ -307,9 +307,6 @@ export default function ProductsPage() {
                     <p className="text-slate-500 dark:text-slate-400 mt-1 text-sm">{t('products.subtitle')}</p>
                 </div>
                 <div className="flex gap-3">
-                    <button className="p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
-                        <Filter size={20} />
-                    </button>
                     <button
                         onClick={() => handleOpenModal()}
                         className="flex items-center gap-2 bg-slate-900 dark:bg-slate-50 text-white dark:text-slate-900 px-5 py-2.5 rounded-lg font-semibold hover:bg-slate-800 dark:hover:bg-slate-200 transition-all shadow-sm"
