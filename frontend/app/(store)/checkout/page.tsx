@@ -3,7 +3,7 @@
 import { useCart } from '@/app/context/CartContext';
 import { useStoreAuth } from '@/app/context/StoreAuthContext';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { toast } from 'react-hot-toast';
 import Link from 'next/link';
 import jsCookie from 'js-cookie';
@@ -49,6 +49,39 @@ export default function CheckoutPage() {
     const [isMapOpen, setIsMapOpen] = useState(false);
     const [isLoadingSettings, setIsLoadingSettings] = useState(true);
 
+    // Derived State & Memoization (Moved up to avoid Hook Order errors)
+    const isMoney = paymentMethods.find(m => m.id === selectedMethodId)?.slug.includes('money') ||
+        paymentMethods.find(m => m.id === selectedMethodId)?.slug.includes('dinheiro');
+
+    const selectedSlug = paymentMethods.find(m => m.id === selectedMethodId)?.slug || '';
+    const isPix = selectedSlug.includes('pix');
+    const isCard = selectedSlug.includes('card') || selectedSlug.includes('credito');
+
+    const paymentInitialization = useMemo(() => ({
+        amount: finalTotal,
+        payer: user?.email ? { email: user.email } : undefined,
+    }), [finalTotal, user?.email]);
+
+    const paymentCustomization = useMemo(() => ({
+        paymentMethods: {
+            ticket: [],
+            bankTransfer: isPix ? ['all'] : [],
+            creditCard: isCard ? ['all'] : [],
+            debitCard: isCard ? ['all'] : [],
+            mercadoPago: []
+        },
+        visual: {
+            style: {
+                theme: 'bootstrap' as const,
+                customVariables: {
+                    baseColor: '#ec4899'
+                }
+            },
+            hidePaymentButton: false
+        }
+    }), [isPix, isCard]);
+
+    const [isMercadoPagoInitialized, setIsMercadoPagoInitialized] = useState(false);
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 
     // Protect Route
@@ -70,9 +103,20 @@ export default function CheckoutPage() {
                     setPaymentMethods(activeMethods);
 
                     // Initialize MP if key exists
+                    // Initialize MP if key exists
                     const mpMethod = activeMethods.find((m: PaymentMethod) => m.public_key);
                     if (mpMethod && mpMethod.public_key) {
-                        initMercadoPago(mpMethod.public_key, { locale: 'pt-BR' });
+                        const cleanKey = mpMethod.public_key.trim();
+                        if (cleanKey) {
+                            initMercadoPago(cleanKey, { locale: 'pt-BR' });
+                            setIsMercadoPagoInitialized(true);
+                        } else {
+                            // If key is empty but method exists (shouldn't happen), safely unblock
+                            setIsMercadoPagoInitialized(true);
+                        }
+                    } else {
+                        // If no MP method, we also set initialized to true to allow other methods
+                        setIsMercadoPagoInitialized(true);
                     }
 
                     // Select first method by default if available
@@ -287,13 +331,7 @@ export default function CheckoutPage() {
         }
     };
 
-    const isMoney = paymentMethods.find(m => m.id === selectedMethodId)?.slug.includes('money') ||
-        paymentMethods.find(m => m.id === selectedMethodId)?.slug.includes('dinheiro');
 
-    // Determine customization based on selection
-    const selectedSlug = paymentMethods.find(m => m.id === selectedMethodId)?.slug || '';
-    const isPix = selectedSlug.includes('pix');
-    const isCard = selectedSlug.includes('card') || selectedSlug.includes('credito');
 
     return (
         <div className="min-h-screen pb-32 animate-fadeIn transition-colors duration-500" style={{ backgroundColor: 'var(--store-bg)' }}>
@@ -553,28 +591,16 @@ export default function CheckoutPage() {
                                 </button>
                             ) : (
                                 <div className="mt-8">
-                                    {(isPix || isCard) && (
+                                    {isMercadoPagoInitialized && (isPix || isCard) && (
                                         <Payment
-                                            initialization={{ amount: finalTotal }}
-                                            customization={{
-                                                paymentMethods: {
-                                                    ticket: 'none',
-                                                    bankTransfer: isPix ? 'all' : 'none',
-                                                    creditCard: isCard ? 'all' : 'none',
-                                                    debitCard: isCard ? 'all' : 'none',
-                                                    mercadoPago: 'none'
-                                                },
-                                                visual: {
-                                                    style: {
-                                                        theme: 'bootstrap', // or 'default' / 'flat'
-                                                        customVariables: {
-                                                            baseColor: '#ec4899' // Pink-500
-                                                        }
-                                                    },
-                                                    hidePaymentButton: false
-                                                }
-                                            }}
+                                            key={selectedMethodId}
+                                            initialization={paymentInitialization}
+                                            customization={paymentCustomization}
                                             onSubmit={handleBrickSubmit}
+                                            onReady={() => console.log('Brick payment ready')}
+                                            onError={(error) => {
+                                                console.error('Brick error:', error);
+                                            }}
                                         />
                                     )}
                                 </div>

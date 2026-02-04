@@ -55,7 +55,7 @@ class PaymentController extends Controller
             // If we have more gateways later, we can move this to a dedicated Factory class.
             $service = null;
 
-            if (str_contains($methodSlug, 'mercadopago') || str_contains($methodSlug, 'pix') || str_contains($methodSlug, 'card')) {
+            if (str_contains($methodSlug, 'mercadopago') || str_contains($methodSlug, 'pix') || str_contains($methodSlug, 'card') || str_contains($methodSlug, 'cartao')) {
                 // Assuming Mercado Pago handles Pix and Cards for now if associated
                 // Check if it's really Mercado Pago based on settings or name?
                 // For this implementation, we default to MercadoPagoService for these types if settings exist.
@@ -113,12 +113,12 @@ class PaymentController extends Controller
             }
 
         } catch (Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Erro no checkout: ' . $e->getMessage() . ' - Trace: ' . $e->getTraceAsString());
             return response()->json([
                 'error' => true,
                 'message' => $e->getMessage(),
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
-                // 'trace' => $e->getTraceAsString() // Maybe too much for prod but good for debug
             ], 500);
         }
     }

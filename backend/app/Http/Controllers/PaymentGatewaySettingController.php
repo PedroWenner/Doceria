@@ -41,7 +41,9 @@ class PaymentGatewaySettingController extends Controller
             [
                 'mode' => $validated['mode'],
                 'is_active' => $validated['is_active'],
-                'credentials' => $validated['credentials'] ?? [],
+                'credentials' => array_map(function($value) {
+                    return is_string($value) ? trim($value) : $value;
+                }, $validated['credentials'] ?? []),
             ]
         );
 

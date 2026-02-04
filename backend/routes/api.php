@@ -23,7 +23,13 @@ Route::group([
     Route::post('logout', [App\Http\Controllers\AuthController::class, 'logout']);
     Route::post('refresh', [App\Http\Controllers\AuthController::class, 'refresh']);
     Route::post('me', [App\Http\Controllers\AuthController::class, 'me']);
+    Route::post('me', [App\Http\Controllers\AuthController::class, 'me']);
 });
+
+// Fallback for Auth Middleware Redirects
+Route::get('login', function() { 
+    return response()->json(['message' => 'Unauthenticated.'], 401); 
+})->name('login');
 
 Route::group(['middleware' => ['api', 'auth:api', 'role:admin']], function () {
     // Users & Audits - Allow Admin and Manager (Read)
