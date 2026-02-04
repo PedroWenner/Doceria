@@ -8,7 +8,7 @@ interface Product {
     name: string;
     description: string;
     price: string;
-    image_url: string;
+    image_path: string | null;
     category_id: number;
     discounts?: {
         id?: number;

@@ -10,7 +10,7 @@ interface Product {
     name: string;
     description: string;
     price: string;
-    image_url: string;
+    image_path: string | null;
     category_id: number;
 }
 
@@ -190,8 +190,8 @@ export default function StoreHome() {
                             {/* Image */}
                             <div className="w-28 h-28 rounded-xl flex-shrink-0 overflow-hidden relative border"
                                 style={{ backgroundColor: 'var(--store-secondary)', borderColor: 'var(--store-border)' }}>
-                                {getImageUrl(product.image_url) ? (
-                                    <img src={getImageUrl(product.image_url)!} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                                {getImageUrl(product.image_path) ? (
+                                    <img src={getImageUrl(product.image_path)!} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                                 ) : (
                                     <div className="w-full h-full flex items-center justify-center text-3xl opacity-30 grayscale">🍰</div>
                                 )}

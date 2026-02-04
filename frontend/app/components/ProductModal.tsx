@@ -8,7 +8,7 @@ interface Product {
     name: string;
     description: string;
     price: string;
-    image_url: string;
+    image_path: string | null;
     category_id: number;
 }
 
@@ -89,9 +89,9 @@ export default function ProductModal({ product, isOpen, onClose, getImageUrl }: 
 
                 {/* Header Image */}
                 <div className="h-64 md:h-72 relative shrink-0" style={{ backgroundColor: 'var(--store-secondary)' }}>
-                    {getImageUrl(product.image_url) ? (
+                    {getImageUrl(product.image_path) ? (
                         <img
-                            src={getImageUrl(product.image_url)!}
+                            src={getImageUrl(product.image_path)!}
                             alt={product.name}
                             className="w-full h-full object-cover"
                         />
