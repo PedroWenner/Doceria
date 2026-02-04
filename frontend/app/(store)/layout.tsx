@@ -66,6 +66,9 @@ function StoreLayoutContent({ children }: { children: React.ReactNode }) {
                         <div className="px-4 py-2 border-b border-gray-50 mb-1">
                             <p className="text-xs text-gray-400">Olá, {user.name.split(' ')[0]}</p>
                         </div>
+                        <Link href="/orders" className="block w-full text-left px-4 py-2 text-sm text-gray-500 hover:text-gray-900 hover:bg-gray-50 font-bold transition-colors flex items-center gap-2">
+                            <span>📦</span> Meus Pedidos
+                        </Link>
                         <button
                             onClick={() => { setShowProfileMenu(false); logout(); }}
                             className="w-full text-left px-4 py-2 text-sm text-gray-500 hover:text-gray-900 hover:bg-gray-50 font-bold transition-colors flex items-center gap-2"
@@ -88,7 +91,6 @@ function StoreLayoutContent({ children }: { children: React.ReactNode }) {
                         {/* Desktop Links */}
                         <Link href="/" className={`font-bold text-sm tracking-wide ${pathname === '/' ? 'text-gray-900' : 'text-gray-500 hover:text-gray-900'} transition-colors`}>INÍCIO</Link>
                         <Link href="/menu" className={`font-bold text-sm tracking-wide ${pathname === '/menu' ? 'text-gray-900' : 'text-gray-500 hover:text-gray-900'} transition-colors`}>CARDÁPIO</Link>
-                        <Link href="/orders" className={`font-bold text-sm tracking-wide ${pathname === '/orders' ? 'text-gray-900' : 'text-gray-500 hover:text-gray-900'} transition-colors`}>PEDIDOS</Link>
                     </nav>
                 </div>
                 <div className="flex items-center gap-6">
@@ -147,6 +149,9 @@ function StoreLayoutContent({ children }: { children: React.ReactNode }) {
                                         <p className="text-xs mb-0.5" style={{ color: 'var(--store-text-muted)' }}>Logado como</p>
                                         <p className="font-bold truncate text-sm" style={{ color: 'var(--store-text)' }}>{user.name}</p>
                                     </div>
+                                    <Link href="/orders" className="block w-full text-left px-4 py-2.5 text-sm font-medium transition-colors flex items-center gap-2 hover:bg-gray-50" style={{ color: 'var(--store-text-muted)' }}>
+                                        <span>📦</span> Meus Pedidos
+                                    </Link>
                                     <button
                                         onClick={() => {
                                             logout();
@@ -238,6 +243,9 @@ function StoreLayoutContent({ children }: { children: React.ReactNode }) {
                     <div className="px-4 py-2 border-b border-gray-50 mb-1">
                         <p className="text-xs text-gray-400">Olá, {user.name.split(' ')[0]}</p>
                     </div>
+                    <Link href="/orders" className="block w-full text-left px-4 py-2 text-sm text-gray-500 hover:text-gray-900 hover:bg-gray-50 font-medium transition-colors flex items-center gap-2">
+                        <span>📦</span> Meus Pedidos
+                    </Link>
                     <button
                         onClick={() => {
                             logout();
