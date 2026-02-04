@@ -85,6 +85,27 @@ export default function CheckoutPage() {
         }
     }, [router]);
 
+    // Initialize MP - dedicated effect
+    const initializationRef = useMemo(() => ({ current: false }), []);
+
+    useEffect(() => {
+        if (!paymentMethods.length) return;
+
+        const mpMethod = paymentMethods.find((m: PaymentMethod) => m.public_key);
+        if (mpMethod && mpMethod.public_key) {
+            const cleanKey = mpMethod.public_key.trim();
+            if (cleanKey && !initializationRef.current) {
+                initMercadoPago(cleanKey, { locale: 'pt-BR' });
+                initializationRef.current = true;
+                setIsMercadoPagoInitialized(true);
+            } else if (initializationRef.current) {
+                setIsMercadoPagoInitialized(true);
+            }
+        } else {
+            setIsMercadoPagoInitialized(true);
+        }
+    }, [paymentMethods, initializationRef]);
+
     // Fetch Payment Methods
     useEffect(() => {
         const fetchMethods = async () => {
@@ -95,23 +116,12 @@ export default function CheckoutPage() {
                     const activeMethods = response.data.filter((m: PaymentMethod) => m.is_active);
                     setPaymentMethods(activeMethods);
 
-                    // Initialize MP if key exists
-                    const mpMethod = activeMethods.find((m: PaymentMethod) => m.public_key);
-                    if (mpMethod && mpMethod.public_key) {
-                        const cleanKey = mpMethod.public_key.trim();
-                        if (cleanKey) {
-                            initMercadoPago(cleanKey, { locale: 'pt-BR' });
-                            setIsMercadoPagoInitialized(true);
-                        } else {
-                            setIsMercadoPagoInitialized(true);
-                        }
-                    } else {
-                        setIsMercadoPagoInitialized(true);
-                    }
-
-                    // Select first method by default if available
-                    if (activeMethods.length > 0) {
-                        setSelectedMethodId(activeMethods[0].id);
+                    // Select first method by default if available and none selected
+                    if (activeMethods.length > 0 && !selectedMethodId) {
+                        // Prefer Pix if available
+                        const pix = activeMethods.find((m: PaymentMethod) => m.slug.includes('pix'));
+                        if (pix) setSelectedMethodId(pix.id);
+                        else setSelectedMethodId(activeMethods[0].id);
                     }
                 }
             } catch (error) {
@@ -528,16 +538,17 @@ export default function CheckoutPage() {
                             ) : (
                                 <div className="mt-8">
                                     {isMercadoPagoInitialized && (isPix || isCard) ? (
-                                        <Payment
-                                            key={selectedMethodId}
-                                            initialization={paymentInitialization}
-                                            customization={paymentCustomization}
-                                            onSubmit={handleBrickSubmit}
-                                            onReady={() => console.log('Brick payment ready')}
-                                            onError={(error) => {
-                                                console.error('Brick error:', error);
-                                            }}
-                                        />
+                                        <div key={selectedMethodId} className="min-h-[200px]">
+                                            <Payment
+                                                initialization={paymentInitialization}
+                                                customization={paymentCustomization}
+                                                onSubmit={handleBrickSubmit}
+                                                onReady={() => console.log('Brick payment ready')}
+                                                onError={(error) => {
+                                                    console.error('Brick error:', error);
+                                                }}
+                                            />
+                                        </div>
                                     ) : (
                                         <div className="flex flex-col items-center justify-center h-40 text-slate-400 gap-3 border-2 border-dashed border-slate-200 rounded-xl">
                                             <span className="animate-pulse text-2xl">⏳</span>

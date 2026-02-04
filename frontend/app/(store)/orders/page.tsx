@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { Package, Clock, CheckCircle, XCircle, ChevronRight, Info } from 'lucide-react';
 import Link from 'next/link';
 import Cookies from 'js-cookie';
+import { toast } from 'react-hot-toast';
 
 interface OrderItem {
     id: number;
@@ -104,8 +105,7 @@ export default function MyOrdersPage() {
         const qrCode = selectedPixOrder?.payment_metadata?.qr_code || selectedPixOrder?.payment_metadata?.transaction_data?.qr_code;
         if (qrCode) {
             navigator.clipboard.writeText(qrCode);
-            // toast.success("Copiado!"); // Assuming toast is imported or use alerts if not
-            alert("Código Pix copiado!");
+            toast.success("Código Pix copiado!");
         }
     };
 
