@@ -21,13 +21,18 @@ interface ProductModalProps {
 
 export default function ProductModal({ product, isOpen, onClose, getImageUrl }: ProductModalProps) {
     const [quantity, setQuantity] = useState(1);
-    const { addToCart, items, updateQuantity } = useCart();
+    const [observation, setObservation] = useState('');
+    const { addToCart, items } = useCart(); // Removed updateQuantity usage from here to simplify add logic
     const [isClosing, setIsClosing] = useState(false);
 
     useEffect(() => {
         if (isOpen && product) {
-            const existingItem = items.find(item => item.product.id === product.id);
+            // Logic to find existing item is ambiguous with observations. 
+            // We will default to 1 for new additions to avoid confusion.
+            // Or we could try to find an item with *empty* observation.
+            const existingItem = items.find(item => item.product.id === product.id && !item.observation);
             setQuantity(existingItem ? existingItem.quantity : 1);
+            setObservation(''); // Reset observation
 
             setIsClosing(false);
             document.body.style.overflow = 'hidden';
@@ -42,20 +47,13 @@ export default function ProductModal({ product, isOpen, onClose, getImageUrl }: 
         setTimeout(() => {
             onClose();
             setIsClosing(false);
+            setObservation('');
         }, 300); // Animation duration
     };
 
     const handleAddToCart = () => {
         if (product) {
-            const existingItem = items.find(item => item.product.id === product.id);
-            if (existingItem) {
-                const delta = quantity - existingItem.quantity;
-                if (delta !== 0) {
-                    updateQuantity(product.id, delta);
-                }
-            } else {
-                addToCart(product, quantity);
-            }
+            addToCart(product, quantity, observation);
             handleClose();
         }
     };
@@ -124,6 +122,8 @@ export default function ProductModal({ product, isOpen, onClose, getImageUrl }: 
                             }}
                             placeholder="Ex: Tirar a cebola, caprichar no molho..."
                             rows={3}
+                            value={observation}
+                            onChange={(e) => setObservation(e.target.value)}
                         ></textarea>
                     </div>
                 </div>

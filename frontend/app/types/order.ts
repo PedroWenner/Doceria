@@ -5,7 +5,8 @@ export interface OrderItem {
     unit_price: string;
     product?: {
         name: string;
-    }
+    };
+    observation?: string;
 }
 
 export interface Order {

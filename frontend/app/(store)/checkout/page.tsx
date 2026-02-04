@@ -210,7 +210,8 @@ export default function CheckoutPage() {
                 items: items.map(item => ({
                     product_id: item.product.id,
                     quantity: item.quantity,
-                    unit_price: parseFloat(item.product.price)
+                    unit_price: parseFloat(item.product.price),
+                    observation: item.observation
                 })),
                 total_amount: finalTotal,
                 payment_method: selectedMethod?.slug,
@@ -287,7 +288,8 @@ export default function CheckoutPage() {
             items: items.map(item => ({
                 product_id: item.product.id,
                 quantity: item.quantity,
-                unit_price: parseFloat(item.product.price)
+                unit_price: parseFloat(item.product.price),
+                observation: item.observation
             })),
             total_amount: finalTotal,
             payment_method: selectedMethod?.slug,
@@ -595,6 +597,9 @@ export default function CheckoutPage() {
                                                     <span className="w-32 truncate" style={{ color: 'var(--store-text-muted)' }}>{item.product.name}</span>
                                                     {hasDiscount && (
                                                         <span className="text-[10px] text-green-600 font-bold">{Number(discountRule.percentage)}% OFF</span>
+                                                    )}
+                                                    {item.observation && (
+                                                        <span className="text-[10px] italic mt-0.5 opacity-70" style={{ color: 'var(--store-text-muted)' }}>"{item.observation}"</span>
                                                     )}
                                                 </div>
                                             </div>

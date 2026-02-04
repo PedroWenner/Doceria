@@ -82,11 +82,22 @@ export default function OrderCard({ order }: Props) {
 
             {/* Items Summary */}
             <div className="bg-slate-50 dark:bg-slate-900/50 rounded-lg p-2 mb-3 text-xs text-slate-600 dark:text-slate-300 border border-slate-100 dark:border-slate-800/50">
-                <div className="flex gap-1.5 mb-1">
-                    <ShoppingBag size={12} className="text-slate-400 mt-0.5 flex-shrink-0" />
-                    <div className="line-clamp-2 leading-relaxed">
-                        {order.items.map(i => `${i.quantity}x ${i.product?.name || 'Item'}`).join(', ')}
-                    </div>
+                <div className="flex flex-col gap-1.5">
+                    {order.items.map((i, index) => (
+                        <div key={index} className="flex flex-col">
+                            <div className="flex gap-1.5">
+                                <ShoppingBag size={12} className="text-slate-400 mt-0.5 flex-shrink-0" />
+                                <span className="line-clamp-2 leading-relaxed">
+                                    {i.quantity}x {i.product?.name || 'Item'}
+                                </span>
+                            </div>
+                            {i.observation && (
+                                <div className="pl-5 text-[10px] text-amber-600 dark:text-amber-500 italic">
+                                    "{i.observation}"
+                                </div>
+                            )}
+                        </div>
+                    ))}
                 </div>
             </div>
 

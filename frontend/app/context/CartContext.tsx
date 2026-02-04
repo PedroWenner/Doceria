@@ -21,13 +21,14 @@ interface Product {
 interface CartItem {
     product: Product;
     quantity: number;
+    observation?: string;
 }
 
 interface CartContextType {
     items: CartItem[];
-    addToCart: (product: Product, quantity?: number) => void;
-    removeFromCart: (productId: number) => void;
-    updateQuantity: (productId: number, delta: number) => void;
+    addToCart: (product: Product, quantity?: number, observation?: string) => void;
+    removeFromCart: (productId: number, observation?: string) => void;
+    updateQuantity: (productId: number, delta: number, observation?: string) => void;
     clearCart: () => void;
     cartTotal: number;
     cartCount: number;
@@ -62,30 +63,37 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         sessionStorage.setItem('sweet_cart', JSON.stringify(items));
     }, [items]);
 
-    const addToCart = React.useCallback((product: Product, quantity = 1) => {
+    const addToCart = React.useCallback((product: Product, quantity = 1, observation = '') => {
         setItems(prev => {
-            const existing = prev.find(item => item.product.id === product.id);
+            // Find item with same product ID AND same observation
+            const existing = prev.find(item =>
+                item.product.id === product.id &&
+                (item.observation || '') === (observation || '')
+            );
+
             if (existing) {
                 return prev.map(item =>
-                    item.product.id === product.id
+                    (item.product.id === product.id && (item.observation || '') === (observation || ''))
                         ? { ...item, quantity: item.quantity + quantity }
                         : item
                 );
             }
-            return [...prev, { product, quantity }];
+            return [...prev, { product, quantity, observation }];
         });
 
         // Trigger toast (Optimistic UI)
         toast.success(`${product.name} adicionado!`);
     }, []);
 
-    const removeFromCart = React.useCallback((productId: number) => {
-        setItems(prev => prev.filter(item => item.product.id !== productId));
+    const removeFromCart = React.useCallback((productId: number, observation = '') => {
+        setItems(prev => prev.filter(item =>
+            !(item.product.id === productId && (item.observation || '') === (observation || ''))
+        ));
     }, []);
 
-    const updateQuantity = React.useCallback((productId: number, delta: number) => {
+    const updateQuantity = React.useCallback((productId: number, delta: number, observation = '') => {
         setItems(prev => prev.map(item => {
-            if (item.product.id === productId) {
+            if (item.product.id === productId && (item.observation || '') === (observation || '')) {
                 const newQty = item.quantity + delta;
                 return newQty > 0 ? { ...item, quantity: newQty } : item;
             }

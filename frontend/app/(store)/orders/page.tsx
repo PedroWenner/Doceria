@@ -18,6 +18,7 @@ interface OrderItem {
     };
     quantity: number;
     unit_price: number;
+    observation?: string;
 }
 
 interface Order {
@@ -190,7 +191,12 @@ export default function MyOrdersPage() {
                                             <div key={item.id} className="flex items-center justify-between text-sm">
                                                 <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300">
                                                     <span className="font-medium text-slate-900 dark:text-slate-100">{item.quantity}x</span>
-                                                    <span>{item.product.name}</span>
+                                                    <div className="flex flex-col">
+                                                        <span>{item.product.name}</span>
+                                                        {item.observation && (
+                                                            <span className="text-xs italic text-slate-500 dark:text-slate-400">"{item.observation}"</span>
+                                                        )}
+                                                    </div>
                                                 </div>
                                                 <div className="text-slate-500 dark:text-slate-400">
                                                     R$ {Number(item.unit_price).toFixed(2)}

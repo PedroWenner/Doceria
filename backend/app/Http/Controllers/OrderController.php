@@ -43,21 +43,19 @@ class OrderController extends Controller
             'items.*.product_id' => 'required|exists:products,id',
             'items.*.quantity' => 'required|integer|min:1',
             'items.*.unit_price' => 'required|numeric',
+            'items.*.observation' => 'nullable|string',
             'total_amount' => 'required|numeric',
             'payment_method' => 'required|string',
             'delivery_type' => 'required|string',
             'delivery_address' => 'nullable|array',
-            'notes' => 'nullable|json' // Expecting JSON string or handle array if needed, but Checkout sends JSON string per plan? Actually let's accept string or array and cast properly or let model handle it. Model expects casting.
-            // Wait, front-end sends `notes` as a JSON string in my plan. But maybe it's cleaner to send objects?
-            // "notes": JSON.stringify({...}) in previous code.
-            // Let's allow nullable string.
+            'notes' => 'nullable|string' 
         ]);
 
         return \Illuminate\Support\Facades\DB::transaction(function () use ($validated, $request) {
             $order = Order::create([
                 'user_id' => $request->user()->id,
                 'customer_name' => $request->user()->name,
-                'customer_phone' => null, // We don't have phone in User yet? Or maybe from profile? Leaving null for now.
+                'customer_phone' => null, 
                 'status' => 'pending',
                 'total_amount' => $validated['total_amount'],
                 'payment_method' => $validated['payment_method'],
@@ -71,7 +69,8 @@ class OrderController extends Controller
                     'order_id' => $order->id,
                     'product_id' => $item['product_id'],
                     'quantity' => $item['quantity'],
-                    'unit_price' => $item['unit_price']
+                    'unit_price' => $item['unit_price'],
+                    'observation' => $item['observation'] ?? null
                 ]);
             }
 
