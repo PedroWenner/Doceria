@@ -66,15 +66,51 @@ class PaymentController extends Controller
                 return $this->error('Serviço de pagamento não implementado para este método.', 501);
             }
 
-            $response = $service->createPreference($order, $settings);
+            if ($request->has('brick_data')) {
+                // Payment Bricks (Unified: Card, Pix, etc.)
+                $brickData = $request->input('brick_data');
+                
+                // Ensure transaction_amount matches order total (Security)
+                $brickData['transaction_amount'] = (float) $order->total_amount;
+                $brickData['description'] = "Pedido #{$order->id} - SweetStore";
+                $brickData['external_reference'] = (string) $order->id;
+                // Add payer email if missing in brick data (Bricks usually handles it but good to ensure)
+                if (!isset($brickData['payer']['email']) && $order->user) {
+                     $brickData['payer']['email'] = $order->user->email;
+                }
 
-            // Update Order with transaction info if available
-            if (isset($response['preference_id'])) {
-                $order->transaction_id = $response['preference_id'];
-                $order->save();
+                $response = $service->processPayment($brickData, $settings);
+
+                // Update Order based on status
+                if (isset($response['id'])) {
+                    $order->transaction_id = $response['id'];
+                    $status = $response['status'];
+                    $mappedStatus = match ($status) {
+                        'approved' => 'paid',
+                        'in_process', 'pending' => 'pending',
+                        'rejected' => 'failed', 
+                        default => 'pending'
+                    };
+                    $order->status = $mappedStatus;
+                    $order->save();
+                    
+                    return $this->success([
+                        'type' => 'brick_success',
+                        'data' => $response
+                    ]);
+                }
+            } else {
+                // Legacy Redirect (Checkout Pro)
+                $response = $service->createPreference($order, $settings);
+
+                // Update Order with transaction info if available
+                if (isset($response['preference_id'])) {
+                    $order->transaction_id = $response['preference_id'];
+                    $order->save();
+                }
+
+                return $this->success($response);
             }
-
-            return $this->success($response);
 
         } catch (Exception $e) {
             return response()->json([

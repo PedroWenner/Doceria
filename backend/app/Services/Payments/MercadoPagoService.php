@@ -100,4 +100,27 @@ class MercadoPagoService implements PaymentGatewayInterface
 
         return $response->json();
     }
+    public function processPayment(array $paymentData, PaymentGatewaySetting $settings): array
+    {
+        $accessToken = $settings->credentials['access_token'] ?? null;
+
+        if (!$accessToken) {
+            throw new Exception("Access Token não configurado.");
+        }
+
+        // Add idempotency key for safety
+        $headers = [
+            'X-Idempotency-Key' => uniqid('payment_', true)
+        ];
+
+        $response = Http::withToken($accessToken)
+            ->withHeaders($headers)
+            ->post($this->getBaseUrl($settings->mode) . '/v1/payments', $paymentData);
+
+        if ($response->failed()) {
+            throw new Exception("Erro ao processar pagamento: " . $response->body());
+        }
+
+        return $response->json();
+    }
 }

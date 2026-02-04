@@ -8,13 +8,11 @@ import toast from 'react-hot-toast';
 import {
     CreditCard,
     Plus,
-    Power,
     Trash2,
     Pencil,
     Search,
     X,
     Check,
-    AlertCircle,
     AlertTriangle,
     Wallet
 } from 'lucide-react';
@@ -51,10 +49,7 @@ export default function PaymentMethodsPage() {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
     const token = Cookies.get('admin_token');
 
-    useEffect(() => {
-        fetchMethods();
-    }, []);
-
+    // Fetch Methods
     const fetchMethods = async (page = 1) => {
         try {
             setIsLoading(true);
@@ -64,9 +59,7 @@ export default function PaymentMethodsPage() {
             const data = await res.json();
 
             if (res.ok) {
-                // Determine if data is paginated or not
-                const responseData = data.data; // Wrapper from ApiResponse
-
+                const responseData = data.data;
                 let items: PaymentMethod[] = [];
                 let pagination = {
                     current_page: 1,
@@ -75,8 +68,6 @@ export default function PaymentMethodsPage() {
                     per_page: 15
                 };
 
-                // Case 1: Laravel Standard Pagination (inside ApiResponse data)
-                // Structure: { data: { current_page: 1, data: [...], ... } }
                 if (responseData && typeof responseData === 'object' && 'data' in responseData && Array.isArray(responseData.data)) {
                     items = responseData.data;
                     pagination = {
@@ -86,8 +77,6 @@ export default function PaymentMethodsPage() {
                         per_page: responseData.per_page
                     };
                 }
-                // Case 2: Simple Array (non-paginated)
-                // Structure: { data: [...] }
                 else if (Array.isArray(responseData)) {
                     items = responseData;
                     pagination = {
@@ -97,8 +86,6 @@ export default function PaymentMethodsPage() {
                         per_page: items.length
                     };
                 }
-                // Case 3: API Resources (meta at root)
-                // Structure: { data: [...], meta: { current_page: 1, ... } }
                 else if (data.meta) {
                     items = data.data;
                     pagination = {
@@ -111,9 +98,6 @@ export default function PaymentMethodsPage() {
 
                 setMethods(items);
                 setMeta(pagination);
-
-                // If items is empty and page > 1, maybe go back?
-                // Optional logic, but implemented in some tables.
             }
         } catch (error) {
             console.error(error);
@@ -123,6 +107,11 @@ export default function PaymentMethodsPage() {
         }
     };
 
+    useEffect(() => {
+        fetchMethods();
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+    // Toggle Status
     const handleToggle = async (id: number) => {
         try {
             const res = await fetch(`${apiUrl}/payment-methods/${id}/toggle`, {
@@ -138,6 +127,7 @@ export default function PaymentMethodsPage() {
         }
     };
 
+    // Delete
     const confirmDelete = (id: number) => {
         setDeleteConfirmation({ isOpen: true, methodId: id });
     };
@@ -160,6 +150,7 @@ export default function PaymentMethodsPage() {
         }
     };
 
+    // Create/Edit
     const openModal = (method?: PaymentMethod) => {
         if (method) {
             setEditingMethod(method);
@@ -176,16 +167,14 @@ export default function PaymentMethodsPage() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsSaving(true);
-
         try {
             const url = editingMethod
                 ? `${apiUrl}/payment-methods/${editingMethod.id}`
                 : `${apiUrl}/payment-methods`;
-
-            const method = editingMethod ? 'PUT' : 'POST';
+            const methodKey = editingMethod ? 'PUT' : 'POST';
 
             const res = await fetch(url, {
-                method,
+                method: methodKey,
                 headers: {
                     'Content-Type': 'application/json',
                     Authorization: `Bearer ${token}`
@@ -208,13 +197,10 @@ export default function PaymentMethodsPage() {
         }
     };
 
-    // Auto-generate slug
     const handleNameChange = (val: string) => {
         setName(val);
         if (!editingMethod) {
-            setSlug(val.toLowerCase()
-                .replace(/[^\w ]+/g, '')
-                .replace(/ +/g, '_'));
+            setSlug(val.toLowerCase().replace(/[^\w ]+/g, '').replace(/ +/g, '_'));
         }
     };
 
@@ -338,11 +324,10 @@ export default function PaymentMethodsPage() {
                 />
             </div>
 
-            {/* Modal */}
+            {/* Modal Basic (Name/Slug) */}
             {isModalOpen && (
                 <div className="fixed inset-0 bg-slate-950/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fadeIn">
                     <div className="w-full max-w-md bg-white dark:bg-slate-950 rounded-2xl shadow-xl overflow-hidden flex flex-col border border-slate-200 dark:border-slate-800 animate-scaleIn">
-                        {/* Modal Header */}
                         <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/50">
                             <h2 className="text-lg font-bold text-slate-900 dark:text-slate-50 flex items-center gap-2">
                                 {editingMethod ? <Pencil size={18} /> : <Plus size={18} />}
@@ -353,7 +338,6 @@ export default function PaymentMethodsPage() {
                             </button>
                         </div>
 
-                        {/* Modal Body */}
                         <form onSubmit={handleSubmit} className="p-6 space-y-5">
                             <div>
                                 <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1.5">{t('payment_methods.name')}</label>
@@ -379,7 +363,7 @@ export default function PaymentMethodsPage() {
                                     <span className="absolute left-3 top-2.5 text-slate-400 font-mono text-sm">#</span>
                                 </div>
                                 <p className="text-xs text-slate-500 mt-2 flex items-center gap-1">
-                                    <AlertCircle size={12} />
+                                    <AlertTriangle size={12} />
                                     {t('payment_methods.slug_hint')}
                                 </p>
                             </div>
@@ -409,7 +393,6 @@ export default function PaymentMethodsPage() {
             {deleteConfirmation.isOpen && (
                 <div className="fixed inset-0 bg-slate-950/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fadeIn">
                     <div className="w-full max-w-sm bg-white dark:bg-slate-950 rounded-2xl shadow-xl overflow-hidden flex flex-col border border-slate-200 dark:border-slate-800 animate-scaleIn">
-                        {/* Modal Header */}
                         <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/50">
                             <h2 className="text-lg font-bold text-slate-900 dark:text-slate-50 flex items-center gap-2">
                                 <AlertTriangle size={24} className="text-rose-500" />

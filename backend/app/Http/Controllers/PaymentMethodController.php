@@ -13,7 +13,23 @@ class PaymentMethodController extends Controller
     // Public: List active payment methods
     public function index()
     {
-        $methods = PaymentMethod::where('is_active', true)->get();
+        $methods = PaymentMethod::where('is_active', true)->with('gatewaySetting')->get();
+
+        $methods->transform(function ($method) {
+            // Check if settings exist and have credentials
+            if ($method->gatewaySetting && isset($method->gatewaySetting->credentials)) {
+                $creds = $method->gatewaySetting->credentials; // This is automatically decrypted by cast
+                
+                // Only expose public/site key
+                if (isset($creds['public_key'])) {
+                    $method->public_key = $creds['public_key'];
+                }
+            }
+            // Hide the full settings relation to prevent leaking access_token
+            $method->unsetRelation('gatewaySetting');
+            return $method;
+        });
+
         return $this->success($methods);
     }
 

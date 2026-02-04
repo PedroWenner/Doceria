@@ -10,12 +10,14 @@ import jsCookie from 'js-cookie';
 import LoadingSpinner from '@/app/components/LoadingSpinner';
 import LocationMap from '@/app/components/LocationMap';
 import { MapPin, X } from 'lucide-react';
+import { initMercadoPago, Payment } from '@mercadopago/sdk-react';
 
 interface PaymentMethod {
     id: number;
     name: string;
     slug: string;
     is_active: boolean;
+    public_key?: string;
 }
 
 interface CompanySettings {
@@ -66,6 +68,12 @@ export default function CheckoutPage() {
                     const response = await res.json();
                     const activeMethods = response.data.filter((m: PaymentMethod) => m.is_active);
                     setPaymentMethods(activeMethods);
+
+                    // Initialize MP if key exists
+                    const mpMethod = activeMethods.find((m: PaymentMethod) => m.public_key);
+                    if (mpMethod && mpMethod.public_key) {
+                        initMercadoPago(mpMethod.public_key, { locale: 'pt-BR' });
+                    }
 
                     // Select first method by default if available
                     if (activeMethods.length > 0) {
@@ -144,6 +152,86 @@ export default function CheckoutPage() {
 
     if (isLoadingMethods) return <LoadingSpinner />;
 
+    // Handle Brick Submission (Pay Online)
+    const handleBrickSubmit = async (param: any) => {
+        const { formData } = param;
+        if (!user || !selectedMethodId) return false;
+
+        try {
+            const token = jsCookie.get('store_token');
+            const selectedMethod = paymentMethods.find(m => m.id === selectedMethodId);
+
+            // 1. Create Order
+            const orderData = {
+                items: items.map(item => ({
+                    product_id: item.product.id,
+                    quantity: item.quantity,
+                    unit_price: parseFloat(item.product.price)
+                })),
+                total_amount: finalTotal,
+                payment_method: selectedMethod?.slug,
+                delivery_type: 'pickup',
+                delivery_address: null,
+                notes: JSON.stringify({
+                    change_for: null,
+                    pickup_info: 'Retirada em Rua das Gostosuras, 123'
+                })
+            };
+
+            const res = await fetch(`${apiUrl}/orders`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(orderData)
+            });
+
+            if (!res.ok) {
+                const err = await res.json();
+                toast.error(err.message || 'Erro ao criar pedido.');
+                return Promise.reject();
+            }
+
+            const response = await res.json();
+            const orderId = response.data.id;
+
+            // 2. Process Payment via Backend (passing Brick Data)
+            const payRes = await fetch(`${apiUrl}/orders/${orderId}/pay`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    brick_data: {
+                        ...formData,
+                        description: `Pedido #${orderId} - SweetStore`
+                    }
+                })
+            });
+
+            if (payRes.ok) {
+                const payData = await payRes.json();
+                clearCart();
+                router.push(`/checkout/success?order_id=${orderId}`);
+                return Promise.resolve();
+            } else {
+                const errPay = await payRes.json();
+                toast.error(`Erro: ${errPay.message}`);
+                return Promise.reject();
+            }
+
+        } catch (e) {
+            console.error(e);
+            toast.error('Erro de conexão.');
+            return Promise.reject();
+        }
+    };
+
+    // Handle Manual Submission (Direct Money)
     const handleFinishOrder = async () => {
         if (!user || !selectedMethodId) return;
         setIsSubmitting(true);
@@ -168,7 +256,6 @@ export default function CheckoutPage() {
 
         try {
             const token = jsCookie.get('store_token');
-            // 1. Create Order
             const res = await fetch(`${apiUrl}/orders`, {
                 method: 'POST',
                 headers: {
@@ -181,51 +268,16 @@ export default function CheckoutPage() {
 
             if (res.ok) {
                 const response = await res.json();
-                const orderId = response.data.id; // Assuming API returns data: { id: ... }
+                const orderId = response.data.id;
 
-                // 2. Process Payment (if online)
-                if (selectedMethod?.slug.includes('mercadopago') || selectedMethod?.slug.includes('pix') || selectedMethod?.slug.includes('card')) {
-                    toast.loading("Gerando pagamento...");
-
-                    const payRes = await fetch(`${apiUrl}/orders/${orderId}/pay`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${token}`,
-                            'Accept': 'application/json'
-                        }
-                    });
-
-                    if (payRes.ok) {
-                        const payData = await payRes.json();
-                        if (payData.data.type === 'redirect') {
-                            window.location.href = payData.data.data; // Redirect to MP
-                            return; // Stop here, browser will redirect
-                        } else {
-                            // Handle other types (payload, qr_code) later
-                            toast.success("Pedido realizado! Verifique seu email.");
-                            clearCart();
-                            router.push(`/checkout/success?order_id=${orderId}`);
-                        }
-                    } else {
-                        const errPay = await payRes.json();
-                        toast.error(`Erro no pagamento: ${errPay.message || 'Tente novamente.'}`);
-                        // Stay on page to retry? Or go to failure?
-                        // For now, let's go to failure to avoid stuck state
-                        router.push(`/checkout/failure?order_id=${orderId}`);
-                    }
-
-                } else {
-                    // Offline payment (Money)
-                    toast.success("Pedido realizado com sucesso! 🎉");
-                    clearCart();
-                    router.push(`/checkout/success?order_id=${orderId}`);
-                }
+                toast.success("Pedido realizado com sucesso! 🎉");
+                clearCart();
+                router.push(`/checkout/success?order_id=${orderId}`);
 
             } else {
                 const errorData = await res.json();
                 console.error("Order error", errorData);
-                toast.error(errorData.message || "Erro ao realizar pedido. Tente novamente.");
+                toast.error(errorData.message || "Erro ao realizar pedido.");
             }
         } catch (error) {
             console.error("Order error", error);
@@ -234,6 +286,14 @@ export default function CheckoutPage() {
             setIsSubmitting(false);
         }
     };
+
+    const isMoney = paymentMethods.find(m => m.id === selectedMethodId)?.slug.includes('money') ||
+        paymentMethods.find(m => m.id === selectedMethodId)?.slug.includes('dinheiro');
+
+    // Determine customization based on selection
+    const selectedSlug = paymentMethods.find(m => m.id === selectedMethodId)?.slug || '';
+    const isPix = selectedSlug.includes('pix');
+    const isCard = selectedSlug.includes('card') || selectedSlug.includes('credito');
 
     return (
         <div className="min-h-screen pb-32 animate-fadeIn transition-colors duration-500" style={{ backgroundColor: 'var(--store-bg)' }}>
@@ -342,7 +402,6 @@ export default function CheckoutPage() {
                                         </div>
 
                                         {/* Dynamic Discount Badge Check */}
-                                        {/* Since discounts are per product, we check if total discount > 0 for this method */}
                                         {(() => {
                                             const potentialDiscount = items.reduce((acc, item) => {
                                                 const rule = item.product.discounts?.find(d => d.payment_method_id === method.id);
@@ -416,7 +475,6 @@ export default function CheckoutPage() {
 
                             <div className="space-y-4 max-h-[40vh] overflow-y-auto pr-2 custom-scrollbar">
                                 {items.map(item => {
-                                    // Calculate discount visual for this item if applicable
                                     const discountRule = selectedMethodId ? item.product.discounts?.find(d => d.payment_method_id === selectedMethodId) : null;
                                     const hasDiscount = !!discountRule;
                                     const itemPrice = parseFloat(item.product.price);
@@ -467,30 +525,60 @@ export default function CheckoutPage() {
                                 </div>
                             </div>
 
-                            <button
-                                onClick={handleFinishOrder}
-                                disabled={isSubmitting || !selectedMethodId}
-                                className={`w-full py-4 rounded-xl font-bold text-base shadow-xl flex items-center justify-center gap-3 transition-all mt-8 group hover:opacity-90 active:scale-[0.98]
-                                    ${(isSubmitting || !selectedMethodId) ? 'opacity-70 cursor-not-allowed' : ''}
-                                `}
-                                style={{
-                                    backgroundColor: 'var(--store-primary)',
-                                    color: 'var(--store-primary-fg)',
-                                    boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)'
-                                }}
-                            >
-                                {isSubmitting ? (
-                                    <>
-                                        <span className="animate-spin text-xl">🍩</span>
-                                        <span>Processando...</span>
-                                    </>
-                                ) : (
-                                    <>
-                                        <span>Confirmar Pedido</span>
-                                        <span>➜</span>
-                                    </>
-                                )}
-                            </button>
+                            {/* Conditional Button: Money uses normal button, Online uses Brick */}
+                            {isMoney ? (
+                                <button
+                                    onClick={handleFinishOrder}
+                                    disabled={isSubmitting || !selectedMethodId}
+                                    className={`w-full py-4 rounded-xl font-bold text-base shadow-xl flex items-center justify-center gap-3 transition-all mt-8 group hover:opacity-90 active:scale-[0.98]
+                                        ${(isSubmitting || !selectedMethodId) ? 'opacity-70 cursor-not-allowed' : ''}
+                                    `}
+                                    style={{
+                                        backgroundColor: 'var(--store-primary)',
+                                        color: 'var(--store-primary-fg)',
+                                        boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)'
+                                    }}
+                                >
+                                    {isSubmitting ? (
+                                        <>
+                                            <span className="animate-spin text-xl">🍩</span>
+                                            <span>Processando...</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <span>Confirmar Pedido</span>
+                                            <span>➜</span>
+                                        </>
+                                    )}
+                                </button>
+                            ) : (
+                                <div className="mt-8">
+                                    {(isPix || isCard) && (
+                                        <Payment
+                                            initialization={{ amount: finalTotal }}
+                                            customization={{
+                                                paymentMethods: {
+                                                    ticket: 'none',
+                                                    bankTransfer: isPix ? 'all' : 'none',
+                                                    creditCard: isCard ? 'all' : 'none',
+                                                    debitCard: isCard ? 'all' : 'none',
+                                                    mercadoPago: 'none'
+                                                },
+                                                visual: {
+                                                    style: {
+                                                        theme: 'bootstrap', // or 'default' / 'flat'
+                                                        customVariables: {
+                                                            baseColor: '#ec4899' // Pink-500
+                                                        }
+                                                    },
+                                                    hidePaymentButton: false
+                                                }
+                                            }}
+                                            onSubmit={handleBrickSubmit}
+                                        />
+                                    )}
+                                </div>
+                            )}
 
                             <p className="text-center text-[10px] mt-4 leading-relaxed" style={{ color: 'var(--store-text-muted)' }}>
                                 Ao confirmar, você concorda com nossos <br /><Link href="#" className="underline hover:text-gray-900">termos de serviço</Link>.
