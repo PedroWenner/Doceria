@@ -38,7 +38,9 @@ export const translations = {
             menu: 'Menu',
             settings: 'Configurações',
             audit: 'Auditoria',
-            session_expires: 'Sessão expira em'
+            session_expires: 'Sessão expira em',
+            payments_methods: 'Meios de Pagamento',
+            payments: 'Pagamentos'
         },
         dashboard: {
             welcome: 'Bem-vindo de volta',
@@ -322,7 +324,9 @@ export const translations = {
             menu: 'Menu',
             settings: 'Settings',
             audit: 'Audit Logs',
-            session_expires: 'Session expires in'
+            session_expires: 'Session expires in',
+            payments_methods: 'Payment Methods',
+            payments: 'Payments'
         },
         dashboard: {
             welcome: 'Welcome back',

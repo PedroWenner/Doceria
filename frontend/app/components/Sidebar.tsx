@@ -14,6 +14,7 @@ import {
     Package,
     FileText,
     CreditCard,
+    DollarSign,
     Settings,
     LogOut,
     Menu,
@@ -77,8 +78,14 @@ export default function Sidebar({
         },
         {
             icon: CreditCard,
-            label: 'Meios de Pagamento',
+            label: 'sidebar.payments_methods',
             href: '/dashboard/settings/payments',
+            roles: ['admin']
+        },
+        {
+            icon: DollarSign,
+            label: 'sidebar.payments',
+            href: '/dashboard/payments',
             roles: ['admin']
         },
         {

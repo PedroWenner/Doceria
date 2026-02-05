@@ -157,7 +157,7 @@ export default function PaymentTable({ payments, isLoading, token, onRefresh }: 
                 <td className="px-6 py-4 text-right flex justify-end gap-2">
                   <button
                     onClick={(e) => { e.stopPropagation(); handleSync(payment.id); }}
-                    disabled={syncingId === payment.id || !token}
+                    disabled={(syncingId === payment.id || !token || payment.status === 'paid')}
                     className={`p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-blue-600 transition-colors ${syncingId === payment.id ? 'animate-spin text-blue-600' : ''}`}
                     title={t('payments_dashboard.table.sync_tooltip')}
                   >
