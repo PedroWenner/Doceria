@@ -63,6 +63,10 @@ Route::group(['middleware' => ['api', 'auth:api', 'role:admin']], function () {
     Route::get('/payment-gateway-settings', [App\Http\Controllers\PaymentGatewaySettingController::class, 'index']);
     Route::put('/payment-gateway-settings/{paymentMethod}', [App\Http\Controllers\PaymentGatewaySettingController::class, 'update']);
 
+    // Payments Dashboard (Admin)
+    Route::get('payments', [App\Http\Controllers\PaymentController::class, 'index']);
+    Route::post('payments', [App\Http\Controllers\PaymentController::class, 'store']);
+
     // Payment Methods (Admin)
     Route::get('payment-methods/admin', [App\Http\Controllers\PaymentMethodController::class, 'indexAdmin']);
     Route::post('payment-methods', [App\Http\Controllers\PaymentMethodController::class, 'store']);
@@ -88,7 +92,7 @@ Route::post('/webhooks/mercadopago', [App\Http\Controllers\WebhookController::cl
 Route::group(['middleware' => ['api', 'auth:api']], function () {
     Route::get('orders/my-orders', [App\Http\Controllers\OrderController::class, 'myOrders']);
     Route::post('orders', [App\Http\Controllers\OrderController::class, 'store']);
-    Route::post('orders/{order}/pay', [App\Http\Controllers\PaymentController::class, 'store']);
+    Route::post('orders/{order}/pay', [App\Http\Controllers\PaymentController::class, 'payOrder']);
     Route::post('orders/{order}/verify-payment', [App\Http\Controllers\OrderController::class, 'verifyPayment']);
     Route::get('orders/{order}', [App\Http\Controllers\OrderController::class, 'show']);
 });

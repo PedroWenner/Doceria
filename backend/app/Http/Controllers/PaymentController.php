@@ -14,9 +14,90 @@ class PaymentController extends Controller
     use ApiResponse;
 
     /**
-     * Process payment for an order.
+     * List payments with advanced filtering.
      */
-    public function store(Request $request, $orderId)
+    public function index(Request $request)
+    {
+        $query = \App\Models\Payment::with(['order.user']);
+
+        // Search: External ID or Order ID
+        if ($request->has('search') && !empty($request->search)) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('external_id', 'like', "%{$search}%")
+                  ->orWhere('order_id', 'like', "%{$search}%");
+            });
+        }
+
+        // Filter by Status
+        if ($request->has('status') && !empty($request->status) && $request->status !== 'all') {
+            $query->where('status', $request->status);
+        }
+
+        // Filter by Method
+        if ($request->has('method') && !empty($request->method) && $request->method !== 'all') {
+            $query->where('method', $request->method);
+        }
+
+        // Date Range
+        if ($request->has('date_from')) {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+        if ($request->has('date_to')) {
+            $query->whereDate('created_at', '<=', $request->date_to);
+        }
+
+        $payments = $query->latest()->paginate(15);
+        
+        return $this->success($payments);
+    }
+
+    /**
+     * Create a manual payment (Cash, Settlement, etc).
+     */
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'amount' => 'required|numeric|min:0.01',
+            'method' => 'required|string',
+            'status' => 'required|in:paid,pending,failed',
+            'order_id' => 'nullable|exists:orders,id',
+            'external_id' => 'nullable|string|max:255',
+            'notes' => 'nullable|string'
+        ]);
+
+        try {
+            $payment = \App\Models\Payment::create([
+                'amount' => $validated['amount'],
+                'method' => $validated['method'],
+                'status' => $validated['status'],
+                'order_id' => $validated['order_id'] ?? null,
+                'external_id' => $validated['external_id'] ?? 'MANUAL-' . uniqid(),
+                'metadata' => [
+                    'source' => 'manual_dashboard',
+                    'notes' => $validated['notes'] ?? null,
+                    'created_by' => $request->user()->id
+                ]
+            ]);
+
+            // Optional: Update Order if linked
+            if ($payment->order_id && $payment->status === 'paid') {
+                $order = \App\Models\Order::find($payment->order_id);
+                if ($order && $order->payment_status !== 'paid') {
+                    $order->update(['payment_status' => 'paid']);
+                }
+            }
+
+            return $this->success($payment, 'Pagamento registrado com sucesso.', 201);
+
+        } catch (Exception $e) {
+            return $this->error($e->getMessage(), 500);
+        }
+    }
+    /**
+     * Process payment for an order (Customer Checkout).
+     */
+    public function payOrder(Request $request, $orderId)
     {
         $order = Order::findOrFail($orderId);
 
@@ -25,25 +106,13 @@ class PaymentController extends Controller
             return $this->error('Pedido já pago ou finalizado.', 400);
         }
 
-        // Find Payment Method from Order's payment_method string (slug matches?)
-        // In our current Order table we store "payment_method" as string ("credit_card", "pix").
-        // We need to find the corresponding PaymentMethod model to get settings.
-        
-        // Assumption: The string in orders table matches the slug in payment_methods table.
-        // Or we might need to map them. Let's assume slug match for now.
         $methodSlug = $order->payment_method; 
-        
         $paymentMethod = PaymentMethod::where('slug', $methodSlug)->first();
 
         if (!$paymentMethod) {
-            // Fallback or specific heuristic if slug doesn't match exactly
-            // For now, let's try to find by similarity or return error
-            // Actually, frontend sends "credit_card" or "pix".
-            // Let's assume we have payment methods with these slugs.
              return $this->error("Método de pagamento não encontrado: {$methodSlug}", 404);
         }
 
-        // Get Gateway Settings
         $settings = $paymentMethod->gatewaySetting;
 
         if (!$settings || !$settings->is_active) {
@@ -51,53 +120,42 @@ class PaymentController extends Controller
         }
 
         try {
-            // Simple Factory for now. 
-            // If we have more gateways later, we can move this to a dedicated Factory class.
             $service = null;
-
-            if (str_contains($methodSlug, 'mercadopago') || str_contains($methodSlug, 'pix') || str_contains($methodSlug, 'card') || str_contains($methodSlug, 'cartao') || str_contains($methodSlug, 'credito')) {
-                // Assuming Mercado Pago handles Pix and Cards for now if associated
-                // Check if it's really Mercado Pago based on settings or name?
-                // For this implementation, we default to MercadoPagoService for these types if settings exist.
+            if (str_contains($methodSlug, 'mercadopago') || str_contains($methodSlug, 'pix') || str_contains($methodSlug, 'card')) {
                 $service = new MercadoPagoService();
             }
 
             if (!$service) {
-                return $this->error('Serviço de pagamento não implementado para este método.', 501);
+                return $this->error('Serviço de pagamento não implementado.', 501);
             }
 
             if ($request->has('brick_data')) {
-                // Payment Bricks (Unified: Card, Pix, etc.)
                 $brickData = $request->input('brick_data');
-                
-                // Ensure transaction_amount matches order total (Security)
                 $brickData['transaction_amount'] = (float) $order->total_amount;
                 $brickData['description'] = "Pedido #{$order->id} - SweetStore";
                 $brickData['external_reference'] = (string) $order->id;
-                // Add payer email if missing in brick data (Bricks usually handles it but good to ensure)
+                
                 if (!isset($brickData['payer']['email']) && $order->user) {
                      $brickData['payer']['email'] = $order->user->email;
                 }
 
                 $response = $service->processPayment($brickData, $settings);
 
-                // Update Order based on status
                 if (isset($response['id'])) {
+                    // Create Payment Record (New Architecture)
+                    $payment = \App\Models\Payment::updateOrCreate(
+                        ['external_id' => $response['id']],
+                        [
+                            'order_id' => $order->id,
+                            'method' => $request->input('brick_data.payment_method_id', 'unknown'),
+                            'status' => $response['status'] === 'approved' ? 'paid' : ($response['status'] === 'rejected' ? 'failed' : 'pending'),
+                            'amount' => $brickData['transaction_amount'],
+                            'metadata' => $response
+                        ]
+                    );
+
                     $order->transaction_id = $response['id'];
-                    $status = $response['status'];
-                    $mappedStatus = match ($status) {
-                        'approved' => 'preparing',
-                        'in_process', 'pending' => 'pending',
-                        'rejected' => 'failed', 
-                        default => 'pending'
-                    };
-                    $order->status = $mappedStatus;
-
-                    // Save Metadata (QR Code for Pix)
-                    if (isset($response['point_of_interaction'])) {
-                        $order->payment_metadata = $response['point_of_interaction'];
-                    }
-
+                    $order->payment_status = $payment->status;
                     $order->save();
                     
                     return $this->success([
@@ -106,26 +164,13 @@ class PaymentController extends Controller
                     ]);
                 }
             } else {
-                // Legacy Redirect (Checkout Pro)
+                // Redirect Flow
                 $response = $service->createPreference($order, $settings);
-
-                // Update Order with transaction info if available
-                if (isset($response['preference_id'])) {
-                    $order->transaction_id = $response['preference_id'];
-                    $order->save();
-                }
-
                 return $this->success($response);
             }
 
         } catch (Exception $e) {
-            \Illuminate\Support\Facades\Log::error('Erro no checkout: ' . $e->getMessage() . ' - Trace: ' . $e->getTraceAsString());
-            return response()->json([
-                'error' => true,
-                'message' => $e->getMessage(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
-            ], 500);
+            return $this->error($e->getMessage(), 500);
         }
     }
 }
