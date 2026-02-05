@@ -41,6 +41,12 @@ interface Order {
             ticket_url_base64?: string;
         };
     };
+    latest_payment?: {
+        id: number;
+        method: string;
+        status: string;
+        metadata: any;
+    };
 }
 
 export default function MyOrdersPage() {
@@ -79,7 +85,6 @@ export default function MyOrdersPage() {
             });
             const data = await res.json();
             if (data.status === 'success') {
-                console.log('Orders Data:', data.data);
                 setOrders(data.data);
             }
         } catch (error) {
@@ -117,11 +122,20 @@ export default function MyOrdersPage() {
         }
     };
 
+    const getOrderMetadata = (order: Order) => {
+        return order.latest_payment?.metadata || order.payment_metadata;
+    };
+
     const handleCopyPix = () => {
-        const qrCode = selectedPixOrder?.payment_metadata?.qr_code || selectedPixOrder?.payment_metadata?.transaction_data?.qr_code;
+        if (!selectedPixOrder) return;
+        const metadata = getOrderMetadata(selectedPixOrder);
+        const qrCode = metadata?.qr_code || metadata?.transaction_data?.qr_code || metadata?.point_of_interaction?.transaction_data?.qr_code;
+
         if (qrCode) {
             navigator.clipboard.writeText(qrCode);
             toast.success("Código Pix copiado!");
+        } else {
+            toast.error("Erro ao copiar código Pix.");
         }
     };
 
@@ -171,7 +185,7 @@ export default function MyOrdersPage() {
                                             </div>
                                             <div className="flex gap-2">
                                                 {getStatusBadge(order.status)}
-                                                {getPaymentStatusBadge(order.payment_status)}
+                                                {getPaymentStatusBadge(order.latest_payment?.status || order.payment_status)}
                                             </div>
                                         </div>
                                         <div className="text-sm text-slate-500 dark:text-slate-400 flex items-center gap-2">
@@ -214,14 +228,16 @@ export default function MyOrdersPage() {
                                         </div>
 
                                         {/* Pix QR Code Button */}
-                                        {order.payment_status !== 'paid' && order.payment_method.toLowerCase().includes('pix') && (order.payment_metadata?.qr_code || order.payment_metadata?.transaction_data?.qr_code) && (
-                                            <button
-                                                onClick={() => setSelectedPixOrder(order)}
-                                                className="px-4 py-2 bg-blue-50 text-blue-600 dark:text-blue-400 dark:bg-blue-900/20 rounded-lg text-sm font-bold hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors flex items-center gap-2"
-                                            >
-                                                💠 Ver PIX
-                                            </button>
-                                        )}
+                                        {(order.latest_payment?.status || order.payment_status) !== 'paid' &&
+                                            (order.latest_payment?.method || order.payment_method).toLowerCase().includes('pix') &&
+                                            (getOrderMetadata(order)?.qr_code || getOrderMetadata(order)?.transaction_data?.qr_code || getOrderMetadata(order)?.point_of_interaction?.transaction_data?.qr_code) && (
+                                                <button
+                                                    onClick={() => setSelectedPixOrder(order)}
+                                                    className="px-4 py-2 bg-blue-50 text-blue-600 dark:text-blue-400 dark:bg-blue-900/20 rounded-lg text-sm font-bold hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors flex items-center gap-2"
+                                                >
+                                                    💠 Ver PIX
+                                                </button>
+                                            )}
                                     </div>
                                 </div>
                             </div>
@@ -248,33 +264,43 @@ export default function MyOrdersPage() {
                             <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Pagamento Pix</h3>
                             <p className="text-sm text-slate-500 mb-6">Escaneie o QR Code ou copie o código.</p>
 
-                            {(selectedPixOrder.payment_metadata?.qr_code_base64 || selectedPixOrder.payment_metadata?.transaction_data?.qr_code_base64) && (
-                                <div className="mb-6 p-4 bg-white border rounded-xl shadow-sm inline-block">
-                                    <img
-                                        src={`data:image/jpeg;base64,${selectedPixOrder.payment_metadata?.qr_code_base64 || selectedPixOrder.payment_metadata?.transaction_data?.qr_code_base64}`}
-                                        alt="QR Code Pix"
-                                        className="w-48 h-48 object-contain"
-                                    />
-                                </div>
-                            )}
+                            {(() => {
+                                const meta = getOrderMetadata(selectedPixOrder);
+                                const base64 = meta?.qr_code_base64 || meta?.transaction_data?.qr_code_base64 || meta?.point_of_interaction?.transaction_data?.qr_code_base64;
+                                const code = meta?.qr_code || meta?.transaction_data?.qr_code || meta?.point_of_interaction?.transaction_data?.qr_code || meta?.latest_payment?.point_of_interaction?.transaction_data?.qr_code;
 
-                            <div className="w-full mb-6">
-                                <label className="text-xs font-bold text-slate-400 uppercase mb-2 block text-left">Código Pix Copia e Cola</label>
-                                <div className="flex gap-2">
-                                    <input
-                                        type="text"
-                                        readOnly
-                                        value={selectedPixOrder.payment_metadata?.qr_code || selectedPixOrder.payment_metadata?.transaction_data?.qr_code}
-                                        className="flex-1 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-600 truncate font-mono"
-                                    />
-                                    <button
-                                        onClick={handleCopyPix}
-                                        className="px-4 py-2 bg-blue-600 text-white text-sm font-bold rounded-lg hover:bg-blue-700 transition-colors"
-                                    >
-                                        Copiar
-                                    </button>
-                                </div>
-                            </div>
+                                return (
+                                    <>
+                                        {base64 && (
+                                            <div className="mb-6 p-4 bg-white border rounded-xl shadow-sm inline-block">
+                                                <img
+                                                    src={`data:image/jpeg;base64,${base64}`}
+                                                    alt="QR Code Pix"
+                                                    className="w-48 h-48 object-contain"
+                                                />
+                                            </div>
+                                        )}
+
+                                        <div className="w-full mb-6">
+                                            <label className="text-xs font-bold text-slate-400 uppercase mb-2 block text-left">Código Pix Copia e Cola</label>
+                                            <div className="flex gap-2">
+                                                <input
+                                                    type="text"
+                                                    readOnly
+                                                    value={code || ''}
+                                                    className="flex-1 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-600 truncate font-mono"
+                                                />
+                                                <button
+                                                    onClick={handleCopyPix}
+                                                    className="px-4 py-2 bg-blue-600 text-white text-sm font-bold rounded-lg hover:bg-blue-700 transition-colors"
+                                                >
+                                                    Copiar
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </>
+                                );
+                            })()}
 
                             <button
                                 onClick={() => setSelectedPixOrder(null)}

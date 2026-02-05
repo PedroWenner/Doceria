@@ -153,7 +153,7 @@ class OrderController extends Controller
         $userId = $request->user()->id;
 
         $orders = Order::where('user_id', $userId)
-            ->with(['items.product'])
+            ->with(['items.product', 'latestPayment'])
             ->latest()
             ->get();
         
@@ -169,6 +169,6 @@ class OrderController extends Controller
         // If guest (not logged in), we might strictly need signed URLs or just session checks. 
         // For now, let's assume valid token access.
         
-        return $this->success($order->load('items.product'));
+        return $this->success($order->load(['items.product', 'latestPayment']));
     }
 }

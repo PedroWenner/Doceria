@@ -54,8 +54,13 @@ export default function CheckoutSuccessPage() {
         }
     }, [orderId, clearCart]);
 
+    const getMetadata = () => {
+        return order?.latest_payment?.metadata || order?.payment_metadata;
+    };
+
     const handleCopyPix = () => {
-        const qrCode = order?.payment_metadata?.qr_code || order?.payment_metadata?.transaction_data?.qr_code;
+        const metadata = getMetadata();
+        const qrCode = metadata?.point_of_interaction?.transaction_data?.qr_code;
         if (qrCode) {
             navigator.clipboard.writeText(qrCode);
             toast.success("Código Pix copiado!");
@@ -70,13 +75,13 @@ export default function CheckoutSuccessPage() {
         );
     }
 
-    // Check if it's Pix and Pending
     const isPixPending = order && (order.payment_status === 'pending') &&
-        (order.payment_method?.toLowerCase().includes('pix'));
+        (order.latest_payment?.method?.toLowerCase().includes('pix') || order.payment_method?.toLowerCase().includes('pix'));
 
     if (isPixPending) {
-        const qrCode = order?.payment_metadata?.qr_code || order?.payment_metadata?.transaction_data?.qr_code;
-        const qrCodeBase64 = order?.payment_metadata?.qr_code_base64 || order?.payment_metadata?.transaction_data?.qr_code_base64;
+        const metadata = getMetadata();
+        const qrCode = metadata?.point_of_interaction?.transaction_data?.qr_code;
+        const qrCodeBase64 = metadata?.point_of_interaction?.transaction_data?.qr_code_base64;
 
         return (
             <div className="min-h-[60vh] flex flex-col items-center justify-center p-8 text-center animate-fadeIn max-w-lg mx-auto">
@@ -126,9 +131,10 @@ export default function CheckoutSuccessPage() {
                     <div className="w-full mb-8 p-4 bg-red-50 border border-red-100 rounded-lg text-left">
                         <p className="text-xs font-bold text-red-600 mb-1">Erro ao carregar código Pix</p>
                         <pre className="text-[10px] text-red-500 overflow-auto max-h-20">
-                            {JSON.stringify(order.payment_metadata, null, 2)}
+
                         </pre>
                     </div>
+
                 )}
 
                 <p className="text-xs text-slate-400 mb-8 bg-blue-50 p-3 rounded-lg text-blue-800 border border-blue-100">
