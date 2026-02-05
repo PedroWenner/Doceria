@@ -5,12 +5,14 @@ import Cookies from 'js-cookie';
 import { toast } from 'react-hot-toast';
 import { Wallet } from 'lucide-react';
 
+import { useLanguage } from '@/app/context/LanguageContext';
 import PaymentTable from '@/app/components/payments/PaymentTable';
 import PaymentFilterBar from '@/app/components/payments/PaymentFilterBar';
 import NewPaymentModal from '@/app/components/payments/NewPaymentModal';
 import Pagination from '@/app/components/Pagination';
 
 export default function PaymentsPage() {
+    const { t } = useLanguage();
     const [payments, setPayments] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -84,10 +86,10 @@ export default function PaymentsPage() {
             <div>
                 <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-50 flex items-center gap-2">
                     <Wallet className="text-slate-400" />
-                    Pagamentos
+                    {t('payments_dashboard.title')}
                 </h1>
                 <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 ml-8">
-                    Gestão financeira e histórico de transações.
+                    {t('payments_dashboard.subtitle')}
                 </p>
             </div>
 
@@ -108,7 +110,7 @@ export default function PaymentsPage() {
 
             {/* Table & Pagination */}
             <div className="space-y-4">
-                <PaymentTable payments={payments} isLoading={loading} />
+                <PaymentTable payments={payments} isLoading={loading} token={token || undefined} onRefresh={() => fetchPayments(meta.current_page)} />
 
                 {!loading && (
                     <Pagination

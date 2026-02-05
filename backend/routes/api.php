@@ -64,6 +64,7 @@ Route::group(['middleware' => ['api', 'auth:api', 'role:admin']], function () {
     Route::put('/payment-gateway-settings/{paymentMethod}', [App\Http\Controllers\PaymentGatewaySettingController::class, 'update']);
 
     // Payments Dashboard (Admin)
+    Route::post('payments/{id}/sync', [App\Http\Controllers\PaymentController::class, 'sync']);
     Route::get('payments', [App\Http\Controllers\PaymentController::class, 'index']);
     Route::post('payments', [App\Http\Controllers\PaymentController::class, 'store']);
 

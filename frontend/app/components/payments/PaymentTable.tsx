@@ -1,9 +1,9 @@
-'use client';
-
+import { useState } from 'react';
 import { useLanguage } from '@/app/context/LanguageContext';
 import { displayCurrency } from '@/app/utils/formatters';
-import { Check, X, Clock, AlertCircle, CreditCard, Banknote, MoreHorizontal, Search } from 'lucide-react';
+import { Check, X, Clock, AlertCircle, CreditCard, Banknote, MoreHorizontal, Search, RefreshCw } from 'lucide-react';
 import LoadingSpinner from '@/app/components/LoadingSpinner';
+import { toast } from 'react-hot-toast';
 
 interface Payment {
   id: number;
@@ -21,19 +21,51 @@ interface Payment {
 interface Props {
   payments: Payment[];
   isLoading: boolean;
+  token?: string;
+  onRefresh?: () => void;
 }
 
-export default function PaymentTable({ payments, isLoading }: Props) {
+export default function PaymentTable({ payments, isLoading, token, onRefresh }: Props) {
   const { t } = useLanguage();
+  const [syncingId, setSyncingId] = useState<number | null>(null);
+
+  const handleSync = async (paymentId: number) => {
+    if (!token) return;
+    setSyncingId(paymentId);
+
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/payments/${paymentId}/sync`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json'
+        }
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        toast.success(t('payments_dashboard.table.sync_success'));
+        if (onRefresh) onRefresh();
+      } else {
+        toast.error(data.message || t('payments_dashboard.table.sync_error'));
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error(t('payments_dashboard.table.sync_error'));
+    } finally {
+      setSyncingId(null);
+    }
+  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'paid':
-        return <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-900/30 uppercase tracking-wide"><Check size={10} /> Pago</span>;
+        return <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-900/30 uppercase tracking-wide"><Check size={10} /> {t('orders.payment_status.paid')}</span>;
       case 'failed':
-        return <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-xs font-medium bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-900/20 dark:text-rose-400 dark:border-rose-900/30 uppercase tracking-wide"><X size={10} /> Falha</span>;
+        return <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-xs font-medium bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-900/20 dark:text-rose-400 dark:border-rose-900/30 uppercase tracking-wide"><X size={10} /> {t('orders.payment_status.failed')}</span>;
       default:
-        return <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700 uppercase tracking-wide"><Clock size={10} /> Pendente</span>;
+        return <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700 uppercase tracking-wide"><Clock size={10} /> {t('orders.payment_status.pending')}</span>;
     }
   };
 
@@ -56,7 +88,7 @@ export default function PaymentTable({ payments, isLoading }: Props) {
       <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 p-12 text-center">
         <div className="flex flex-col items-center gap-2">
           <Search size={32} className="opacity-20 text-slate-500" />
-          <span className="text-slate-500 text-sm">Nenhum pagamento encontrado</span>
+          <span className="text-slate-500 text-sm">{t('payments_dashboard.table.no_payments')}</span>
         </div>
       </div>
     );
@@ -68,13 +100,13 @@ export default function PaymentTable({ payments, isLoading }: Props) {
         <table className="w-full text-left">
           <thead className="bg-slate-50 dark:bg-slate-950/50 border-b border-slate-200 dark:border-slate-800">
             <tr>
-              <th className="px-6 py-3 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">ID / Ref</th>
-              <th className="px-6 py-3 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Pedido</th>
-              <th className="px-6 py-3 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Método</th>
-              <th className="px-6 py-3 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Data</th>
-              <th className="px-6 py-3 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-right">Valor</th>
-              <th className="px-6 py-3 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-center">Status</th>
-              <th className="px-6 py-3 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-12 text-right">Ações</th>
+              <th className="px-6 py-3 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{t('payments_dashboard.table.id')}</th>
+              <th className="px-6 py-3 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{t('payments_dashboard.table.order')}</th>
+              <th className="px-6 py-3 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{t('payments_dashboard.table.method')}</th>
+              <th className="px-6 py-3 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{t('payments_dashboard.table.date')}</th>
+              <th className="px-6 py-3 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-right">{t('payments_dashboard.table.value')}</th>
+              <th className="px-6 py-3 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-center">{t('payments_dashboard.table.status')}</th>
+              <th className="px-6 py-3 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-12 text-right">{t('payments_dashboard.table.actions')}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -97,7 +129,7 @@ export default function PaymentTable({ payments, isLoading }: Props) {
                       <span className="text-xs text-slate-500">{payment.order?.customer_name}</span>
                     </div>
                   ) : (
-                    <span className="text-xs text-slate-400 italic">Avulso</span>
+                    <span className="text-xs text-slate-400 italic">{t('payments_dashboard.table.avulso')}</span>
                   )}
                 </td>
                 <td className="px-6 py-4">
@@ -122,9 +154,14 @@ export default function PaymentTable({ payments, isLoading }: Props) {
                 <td className="px-6 py-4 text-center">
                   {getStatusBadge(payment.status)}
                 </td>
-                <td className="px-6 py-4 text-right">
-                  <button className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
-                    <MoreHorizontal size={16} />
+                <td className="px-6 py-4 text-right flex justify-end gap-2">
+                  <button
+                    onClick={(e) => { e.stopPropagation(); handleSync(payment.id); }}
+                    disabled={syncingId === payment.id || !token}
+                    className={`p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-blue-600 transition-colors ${syncingId === payment.id ? 'animate-spin text-blue-600' : ''}`}
+                    title={t('payments_dashboard.table.sync_tooltip')}
+                  >
+                    <RefreshCw size={16} />
                   </button>
                 </td>
               </tr>

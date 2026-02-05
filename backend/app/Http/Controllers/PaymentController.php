@@ -173,4 +173,66 @@ class PaymentController extends Controller
             return $this->error($e->getMessage(), 500);
         }
     }
+    /**
+     * Sync payment status with gateway.
+     */
+    public function sync(Request $request, $id)
+    {
+        try {
+            $payment = \App\Models\Payment::findOrFail($id);
+
+            if (!$payment->external_id) {
+                return $this->error('Pagamento sem ID externo para sincronização.', 400);
+            }
+
+            // Determine gateway based on method slug (simplified logic matching payOrder)
+            $gatewayService = null;
+            if (str_contains($payment->method, 'mercadopago') || str_contains($payment->method, 'pix') || str_contains($payment->method, 'card')) {
+                $gatewayService = new MercadoPagoService();
+            }
+
+            if (!$gatewayService) {
+                return $this->error('Gateway não suportado para sincronização.', 501);
+            }
+
+            // We need settings. In a real scenario, we'd look up the PaymentMethod by the payment's method string.
+            // For now, let's assume valid settings are resolvable or we default to the active ones for that method.
+            $paymentMethod = PaymentMethod::where('slug', $payment->method)->first();
+            
+            if (!$paymentMethod || !$paymentMethod->gatewaySetting) {
+                 return $this->error('Configuração do gateway não encontrada.', 404);
+            }
+
+            // Fetch latest status
+            $latestStatus = $gatewayService->getPaymentStatus($payment->external_id, $paymentMethod->gatewaySetting);
+
+            // Update Payment
+            $oldStatus = $payment->status;
+            $newStatus = $latestStatus['status'] === 'approved' ? 'paid' : ($latestStatus['status'] === 'rejected' ? 'failed' : 'pending');
+            
+            $payment->update([
+                'status' => $newStatus,
+                'metadata' => array_merge($payment->metadata ?? [], ['latest_sync' => $latestStatus])
+            ]);
+
+            // Update Order if changed to paid
+            if ($newStatus === 'paid' && $oldStatus !== 'paid' && $payment->order_id) {
+                $order = Order::find($payment->order_id);
+                if ($order && $order->payment_status !== 'paid') {
+                    $order->update([
+                        'payment_status' => 'paid',
+                        'transaction_id' => $payment->external_id
+                    ]);
+                }
+            }
+
+            return $this->success([
+                'payment' => $payment->fresh(),
+                'synced_at' => now()
+            ], 'Status sincronizado com sucesso.');
+
+        } catch (Exception $e) {
+            return $this->error('Erro na sincronização: ' . $e->getMessage(), 500);
+        }
+    }
 }

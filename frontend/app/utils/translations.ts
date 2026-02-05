@@ -245,6 +245,44 @@ export const translations = {
             load_error: 'Erro ao carregar meios de pagamento',
             save_success: 'Salvo com sucesso!',
             save_error: 'Erro ao salvar'
+        },
+        payments_dashboard: {
+            title: 'Pagamentos',
+            subtitle: 'Gestão financeira e histórico de transações.',
+            table: {
+                id: 'ID / Ref',
+                order: 'Pedido',
+                method: 'Método',
+                date: 'Data',
+                value: 'Valor',
+                status: 'Status',
+                actions: 'Ações',
+                no_payments: 'Nenhum pagamento encontrado',
+                avulso: 'Avulso',
+                sync_success: 'Status sincronizado com sucesso!',
+                sync_error: 'Erro ao sincronizar status.',
+                sync_tooltip: 'Sincronizar Status'
+            },
+            filter: {
+                search_placeholder: 'Buscar por ID ou Ref...',
+                new_payment: 'Novo Pagamento',
+                all_statuses: 'Todos Status',
+                all_methods: 'Todos Métodos',
+                date_from: 'Data Inicial',
+                date_to: 'Data Final'
+            },
+            modal: {
+                title: 'Novo Pagamento',
+                amount: 'Valor',
+                method: 'Método',
+                date: 'Data',
+                status: 'Status',
+                notes: 'Observações (Opcional)',
+                cancel: 'Cancelar',
+                save: 'Salvar',
+                success: 'Pagamento registrado com sucesso!',
+                error: 'Erro ao registrar pagamento.'
+            }
         }
     },
     en: {
@@ -492,6 +530,44 @@ export const translations = {
             load_error: 'Error loading payment methods',
             save_success: 'Saved successfully!',
             save_error: 'Error saving'
+        },
+        payments_dashboard: {
+            title: 'Payments',
+            subtitle: 'Financial management and transaction history.',
+            table: {
+                id: 'ID / Ref',
+                order: 'Order',
+                method: 'Method',
+                date: 'Date',
+                value: 'Value',
+                status: 'Status',
+                actions: 'Actions',
+                no_payments: 'No payments found',
+                avulso: 'Standalone',
+                sync_success: 'Status synced successfully!',
+                sync_error: 'Error syncing status.',
+                sync_tooltip: 'Sync Status'
+            },
+            filter: {
+                search_placeholder: 'Search by ID or Ref...',
+                new_payment: 'New Payment',
+                all_statuses: 'All Statuses',
+                all_methods: 'All Methods',
+                date_from: 'Date From',
+                date_to: 'Date To'
+            },
+            modal: {
+                title: 'New Payment',
+                amount: 'Amount',
+                method: 'Method',
+                date: 'Date',
+                status: 'Status',
+                notes: 'Notes (Optional)',
+                cancel: 'Cancel',
+                save: 'Save',
+                success: 'Payment registered successfully!',
+                error: 'Error registering payment.'
+            }
         }
     }
 };
