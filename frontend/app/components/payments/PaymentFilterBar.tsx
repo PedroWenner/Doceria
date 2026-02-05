@@ -1,68 +1,96 @@
 'use client';
 
-import { Search, Filter, Calendar, Plus } from 'lucide-react';
-import { useState } from 'react';
+import { Search, Filter, Plus } from 'lucide-react';
+import ProDatePicker from '@/app/components/ProDatePicker';
 
 interface Props {
+    search: string;
     onSearch: (value: string) => void;
+    status: string;
     onStatusChange: (status: string) => void;
+    method: string;
     onMethodChange: (method: string) => void;
-    onDateChange: (start: string, end: string) => void;
+    dateFrom: string;
+    onDateFromChange: (date: string) => void;
+    dateTo: string;
+    onDateToChange: (date: string) => void;
     onNewPayment: () => void;
 }
 
-export default function PaymentFilterBar({ onSearch, onStatusChange, onMethodChange, onDateChange, onNewPayment }: Props) {
+export default function PaymentFilterBar({
+    search, onSearch,
+    status, onStatusChange,
+    method, onMethodChange,
+    dateFrom, onDateFromChange,
+    dateTo, onDateToChange,
+    onNewPayment
+}: Props) {
     return (
-        <div className="bg-white dark:bg-slate-900 p-4 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 flex flex-col md:flex-row gap-4 items-center justify-between mb-6">
+        <div className="bg-white dark:bg-slate-900 p-4 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 flex flex-col xl:flex-row gap-4 items-end">
+            <div className="flex-1 w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
 
-            {/* Search Input */}
-            <div className="relative w-full md:w-64">
-                <Search className="absolute left-3 top-2.5 text-slate-400" size={18} />
-                <input
-                    type="text"
-                    placeholder="Buscar ID, Pedido..."
-                    onChange={(e) => onSearch(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-pink-500/50 transition-all placeholder:text-slate-400"
-                />
+                {/* Search */}
+                <div className="space-y-1 lg:col-span-2">
+                    <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 flex items-center gap-1">
+                        <Search size={12} /> Busca
+                    </label>
+                    <div className="relative">
+                        <input
+                            type="text"
+                            placeholder="Buscar ID, Pedido, Ref..."
+                            value={search}
+                            onChange={(e) => onSearch(e.target.value)}
+                            className="w-full h-10 px-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-400 transition-all placeholder:text-slate-400"
+                        />
+                    </div>
+                </div>
+
+                {/* Status Filter */}
+                <div className="space-y-1">
+                    <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 flex items-center gap-1">
+                        <Filter size={12} /> Status
+                    </label>
+                    <select
+                        className="w-full h-10 px-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-400 transition-all cursor-pointer"
+                        value={status}
+                        onChange={(e) => onStatusChange(e.target.value)}
+                    >
+                        <option value="all">Todos</option>
+                        <option value="paid">Pagos</option>
+                        <option value="pending">Pendentes</option>
+                        <option value="failed">Falhas</option>
+                    </select>
+                </div>
+
+                {/* Date From */}
+                <div className="flex-1 min-w-[140px]">
+                    <ProDatePicker
+                        label="De"
+                        value={dateFrom}
+                        onChange={onDateFromChange}
+                    />
+                </div>
+
+                {/* Date To */}
+                <div className="flex-1 min-w-[140px]">
+                    <ProDatePicker
+                        label="Até"
+                        value={dateTo}
+                        onChange={onDateToChange}
+                    />
+                </div>
             </div>
 
-            {/* Filters Group */}
-            <div className="flex flex-1 gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0">
-                <select
-                    onChange={(e) => onStatusChange(e.target.value)}
-                    className="px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-600 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-pink-500/50 cursor-pointer"
+            {/* Action Buttons */}
+            <div className="flex gap-2 w-full xl:w-auto">
+                <button
+                    onClick={onNewPayment}
+                    className="h-10 px-4 bg-slate-900 dark:bg-emerald-600 text-white rounded-lg font-medium hover:bg-slate-800 dark:hover:bg-emerald-700 transition-all flex items-center justify-center gap-2 whitespace-nowrap shadow-sm w-full xl:w-auto"
                 >
-                    <option value="all">Todos Status</option>
-                    <option value="paid">✅ Pagos</option>
-                    <option value="pending">⏳ Pendentes</option>
-                    <option value="failed">❌ Falhas</option>
-                </select>
-
-                <select
-                    onChange={(e) => onMethodChange(e.target.value)}
-                    className="px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-600 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-pink-500/50 cursor-pointer"
-                >
-                    <option value="all">Todos Métodos</option>
-                    <option value="pix">💠 Pix</option>
-                    <option value="credit_card">💳 Cartão de Crédito</option>
-                    <option value="cash">💵 Dinheiro</option>
-                </select>
-
-                {/* Date Picker Stub (Simplificado para hoje) */}
-                <button className="px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors flex items-center gap-2">
-                    <Calendar size={16} />
-                    <span className="hidden sm:inline">Data</span>
+                    <Plus size={16} />
+                    <span>Novo Pagamento</span>
                 </button>
             </div>
-
-            {/* Action Button */}
-            <button
-                onClick={onNewPayment}
-                className="w-full md:w-auto px-5 py-2.5 bg-slate-900 dark:bg-pink-600 text-white rounded-lg font-bold hover:bg-slate-800 dark:hover:bg-pink-700 transition-all shadow-lg shadow-slate-900/10 dark:shadow-pink-900/20 flex items-center justify-center gap-2 active:scale-95"
-            >
-                <Plus size={18} />
-                <span>Novo Pagamento</span>
-            </button>
         </div>
     );
 }

@@ -2,7 +2,8 @@
 
 import { useLanguage } from '@/app/context/LanguageContext';
 import { displayCurrency } from '@/app/utils/formatters';
-import { Clock, CheckCircle, XCircle, MoreVertical, CreditCard, Banknote } from 'lucide-react';
+import { Check, X, Clock, AlertCircle, CreditCard, Banknote, MoreHorizontal, Search } from 'lucide-react';
+import LoadingSpinner from '@/app/components/LoadingSpinner';
 
 interface Payment {
   id: number;
@@ -13,7 +14,7 @@ interface Payment {
   amount: string;
   created_at: string;
   order?: {
-      customer_name: string;
+    customer_name: string;
   }
 }
 
@@ -28,104 +29,103 @@ export default function PaymentTable({ payments, isLoading }: Props) {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'paid':
-        return <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-100 uppercase tracking-wide"><CheckCircle size={12} /> Pago</span>;
+        return <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-900/30 uppercase tracking-wide"><Check size={10} /> Pago</span>;
       case 'failed':
-        return <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-700 border border-rose-100 uppercase tracking-wide"><XCircle size={12} /> Falhou</span>;
+        return <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-xs font-medium bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-900/20 dark:text-rose-400 dark:border-rose-900/30 uppercase tracking-wide"><X size={10} /> Falha</span>;
       default:
-        return <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-100 uppercase tracking-wide"><Clock size={12} /> Pendente</span>;
+        return <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700 uppercase tracking-wide"><Clock size={10} /> Pendente</span>;
     }
   };
 
   const getMethodIcon = (method: string) => {
-    if (method.includes('pix')) return <span className="text-emerald-500">💠</span>;
-    if (method.includes('card') || method.includes('credito')) return <CreditCard size={16} className="text-sky-500" />;
-    return <Banknote size={16} className="text-slate-500" />;
+    if (method.includes('pix')) return <span className="text-emerald-600 font-bold text-[10px] border border-emerald-200 bg-emerald-50 px-1 rounded">PIX</span>;
+    if (method.includes('card') || method.includes('credito')) return <CreditCard size={14} className="text-slate-500" />;
+    return <Banknote size={14} className="text-slate-500" />;
   };
 
   if (isLoading) {
     return (
-      <div className="w-full bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 p-8">
-         <div className="animate-pulse space-y-4">
-            {[1, 2, 3, 4, 5].map(i => (
-                <div key={i} className="h-12 bg-slate-100 dark:bg-slate-800 rounded-lg w-full"></div>
-            ))}
-         </div>
+      <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 p-12 flex justify-center">
+        <LoadingSpinner />
       </div>
     );
   }
 
   if (payments.length === 0) {
-      return (
-        <div className="w-full bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 p-12 text-center flex flex-col items-center justify-center min-h-[400px]">
-            <div className="w-16 h-16 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4">
-                <Banknote size={32} className="text-slate-300 dark:text-slate-600" />
-            </div>
-            <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2">Nenhum pagamento encontrado</h3>
-            <p className="text-slate-500 dark:text-slate-400">Tente ajustar os filtros ou adicione um novo pagamento.</p>
+    return (
+      <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 p-12 text-center">
+        <div className="flex flex-col items-center gap-2">
+          <Search size={32} className="opacity-20 text-slate-500" />
+          <span className="text-slate-500 text-sm">Nenhum pagamento encontrado</span>
         </div>
-      );
+      </div>
+    );
   }
 
   return (
-    <div className="w-full bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
+    <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
       <div className="overflow-x-auto">
-        <table className="w-full text-left border-collapse">
-          <thead>
-            <tr className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
-              <th className="py-4 px-6 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-24">ID</th>
-              <th className="py-4 px-6 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Ref / Pedido</th>
-              <th className="py-4 px-6 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Método</th>
-              <th className="py-4 px-6 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Data</th>
-              <th className="py-4 px-6 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-right">Valor</th>
-              <th className="py-4 px-6 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-center">Status</th>
-              <th className="py-4 px-6 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-12"></th>
+        <table className="w-full text-left">
+          <thead className="bg-slate-50 dark:bg-slate-950/50 border-b border-slate-200 dark:border-slate-800">
+            <tr>
+              <th className="px-6 py-3 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">ID / Ref</th>
+              <th className="px-6 py-3 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Pedido</th>
+              <th className="px-6 py-3 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Método</th>
+              <th className="px-6 py-3 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Data</th>
+              <th className="px-6 py-3 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-right">Valor</th>
+              <th className="px-6 py-3 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-center">Status</th>
+              <th className="px-6 py-3 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-12 text-right">Ações</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
             {payments.map((payment) => (
-              <tr key={payment.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group">
-                <td className="py-4 px-6 text-xs font-mono text-slate-400">#{payment.id}</td>
-                <td className="py-4 px-6">
+              <tr key={payment.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors cursor-pointer group">
+                <td className="px-6 py-4">
+                  <span className="font-mono text-xs text-slate-500">#{payment.id}</span>
+                  {payment.external_id && !payment.external_id.startsWith('MANUAL') && (
+                    <div className="text-[10px] text-slate-400 font-mono truncate max-w-[100px] mt-0.5" title={payment.external_id}>
+                      {payment.external_id}
+                    </div>
+                  )}
+                </td>
+                <td className="px-6 py-4">
+                  {payment.order_id ? (
                     <div className="flex flex-col">
-                        <span className="font-medium text-slate-900 dark:text-slate-200 text-sm">
-                            {payment.external_id ? (payment.external_id.startsWith('MANUAL') ? 'Manual' : 'Gateway') : 'Manual'}
-                        </span>
-                        {payment.order_id && (
-                            <span className="text-xs text-sky-600 dark:text-sky-400 font-medium cursor-pointer hover:underline">
-                                Pedido #{payment.order_id} ({payment.order?.customer_name || 'N/A'})
-                            </span>
-                        )}
-                        {payment.external_id && !payment.external_id.startsWith('MANUAL') && (
-                             <span className="text-[10px] font-mono text-slate-400 truncate max-w-[150px]" title={payment.external_id}>{payment.external_id}</span>
-                        )}
+                      <span className="text-sm font-medium text-slate-700 dark:text-slate-200 group-hover:text-blue-600 transition-colors">
+                        Pedido #{payment.order_id}
+                      </span>
+                      <span className="text-xs text-slate-500">{payment.order?.customer_name}</span>
                     </div>
+                  ) : (
+                    <span className="text-xs text-slate-400 italic">Avulso</span>
+                  )}
                 </td>
-                <td className="py-4 px-6">
-                    <div className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300 capitalize">
-                        {getMethodIcon(payment.method)}
-                        <span>{payment.method.replace(/_/g, ' ')}</span>
-                    </div>
+                <td className="px-6 py-4">
+                  <div className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300 capitalize">
+                    {getMethodIcon(payment.method)}
+                    <span className="text-xs">{payment.method.replace(/_/g, ' ')}</span>
+                  </div>
                 </td>
-                <td className="py-4 px-6">
-                    <div className="flex flex-col text-xs text-slate-500 dark:text-slate-400">
-                         <span className="font-semibold text-slate-700 dark:text-slate-300">
-                             {new Date(payment.created_at).toLocaleDateString()}
-                         </span>
-                         <span>{new Date(payment.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
-                    </div>
-                </td>
-                <td className="py-4 px-6 text-right">
-                    <span className="font-bold text-slate-900 dark:text-slate-100 tabular-nums">
-                        {displayCurrency(payment.amount)}
+                <td className="px-6 py-4">
+                  <div className="flex flex-col text-xs text-slate-500 dark:text-slate-400">
+                    <span className="font-mono text-slate-700 dark:text-slate-300">
+                      {new Date(payment.created_at).toLocaleDateString()}
                     </span>
+                    <span>{new Date(payment.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                  </div>
                 </td>
-                <td className="py-4 px-6 text-center">
-                    {getStatusBadge(payment.status)}
+                <td className="px-6 py-4 text-right">
+                  <span className="font-medium text-slate-900 dark:text-slate-100 font-mono text-sm tabular-nums">
+                    {displayCurrency(payment.amount)}
+                  </span>
                 </td>
-                <td className="py-4 px-6 text-center">
-                    <button className="p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-400 transition-colors">
-                        <MoreVertical size={16} />
-                    </button>
+                <td className="px-6 py-4 text-center">
+                  {getStatusBadge(payment.status)}
+                </td>
+                <td className="px-6 py-4 text-right">
+                  <button className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
+                    <MoreHorizontal size={16} />
+                  </button>
                 </td>
               </tr>
             ))}

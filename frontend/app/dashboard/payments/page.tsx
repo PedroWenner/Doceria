@@ -3,16 +3,20 @@
 import { useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
 import { toast } from 'react-hot-toast';
-import { Wallet, CreditCard, ArrowUpRight } from 'lucide-react';
+import { Wallet } from 'lucide-react';
 
 import PaymentTable from '@/app/components/payments/PaymentTable';
 import PaymentFilterBar from '@/app/components/payments/PaymentFilterBar';
 import NewPaymentModal from '@/app/components/payments/NewPaymentModal';
+import Pagination from '@/app/components/Pagination';
 
 export default function PaymentsPage() {
     const [payments, setPayments] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
+
+    // Pagination Meta
+    const [meta, setMeta] = useState({ current_page: 1, last_page: 1, total: 0, per_page: 15 });
 
     // Filters State
     const [filters, setFilters] = useState({
@@ -25,13 +29,14 @@ export default function PaymentsPage() {
 
     const token = Cookies.get('admin_token');
 
-    const fetchPayments = async () => {
+    const fetchPayments = async (page = 1) => {
         if (!token) return;
         setLoading(true);
 
         try {
             // Build Query Params
             const params = new URLSearchParams();
+            params.append('page', page.toString());
             if (filters.search) params.append('search', filters.search);
             if (filters.status !== 'all') params.append('status', filters.status);
             if (filters.method !== 'all') params.append('method', filters.method);
@@ -44,7 +49,13 @@ export default function PaymentsPage() {
 
             const data = await res.json();
             if (data.status === 'success') {
-                setPayments(data.data.data); // data.data because of pagination wrapper
+                setPayments(data.data.data);
+                setMeta({
+                    current_page: data.data.current_page,
+                    last_page: data.data.last_page,
+                    total: data.data.total,
+                    per_page: data.data.per_page
+                });
             }
         } catch (error) {
             console.error('Failed to fetch payments', error);
@@ -57,7 +68,7 @@ export default function PaymentsPage() {
     // Debounce Search
     useEffect(() => {
         const timeout = setTimeout(() => {
-            fetchPayments();
+            fetchPayments(1);
         }, 500);
         return () => clearTimeout(timeout);
     }, [filters]);
@@ -66,59 +77,57 @@ export default function PaymentsPage() {
     const handleSearch = (val: string) => setFilters(prev => ({ ...prev, search: val }));
     const handleStatus = (val: string) => setFilters(prev => ({ ...prev, status: val }));
     const handleMethod = (val: string) => setFilters(prev => ({ ...prev, method: val }));
-    const handleDate = (start: string, end: string) => setFilters(prev => ({ ...prev, date_from: start, date_to: end }));
 
     return (
-        <div className="min-h-screen bg-slate-50/50 dark:bg-slate-950 p-6 pb-20">
-            <div className="max-w-7xl mx-auto">
-                {/* Header */}
-                <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
-                    <div>
-                        <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-50 tracking-tight flex items-center gap-3">
-                            <div className="p-3 bg-emerald-100 dark:bg-emerald-900/30 rounded-2xl text-emerald-600 dark:text-emerald-400 shadow-sm">
-                                <Wallet size={32} />
-                            </div>
-                            Gestão de Pagamentos
-                        </h1>
-                        <p className="text-slate-500 dark:text-slate-400 mt-2 text-sm ml-[72px] max-w-lg">
-                            Visualize, filtre e gerencie todas as transações financeiras do sistema de forma centralizada.
-                        </p>
-                    </div>
+        <div className="space-y-6 max-w-[1600px] mx-auto p-6 md:p-8">
+            {/* Header */}
+            <div>
+                <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-50 flex items-center gap-2">
+                    <Wallet className="text-slate-400" />
+                    Pagamentos
+                </h1>
+                <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 ml-8">
+                    Gestão financeira e histórico de transações.
+                </p>
+            </div>
 
-                    {/* Quick Stats (Stub) */}
-                    <div className="flex gap-4">
-                        <div className="px-5 py-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-3">
-                            <div className="p-2 rounded-full bg-blue-50 text-blue-600">
-                                <CreditCard size={18} />
-                            </div>
-                            <div className="flex flex-col">
-                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Hoje</span>
-                                <span className="font-bold text-slate-900 dark:text-slate-100">R$ --,--</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            {/* Filters */}
+            <PaymentFilterBar
+                search={filters.search}
+                onSearch={handleSearch}
+                status={filters.status}
+                onStatusChange={handleStatus}
+                method={filters.method}
+                onMethodChange={handleMethod}
+                dateFrom={filters.date_from}
+                onDateFromChange={(val) => setFilters(prev => ({ ...prev, date_from: val }))}
+                dateTo={filters.date_to}
+                onDateToChange={(val) => setFilters(prev => ({ ...prev, date_to: val }))}
+                onNewPayment={() => setIsModalOpen(true)}
+            />
 
-                {/* Filters */}
-                <PaymentFilterBar
-                    onSearch={handleSearch}
-                    onStatusChange={handleStatus}
-                    onMethodChange={handleMethod}
-                    onDateChange={handleDate}
-                    onNewPayment={() => setIsModalOpen(true)}
-                />
-
-                {/* Table */}
+            {/* Table & Pagination */}
+            <div className="space-y-4">
                 <PaymentTable payments={payments} isLoading={loading} />
 
-                {/* Modal */}
-                <NewPaymentModal
-                    isOpen={isModalOpen}
-                    onClose={() => setIsModalOpen(false)}
-                    onSuccess={fetchPayments}
-                    token={token}
-                />
+                {!loading && (
+                    <Pagination
+                        currentPage={meta.current_page}
+                        lastPage={meta.last_page}
+                        total={meta.total}
+                        perPage={meta.per_page}
+                        onPageChange={fetchPayments}
+                    />
+                )}
             </div>
+
+            {/* Modal */}
+            <NewPaymentModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onSuccess={() => fetchPayments(1)}
+                token={token}
+            />
         </div>
     );
 }
