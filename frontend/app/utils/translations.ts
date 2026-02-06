@@ -22,7 +22,7 @@ export const translations = {
             new: 'Novo'
         },
         auth: {
-            login_title: 'SweetStore',
+            login_title: 'AlcaTech',
             login_subtitle: 'Excelência em cada detalhe',
             email: 'Endereço de E-mail',
             password: 'Senha',
@@ -358,7 +358,7 @@ export const translations = {
             new: 'New'
         },
         auth: {
-            login_title: 'SweetStore',
+            login_title: 'AlcaTech',
             login_subtitle: 'Indulge in Excellence',
             email: 'Email Address',
             password: 'Password',
