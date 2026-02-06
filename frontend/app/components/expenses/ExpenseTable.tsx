@@ -4,6 +4,7 @@ import React from 'react';
 import { useLanguage } from '@/app/context/LanguageContext';
 import { Edit2, Trash2, Calendar, CreditCard, Tag } from 'lucide-react';
 import { format } from 'date-fns';
+import { displayCurrency } from '@/app/utils/formatters';
 
 interface Expense {
     id: number;
@@ -33,24 +34,17 @@ export default function ExpenseTable({ expenses, onEdit, onDelete, loading }: Ex
         return <div className="p-12 text-center text-slate-400">{t('financial.no_expenses')}</div>;
     }
 
-    const formatCurrency = (value: number) => {
-        return new Intl.NumberFormat('pt-BR', {
-            style: 'currency',
-            currency: 'BRL'
-        }).format(value);
-    };
-
     return (
         <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
                 <thead>
-                    <tr className="border-b border-slate-100 dark:border-slate-800 text-xs uppercase text-slate-400 font-semibold tracking-wider bg-slate-50/50 dark:bg-slate-900/50">
-                        <th className="px-6 py-4">{t('financial.description')}</th>
-                        <th className="px-6 py-4">{t('financial.category')}</th>
-                        <th className="px-6 py-4">{t('financial.date')}</th>
-                        <th className="px-6 py-4">{t('financial.value')}</th>
-                        <th className="px-6 py-4 text-center">{t('financial.status')}</th>
-                        <th className="px-6 py-4 text-right">{t('common.actions')}</th>
+                    <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700 delay-0">
+                        <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{t('financial.description')}</th>
+                        <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{t('financial.category')}</th>
+                        <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{t('financial.date')}</th>
+                        <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{t('financial.value')}</th>
+                        <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-center">{t('financial.status')}</th>
+                        <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-right">{t('common.actions')}</th>
                     </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -59,7 +53,7 @@ export default function ExpenseTable({ expenses, onEdit, onDelete, loading }: Ex
                             <td className="px-6 py-4 font-medium text-slate-900 dark:text-slate-100">
                                 {expense.description}
                                 <div className="text-xs text-slate-400 font-normal flex items-center gap-1 mt-0.5 md:hidden">
-                                    {formatCurrency(Number(expense.amount))}
+                                    {displayCurrency(expense.amount)}
                                 </div>
                             </td>
                             <td className="px-6 py-4">
@@ -81,7 +75,7 @@ export default function ExpenseTable({ expenses, onEdit, onDelete, loading }: Ex
                                 </span>
                             </td>
                             <td className="px-6 py-4 font-medium text-slate-700 dark:text-slate-300">
-                                {formatCurrency(Number(expense.amount))}
+                                {displayCurrency(expense.amount)}
                             </td>
                             <td className="px-6 py-4 text-center">
                                 {expense.status === 'paid' ? (

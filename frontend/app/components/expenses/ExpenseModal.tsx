@@ -5,6 +5,8 @@ import { X, Check } from 'lucide-react';
 import { useLanguage } from '@/app/context/LanguageContext';
 import { toast } from 'react-hot-toast';
 import Cookies from 'js-cookie';
+import ProDatePicker from '@/app/components/ProDatePicker';
+import { formatCurrency, parseCurrency } from '@/app/utils/formatters';
 
 interface Category {
     id: number;
@@ -69,7 +71,7 @@ export default function ExpenseModal({ isOpen, onClose, onSuccess, expense }: Ex
         if (expense) {
             setFormData({
                 description: expense.description,
-                amount: expense.amount.toString(),
+                amount: formatCurrency(expense.amount),
                 date: expense.date,
                 category_id: expense.category_id.toString(),
                 status: expense.status,
@@ -109,7 +111,10 @@ export default function ExpenseModal({ isOpen, onClose, onSuccess, expense }: Ex
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify(formData)
+                body: JSON.stringify({
+                    ...formData,
+                    amount: parseCurrency(formData.amount)
+                })
             });
 
             if (!response.ok) throw new Error('Failed to save expense');
@@ -164,26 +169,20 @@ export default function ExpenseModal({ isOpen, onClose, onSuccess, expense }: Ex
                         </label>
                         <input
                             required
-                            type="number"
-                            step="0.01"
+                            type="text"
                             value={formData.amount}
-                            onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-                            className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
-                            placeholder="0.00"
+                            onChange={(e) => setFormData({ ...formData, amount: formatCurrency(e.target.value) })}
+                            className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all font-bold"
+                            placeholder="R$ 0,00"
                         />
                     </div>
 
                     {/* Date */}
                     <div>
-                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                            {t('financial.date')}
-                        </label>
-                        <input
-                            required
-                            type="date"
+                        <ProDatePicker
+                            label={t('financial.date')}
                             value={formData.date}
-                            onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                            className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                            onChange={(date) => setFormData({ ...formData, date })}
                         />
                     </div>
 
@@ -264,7 +263,7 @@ export default function ExpenseModal({ isOpen, onClose, onSuccess, expense }: Ex
                         <button
                             type="submit"
                             disabled={loading}
-                            className="flex-1 py-2.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-lg shadow-blue-500/20 transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                            className="flex-1 py-2.5 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-slate-50 dark:hover:bg-slate-200 dark:text-slate-900 text-white font-medium shadow-sm transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
                         >
                             {loading ? (
                                 <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />

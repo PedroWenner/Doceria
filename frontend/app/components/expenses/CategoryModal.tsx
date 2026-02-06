@@ -111,7 +111,7 @@ export default function CategoryModal({ isOpen, onClose, onSuccess, category }: 
                             type="text"
                             value={formData.name}
                             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                            className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                            className="w-full px-4 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-400 outline-none transition-all"
                             placeholder="Ex: Fornecedores"
                         />
                     </div>
@@ -124,7 +124,7 @@ export default function CategoryModal({ isOpen, onClose, onSuccess, category }: 
                         <textarea
                             value={formData.description}
                             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                            className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none h-24"
+                            className="w-full px-4 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-400 outline-none transition-all resize-none h-24"
                             placeholder="Ex: Pagamentos para fornecedores de matéria-prima."
                         />
                     </div>
@@ -141,7 +141,7 @@ export default function CategoryModal({ isOpen, onClose, onSuccess, category }: 
                                 onChange={(e) => setFormData({ ...formData, color: e.target.value })}
                                 className="h-10 w-20 rounded cursor-pointer border-0 p-0"
                             />
-                            <span className="text-sm text-slate-500 uppercase">{formData.color}</span>
+                            <span className="text-sm text-slate-500 uppercase font-mono">{formData.color}</span>
                         </div>
                     </div>
 
@@ -157,7 +157,7 @@ export default function CategoryModal({ isOpen, onClose, onSuccess, category }: 
                         <button
                             type="submit"
                             disabled={loading}
-                            className="flex-1 py-2.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-lg shadow-blue-500/20 transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                            className="flex-1 py-2.5 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-slate-50 dark:hover:bg-slate-200 dark:text-slate-900 text-white font-medium shadow-sm transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
                         >
                             {loading ? (
                                 <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
