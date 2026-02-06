@@ -35,6 +35,7 @@ Route::group(['middleware' => ['api', 'auth:api', 'role:admin']], function () {
     // Users & Audits - Allow Admin and Manager (Read)
     Route::group(['middleware' => ['role:admin,manager']], function () {
         Route::get('users', [App\Http\Controllers\UserController::class, 'index']);
+        Route::post('users', [App\Http\Controllers\UserController::class, 'store']); // Create User
         Route::get('audits', [App\Http\Controllers\AuditController::class, 'index']);
         Route::get('roles', [App\Http\Controllers\UserController::class, 'roles']);
     });

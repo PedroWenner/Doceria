@@ -22,6 +22,40 @@ class UserController extends Controller
     }
 
     /**
+     * Create a new user.
+     */
+    public function store(Request $request)
+    {
+        $validator = \Illuminate\Support\Facades\Validator::make(request()->all(), [
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:6',
+            'role' => 'nullable|exists:roles,slug'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => \Illuminate\Support\Facades\Hash::make($request->password),
+            'role' => $request->role ?? 'customer',
+        ]);
+
+        // Attach Role
+        $roleSlug = $request->role ?? 'customer';
+        $role = Role::where('slug', $roleSlug)->first();
+        
+        if ($role) {
+            $user->roles()->attach($role);
+        }
+
+        return $this->success($user->load('roles'), 'User created successfully', 201);
+    }
+
+    /**
      * List all available roles.
      */
     public function roles()

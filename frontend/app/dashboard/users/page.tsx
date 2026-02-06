@@ -1,5 +1,4 @@
 'use client';
-
 import { useState, useEffect } from 'react';
 import LoadingSpinner from '@/app/components/LoadingSpinner';
 import Cookies from 'js-cookie';
@@ -16,6 +15,8 @@ import {
     Briefcase
 } from 'lucide-react';
 import Pagination from '@/app/components/Pagination';
+import UserModal from '@/app/components/users/UserModal';
+import UserFilterBar from '@/app/components/users/UserFilterBar';
 
 interface User {
     id: number;
@@ -69,7 +70,7 @@ export default function UsersPage() {
             }
             if (rolesRes.ok) {
                 const response = await rolesRes.json();
-                setRoles(response.data);
+                setRoles(response.data.filter((role: Role) => role.slug !== 'admin'));
             }
         } catch (error) {
             console.error('Failed to fetch data', error);
@@ -118,6 +119,41 @@ export default function UsersPage() {
         user.email.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
+    const handleCreateUser = async (userData: any) => {
+        setIsSaving(true);
+        try {
+            const res = await fetch(`${apiUrl}/users`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                    'Accept-Language': 'pt'
+                },
+                body: JSON.stringify(userData)
+            });
+
+            if (res.ok) {
+                await fetchData();
+                setIsCreateModalOpen(false);
+                toast.success(t('users.create_success'));
+            } else {
+                const data = await res.json();
+                if (data.errors) {
+                    const messages = Object.values(data.errors).flat().join('\n');
+                    toast.error(messages);
+                } else {
+                    toast.error(data.message || t('common.error'));
+                }
+            }
+        } catch (error) {
+            toast.error(t('common.error'));
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
     if (isLoading) return <LoadingSpinner />;
 
     return (
@@ -133,17 +169,12 @@ export default function UsersPage() {
                 </div>
             </div>
 
-            {/* Search Bar */}
-            <div className="relative max-w-md">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
-                <input
-                    type="text"
-                    placeholder={t('users.search_placeholder')}
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-50 focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-50 focus:border-transparent outline-none transition-all placeholder:text-slate-400"
-                />
-            </div>
+            {/* Filter Bar */}
+            <UserFilterBar
+                searchTerm={searchTerm}
+                onSearchChange={setSearchTerm}
+                onNewUser={() => setIsCreateModalOpen(true)}
+            />
 
             {/* Table */}
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden">
@@ -216,6 +247,15 @@ export default function UsersPage() {
                     onPageChange={fetchData}
                 />
             </div>
+
+            {/* Create User Modal */}
+            <UserModal
+                isOpen={isCreateModalOpen}
+                onClose={() => setIsCreateModalOpen(false)}
+                onSubmit={handleCreateUser}
+                roles={roles}
+                isSaving={isSaving}
+            />
 
             {/* Edit Modal */}
             {editingUser && (

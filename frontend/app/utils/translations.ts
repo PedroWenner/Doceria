@@ -74,7 +74,10 @@ export const translations = {
             search_placeholder: 'Buscar usuários...',
             no_users: 'Nenhum usuário encontrado.',
             available_roles: 'Cargos Disponíveis',
-            no_permissions: 'Sem permissões'
+            no_permissions: 'Sem permissões',
+            new_user: 'Novo Usuário',
+            create_success: 'Usuário criado com sucesso',
+            create_error: 'Erro ao criar usuário',
         },
         products: {
             title: 'Produtos',
@@ -417,7 +420,10 @@ export const translations = {
             search_placeholder: 'Search users...',
             no_users: 'No users found.',
             available_roles: 'Available Roles',
-            no_permissions: 'No permissions'
+            no_permissions: 'No permissions',
+            new_user: 'New User',
+            create_success: 'User created successfully',
+            create_error: 'Error creating user',
         },
         products: {
             title: 'Products',

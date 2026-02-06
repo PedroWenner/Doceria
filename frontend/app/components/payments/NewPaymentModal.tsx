@@ -164,7 +164,7 @@ export default function NewPaymentModal({ isOpen, onClose, onSuccess, token }: P
                         disabled={loading}
                         className="px-6 py-2.5 rounded-lg bg-slate-900 dark:bg-slate-50 text-white dark:text-slate-900 font-bold hover:bg-slate-800 dark:hover:bg-slate-200 transition-all shadow-sm disabled:opacity-70 disabled:cursor-wait flex items-center gap-2"
                     >
-                        {loading ? <LoadingSpinner /> : <><Check size={18} /> {t('payments_dashboard.modal.save')}</>}
+                        {loading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <><Check size={18} /> {t('payments_dashboard.modal.save')}</>}
                     </button>
                 </div>
             </div>
