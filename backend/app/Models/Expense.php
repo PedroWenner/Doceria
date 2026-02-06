@@ -39,4 +39,9 @@ class Expense extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function attachments()
+    {
+        return $this->hasMany(ExpenseAttachment::class);
+    }
 }

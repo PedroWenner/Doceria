@@ -12,7 +12,7 @@ class ExpenseController extends Controller
 
     public function index(Request $request)
     {
-        $query = Expense::with(['category', 'user']);
+        $query = Expense::with(['category', 'user', 'attachments']);
 
         // Search
         if ($request->has('search') && $request->search != '') {
@@ -54,6 +54,7 @@ class ExpenseController extends Controller
             'status' => 'required|in:paid,pending',
             'due_date' => 'nullable|date',
             'notes' => 'nullable|string',
+            'documents.*' => 'nullable|file|max:10240', // Max 10MB per file
         ]);
 
         $validated['user_id'] = Auth::id();
@@ -63,12 +64,30 @@ class ExpenseController extends Controller
         }
 
         $expense = Expense::create($validated);
+
+        // Handle File Uploads
+        if ($request->hasFile('documents')) {
+            foreach ($request->file('documents') as $file) {
+                $path = $file->store('expenses', 'public');
+                
+                $expense->attachments()->create([
+                    'file_path' => $path,
+                    'original_name' => $file->getClientOriginalName(),
+                    'mime_type' => $file->getClientMimeType(),
+                    'file_size' => $file->getSize(),
+                ]);
+            }
+        }
+
+        // Load relationships for response
+        $expense->load(['category', 'user', 'attachments']);
+
         return $this->success($expense, 'Despesa registrada com sucesso.', 201);
     }
 
     public function show($id)
     {
-        $expense = Expense::with(['category', 'user'])->findOrFail($id);
+        $expense = Expense::with(['category', 'user', 'attachments'])->findOrFail($id);
         return $this->success($expense);
     }
 
@@ -85,6 +104,7 @@ class ExpenseController extends Controller
             'status' => 'required|in:paid,pending',
             'due_date' => 'nullable|date',
             'notes' => 'nullable|string',
+            'documents.*' => 'nullable|file|max:10240',
         ]);
 
         if ($validated['status'] === 'paid' && $expense->status !== 'paid') {
@@ -92,7 +112,41 @@ class ExpenseController extends Controller
         }
 
         $expense->update($validated);
+
+         // Handle New File Uploads
+         if ($request->hasFile('documents')) {
+            foreach ($request->file('documents') as $file) {
+                $path = $file->store('expenses', 'public');
+                
+                $expense->attachments()->create([
+                    'file_path' => $path,
+                    'original_name' => $file->getClientOriginalName(),
+                    'mime_type' => $file->getClientMimeType(),
+                    'file_size' => $file->getSize(),
+                ]);
+            }
+        }
+        
+        $expense->load('attachments');
+
         return $this->success($expense, 'Despesa atualizada com sucesso.');
+    }
+
+    public function removeAttachment($id)
+    {
+        $attachment = \App\Models\ExpenseAttachment::findOrFail($id);
+        
+        // Check permissions (optional, but good practice)
+        // if ($attachment->expense->user_id !== Auth::id()) ...
+
+        // Delete file from storage
+        if (\Illuminate\Support\Facades\Storage::disk('public')->exists($attachment->file_path)) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($attachment->file_path);
+        }
+
+        $attachment->delete();
+
+        return $this->success(null, 'Anexo removido com sucesso.');
     }
 
     public function destroy($id)

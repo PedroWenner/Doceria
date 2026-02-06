@@ -6,6 +6,7 @@ import { Plus, Edit2, Trash2, Tag, Search } from 'lucide-react';
 import Cookies from 'js-cookie';
 import { toast } from 'react-hot-toast';
 import CategoryModal from '@/app/components/expenses/CategoryModal';
+import DeleteConfirmationModal from '@/app/components/DeleteConfirmationModal';
 
 interface Category {
     id: number;
@@ -23,6 +24,8 @@ export default function CategoriesPage() {
     // Modal State
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+    const [deleteConfirmation, setDeleteConfirmation] = useState({ isOpen: false, id: null as number | null });
+    const [isDeleting, setIsDeleting] = useState(false);
 
     const fetchCategories = async () => {
         setLoading(true);
@@ -49,12 +52,17 @@ export default function CategoriesPage() {
         fetchCategories();
     }, []);
 
-    const handleDelete = async (id: number) => {
-        if (!confirm('Tem certeza que deseja excluir?')) return;
+    const handleDeleteClick = (id: number) => {
+        setDeleteConfirmation({ isOpen: true, id });
+    };
+
+    const handleConfirmDelete = async () => {
+        if (!deleteConfirmation.id) return;
+        setIsDeleting(true);
 
         const token = Cookies.get('admin_token');
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/expense-categories/${id}`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/expense-categories/${deleteConfirmation.id}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -70,6 +78,9 @@ export default function CategoriesPage() {
             }
         } catch (error) {
             toast.error(t('common.error'));
+        } finally {
+            setIsDeleting(false);
+            setDeleteConfirmation({ isOpen: false, id: null });
         }
     };
 
@@ -167,7 +178,7 @@ export default function CategoriesPage() {
                                                     <Edit2 size={18} />
                                                 </button>
                                                 <button
-                                                    onClick={() => handleDelete(category.id)}
+                                                    onClick={() => handleDeleteClick(category.id)}
                                                     className="p-2 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                                                     title={t('common.delete')}
                                                 >
@@ -194,6 +205,15 @@ export default function CategoriesPage() {
                 onClose={() => setIsModalOpen(false)}
                 onSuccess={fetchCategories}
                 category={selectedCategory}
+            />
+
+            <DeleteConfirmationModal
+                isOpen={deleteConfirmation.isOpen}
+                onClose={() => setDeleteConfirmation({ isOpen: false, id: null })}
+                onConfirm={handleConfirmDelete}
+                title={t('financial.delete_category_title') || t('common.delete')}
+                message={t('financial.confirm_delete_category')}
+                isDeleting={isDeleting}
             />
         </div>
     );

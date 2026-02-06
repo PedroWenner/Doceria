@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useLanguage } from '@/app/context/LanguageContext';
-import { Edit2, Trash2, Calendar, CreditCard, Tag } from 'lucide-react';
+import { Edit2, Trash2, Calendar, CreditCard, Tag, Paperclip } from 'lucide-react';
 import { format } from 'date-fns';
 import { displayCurrency } from '@/app/utils/formatters';
 
@@ -14,6 +14,8 @@ interface Expense {
     category: { name: string; color: string };
     status: 'paid' | 'pending';
     payment_method: string;
+    attachments_count?: number;
+    attachments?: any[];
 }
 
 interface ExpenseTableProps {
@@ -51,8 +53,13 @@ export default function ExpenseTable({ expenses, onEdit, onDelete, loading }: Ex
                     {expenses.map((expense) => (
                         <tr key={expense.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
                             <td className="px-6 py-4">
-                                <div className="font-medium text-slate-900 dark:text-slate-100">
+                                <div className="font-medium text-slate-900 dark:text-slate-100 flex items-center gap-2">
                                     {expense.description}
+                                    {expense.attachments && expense.attachments.length > 0 && (
+                                        <div className="flex items-center justify-center w-5 h-5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400" title={`${expense.attachments.length} anexo(s)`}>
+                                            <Paperclip size={12} />
+                                        </div>
+                                    )}
                                 </div>
                                 <div className="text-xs text-slate-400 font-normal flex items-center gap-1 mt-0.5 md:hidden">
                                     {displayCurrency(expense.amount)}

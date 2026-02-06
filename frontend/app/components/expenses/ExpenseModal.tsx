@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { X, Check } from 'lucide-react';
+import { X, Check, Upload, FileText, Trash2 } from 'lucide-react';
 import { useLanguage } from '@/app/context/LanguageContext';
 import { toast } from 'react-hot-toast';
 import Cookies from 'js-cookie';
@@ -22,6 +22,7 @@ interface Expense {
     status: 'paid' | 'pending';
     payment_method: string;
     notes?: string;
+    attachments?: { id: number; original_name: string; file_path: string }[];
 }
 
 interface ExpenseModalProps {
@@ -35,6 +36,10 @@ export default function ExpenseModal({ isOpen, onClose, onSuccess, expense }: Ex
     const { t } = useLanguage();
     const [loading, setLoading] = useState(false);
     const [categories, setCategories] = useState<Category[]>([]);
+
+    const [files, setFiles] = useState<File[]>([]);
+    const [existingAttachments, setExistingAttachments] = useState<any[]>([]);
+    const [removedAttachmentIds, setRemovedAttachmentIds] = useState<number[]>([]);
 
     const [formData, setFormData] = useState({
         description: '',
@@ -78,6 +83,7 @@ export default function ExpenseModal({ isOpen, onClose, onSuccess, expense }: Ex
                 payment_method: expense.payment_method,
                 notes: expense.notes || ''
             });
+            setExistingAttachments(expense.attachments || []);
         } else {
             setFormData({
                 description: '',
@@ -88,7 +94,10 @@ export default function ExpenseModal({ isOpen, onClose, onSuccess, expense }: Ex
                 payment_method: 'money',
                 notes: ''
             });
+            setExistingAttachments([]);
         }
+        setFiles([]);
+        setRemovedAttachmentIds([]);
     }, [expense, isOpen]);
 
     if (!isOpen) return null;
@@ -102,19 +111,45 @@ export default function ExpenseModal({ isOpen, onClose, onSuccess, expense }: Ex
             ? `${process.env.NEXT_PUBLIC_API_URL}/expenses/${expense.id}`
             : `${process.env.NEXT_PUBLIC_API_URL}/expenses`;
 
-        const method = expense ? 'PUT' : 'POST';
+        const method = expense ? 'POST' : 'POST'; // Always POST for FormData with files, use _method=PUT for updates if needed but Laravel handles POST update slightly differently or we can just use POST logic.
+        // Actually, strictly speaking, uploading files via PUT is tricky. Common pattern in Laravel is POST with _method field.
+
+        const submitData = new FormData();
+        submitData.append('description', formData.description);
+        submitData.append('amount', parseCurrency(formData.amount).toString());
+        submitData.append('date', formData.date);
+        submitData.append('category_id', formData.category_id);
+        submitData.append('status', formData.status);
+        submitData.append('payment_method', formData.payment_method);
+        submitData.append('notes', formData.notes || '');
+
+        files.forEach(file => {
+            submitData.append('documents[]', file);
+        });
+
+        if (expense) {
+            submitData.append('_method', 'PUT');
+
+            // Handle removed attachments immediately or pass IDs to backend? 
+            // Best approach: Call delete endpoint separately or handle in update. 
+            // My implementation plan suggested removeAttachment endpoint.
+            // Let's call remove for each ID first.
+            for (const id of removedAttachmentIds) {
+                await fetch(`${process.env.NEXT_PUBLIC_API_URL}/expenses/attachments/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+            }
+        }
 
         try {
             const response = await fetch(url, {
-                method,
+                method: 'POST', // Always POST when sending FormData
                 headers: {
-                    'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
+                    // 'Content-Type': 'multipart/form-data' // Do NOT set this manually, let browser set boundary
                 },
-                body: JSON.stringify({
-                    ...formData,
-                    amount: parseCurrency(formData.amount)
-                })
+                body: submitData
             });
 
             if (!response.ok) throw new Error('Failed to save expense');
@@ -240,15 +275,93 @@ export default function ExpenseModal({ isOpen, onClose, onSuccess, expense }: Ex
                     </div>
 
                     {/* Notes */}
-                    <div className="md:col-span-2">
-                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                            {t('financial.notes')}
+                    {/* Attachments */}
+                    <div className="md:col-span-2 space-y-3">
+                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                            {t('financial.attachments')}
                         </label>
-                        <textarea
-                            value={formData.notes}
-                            onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                            className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none h-20"
-                        />
+
+                        {/* File Input */}
+                        <div className="flex items-center justify-center w-full">
+                            <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-slate-300 dark:border-slate-700 border-dashed rounded-xl cursor-pointer bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
+                                <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                    <Upload className="w-8 h-8 mb-3 text-slate-400" />
+                                    <p className="mb-2 text-sm text-slate-500 dark:text-slate-400">
+                                        <span className="font-semibold">{t('financial.click_upload')}</span>
+                                    </p>
+                                    <p className="text-xs text-slate-500 dark:text-slate-400">PDF, PNG, JPG (MAX. 10MB)</p>
+                                </div>
+                                <input
+                                    type="file"
+                                    className="hidden"
+                                    multiple
+                                    onChange={(e) => {
+                                        if (e.target.files) {
+                                            setFiles([...files, ...Array.from(e.target.files)]);
+                                        }
+                                    }}
+                                />
+                            </label>
+                        </div>
+
+                        {/* Selected Files List */}
+                        {(files.length > 0 || existingAttachments.length > 0) && (
+                            <div className="space-y-2">
+                                {/* New Files */}
+                                {files.map((file, index) => (
+                                    <div key={`new-${index}`} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
+                                        <div className="flex items-center gap-3">
+                                            <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg text-blue-600 dark:text-blue-400">
+                                                <FileText size={18} />
+                                            </div>
+                                            <div>
+                                                <p className="text-sm font-medium text-slate-700 dark:text-slate-200">{file.name}</p>
+                                                <p className="text-xs text-slate-500 dark:text-slate-400">{(file.size / 1024 / 1024).toFixed(2)} MB • {t('common.new')}</p>
+                                            </div>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={() => setFiles(files.filter((_, i) => i !== index))}
+                                            className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                                        >
+                                            <X size={18} />
+                                        </button>
+                                    </div>
+                                ))}
+
+                                {/* Existing Attachments */}
+                                {existingAttachments.map((att) => (
+                                    <div key={att.id} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
+                                        <div className="flex items-center gap-3">
+                                            <div className="p-2 bg-slate-200 dark:bg-slate-700 rounded-lg text-slate-600 dark:text-slate-300">
+                                                <FileText size={18} />
+                                            </div>
+                                            <div>
+                                                <a
+                                                    href={`${process.env.NEXT_PUBLIC_API_URL.replace('/api', '')}/storage/${att.file_path}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="text-sm font-medium text-slate-700 dark:text-slate-200 hover:underline hover:text-blue-600"
+                                                >
+                                                    {att.original_name}
+                                                </a>
+                                                <p className="text-xs text-slate-500 dark:text-slate-400">{att.mime_type}</p>
+                                            </div>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setRemovedAttachmentIds([...removedAttachmentIds, att.id]);
+                                                setExistingAttachments(existingAttachments.filter(item => item.id !== att.id));
+                                            }}
+                                            className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                                        >
+                                            <Trash2 size={18} />
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
 
                     {/* Footer Actions */}

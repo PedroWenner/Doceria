@@ -7,6 +7,7 @@ import Cookies from 'js-cookie';
 import { toast } from 'react-hot-toast';
 import ExpenseTable from '@/app/components/expenses/ExpenseTable';
 import ExpenseModal from '@/app/components/expenses/ExpenseModal';
+import DeleteConfirmationModal from '@/app/components/DeleteConfirmationModal';
 import ProDatePicker from '@/app/components/ProDatePicker';
 
 export default function ExpensesPage() {
@@ -23,6 +24,8 @@ export default function ExpensesPage() {
     // Modal State
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedExpense, setSelectedExpense] = useState<any | null>(null);
+    const [deleteConfirmation, setDeleteConfirmation] = useState({ isOpen: false, id: null as number | null });
+    const [isDeleting, setIsDeleting] = useState(false);
 
     const fetchExpenses = async () => {
         setLoading(true);
@@ -76,12 +79,17 @@ export default function ExpensesPage() {
         return () => clearTimeout(timer);
     }, [search, categoryId, status]);
 
-    const handleDelete = async (id: number) => {
-        if (!confirm(t('financial.confirm_delete'))) return;
+    const handleDeleteClick = (id: number) => {
+        setDeleteConfirmation({ isOpen: true, id });
+    };
+
+    const handleConfirmDelete = async () => {
+        if (!deleteConfirmation.id) return;
+        setIsDeleting(true);
 
         const token = Cookies.get('admin_token');
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/expenses/${id}`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/expenses/${deleteConfirmation.id}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -94,6 +102,9 @@ export default function ExpensesPage() {
             }
         } catch (error) {
             toast.error(t('common.error'));
+        } finally {
+            setIsDeleting(false);
+            setDeleteConfirmation({ isOpen: false, id: null });
         }
     };
 
@@ -173,7 +184,7 @@ export default function ExpensesPage() {
                     expenses={expenses}
                     loading={loading}
                     onEdit={(expense) => { setSelectedExpense(expense); setIsModalOpen(true); }}
-                    onDelete={handleDelete}
+                    onDelete={handleDeleteClick}
                 />
             </div>
 
@@ -182,6 +193,14 @@ export default function ExpensesPage() {
                 onClose={() => setIsModalOpen(false)}
                 onSuccess={fetchExpenses}
                 expense={selectedExpense}
+            />
+
+            <DeleteConfirmationModal
+                isOpen={deleteConfirmation.isOpen}
+                onClose={() => setDeleteConfirmation({ isOpen: false, id: null })}
+                onConfirm={handleConfirmDelete}
+                message={t('financial.confirm_delete')}
+                isDeleting={isDeleting}
             />
         </div>
     );

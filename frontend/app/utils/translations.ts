@@ -18,7 +18,8 @@ export const translations = {
             no: 'Não',
             error: 'Erro',
             success: 'Sucesso',
-            color: 'Cor'
+            color: 'Cor',
+            new: 'Novo'
         },
         auth: {
             login_title: 'SweetStore',
@@ -314,6 +315,7 @@ export const translations = {
             filter: 'Filtrar',
             clear_filters: 'Limpar',
             confirm_delete: 'Tem certeza que deseja excluir esta despesa?',
+            confirm_delete_button: 'Sim, Remover',
             save_success: 'Salvo com sucesso!',
             delete_success: 'Removido com sucesso!',
             edit_expense: 'Editar Despesa',
@@ -323,6 +325,8 @@ export const translations = {
             no_categories: 'Nenhuma categoria encontrada.',
             confirm_delete_category: 'Tem certeza que deseja excluir?',
             select_option: 'Selecione...',
+            attachments: 'Anexos (Notas Fiscais)',
+            click_upload: 'Clique para fazer upload',
             value: 'Valor',
             methods: {
                 money: 'Dinheiro',
@@ -350,7 +354,8 @@ export const translations = {
             no: 'No',
             error: 'Error',
             success: 'Success',
-            color: 'Color'
+            color: 'Color',
+            new: 'New'
         },
         auth: {
             login_title: 'SweetStore',
@@ -647,6 +652,7 @@ export const translations = {
             filter: 'Filter',
             clear_filters: 'Clear',
             confirm_delete: 'Are you sure you want to delete this expense?',
+            confirm_delete_button: 'Yes, Remove',
             edit_expense: 'Edit Expense',
             expenses_subtitle: 'Control all company outflows and expenses.',
             categories_subtitle: 'Manage system expense categories.',
@@ -654,6 +660,8 @@ export const translations = {
             no_categories: 'No categories found.',
             confirm_delete_category: 'Are you sure you want to delete?',
             select_option: 'Select...',
+            attachments: 'Attachments (Invoices)',
+            click_upload: 'Click to upload',
             value: 'Value',
             methods: {
                 money: 'Cash',
