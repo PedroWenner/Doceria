@@ -22,6 +22,8 @@ import {
 } from 'lucide-react';
 import Pagination from '@/app/components/Pagination';
 
+import ProductFilterBar from '@/app/components/products/ProductFilterBar';
+
 interface Product {
     id: number;
     name: string;
@@ -76,7 +78,11 @@ export default function ProductsPage() {
     });
     const [isSaving, setIsSaving] = useState(false);
     const [stockSettings, setStockSettings] = useState({ enabled: true, global_min: 5 });
+
+    // Filter State
     const [searchTerm, setSearchTerm] = useState('');
+    const [categoryIdFilter, setCategoryIdFilter] = useState('all');
+    const [statusFilter, setStatusFilter] = useState('all');
 
     // Quick Category Creation State
     const [isCreatingCategory, setIsCreatingCategory] = useState(false);
@@ -88,10 +94,14 @@ export default function ProductsPage() {
     const lowStockCount = products.filter(p => p.stock_quantity <= p.min_stock_level && p.status === 'active').length;
     const activeDiscountsCount = products.reduce((acc, p) => acc + (p.discounts?.length || 0), 0);
 
-    const filteredProducts = products.filter(p =>
-        p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        p.sku.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filteredProducts = products.filter(p => {
+        const matchesSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            p.sku.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesCategory = categoryIdFilter === 'all' || p.category.id.toString() === categoryIdFilter;
+        const matchesStatus = statusFilter === 'all' || p.status === statusFilter;
+
+        return matchesSearch && matchesCategory && matchesStatus;
+    });
 
     useEffect(() => {
         fetchProducts();
@@ -346,17 +356,17 @@ export default function ProductsPage() {
                 </div>
             </div>
 
-            {/* Search & Filter Bar - Aesthetic addition */}
-            <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
-                <input
-                    type="text"
-                    placeholder={t('products.search_placeholder')}
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-50 focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-50 focus:border-transparent outline-none transition-all placeholder:text-slate-400"
-                />
-            </div>
+            {/* Search & Filter Bar */}
+            <ProductFilterBar
+                search={searchTerm}
+                onSearch={setSearchTerm}
+                categoryId={categoryIdFilter}
+                onCategoryChange={setCategoryIdFilter}
+                status={statusFilter}
+                onStatusChange={setStatusFilter}
+                categories={categories}
+                onNewProduct={() => handleOpenModal()}
+            />
 
             {/* Table */}
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden">
@@ -547,7 +557,7 @@ export default function ProductsPage() {
                                                     onChange={(e) => setFormData({ ...formData, status: e.target.value as 'active' | 'draft' })}
                                                 >
                                                     <option value="active">Ativo</option>
-                                                    <option value="draft">Rascunho</option>
+                                                    <option value="draft">Inativo</option>
                                                 </select>
                                                 <ChevronDown size={16} className="absolute right-3 top-3 text-slate-400 pointer-events-none" />
                                             </div>
@@ -663,7 +673,9 @@ export default function ProductsPage() {
                         <div className="p-6 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex justify-end gap-3">
                             <button type="button" onClick={() => setIsModalOpen(false)} className="px-5 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">{t('common.cancel')}</button>
                             <button form="productForm" type="submit" disabled={isSaving} className="px-6 py-2.5 rounded-lg bg-slate-900 dark:bg-slate-50 text-white dark:text-slate-900 font-bold hover:bg-slate-800 dark:hover:bg-slate-200 transition-all shadow-sm disabled:opacity-70 disabled:cursor-wait flex items-center gap-2">
-                                {isSaving ? <LoadingSpinner /> : <><Check size={18} /> {t('common.save')}</>}
+                                {isSaving ?
+                                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> :
+                                    <><Check size={18} /> {t('common.save')}</>}
                             </button>
                         </div>
                     </div>

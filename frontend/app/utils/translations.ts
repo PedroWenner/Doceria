@@ -19,7 +19,14 @@ export const translations = {
             error: 'Erro',
             success: 'Sucesso',
             color: 'Cor',
-            new: 'Novo'
+            new: 'Novo',
+            active: 'Ativo',
+            draft: 'Rascunho',
+            in_stock: 'Em Estoque',
+            low_stock: 'Baixo Estoque',
+            out_of_stock: 'Sem Estoque',
+            no_img: 'Sem Img',
+            inactive: 'Inativo',
         },
         auth: {
             login_title: 'AlcaTech',
@@ -355,7 +362,14 @@ export const translations = {
             error: 'Error',
             success: 'Success',
             color: 'Color',
-            new: 'New'
+            new: 'New',
+            active: 'Active',
+            draft: 'Draft',
+            in_stock: 'In Stock',
+            low_stock: 'Low Stock',
+            out_of_stock: 'Out of Stock',
+            no_img: 'No Image',
+            inactive: 'Inactive',
         },
         auth: {
             login_title: 'AlcaTech',

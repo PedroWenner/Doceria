@@ -381,7 +381,8 @@ export default function PaymentMethodsPage() {
                                     disabled={isSaving}
                                     className="px-5 py-2 rounded-lg bg-slate-900 dark:bg-slate-50 text-white dark:text-slate-900 font-bold hover:bg-slate-800 dark:hover:bg-slate-200 transition-all shadow-sm disabled:opacity-70 disabled:cursor-wait flex items-center gap-2"
                                 >
-                                    {isSaving ? <LoadingSpinner /> : <><Check size={18} /> {t('common.save')}</>}
+                                    {isSaving ?
+                                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <><Check size={18} /> {t('common.save')}</>}
                                 </button>
                             </div>
                         </form>
