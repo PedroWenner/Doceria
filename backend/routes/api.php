@@ -38,6 +38,9 @@ Route::group(['middleware' => ['api', 'auth:api', 'role:admin']], function () {
         Route::post('users', [App\Http\Controllers\UserController::class, 'store']); // Create User
         Route::get('audits', [App\Http\Controllers\AuditController::class, 'index']);
         Route::get('roles', [App\Http\Controllers\UserController::class, 'roles']);
+        Route::put('users/{id}', [App\Http\Controllers\UserController::class, 'update']);
+        Route::put('users/{id}/password', [App\Http\Controllers\UserController::class, 'updatePassword']);
+        Route::delete('users/{id}', [App\Http\Controllers\UserController::class, 'destroy']);
     });
 
     Route::post('users/{user}/roles', [App\Http\Controllers\UserController::class, 'updateRoles']); // Keep strict admin for changing roles

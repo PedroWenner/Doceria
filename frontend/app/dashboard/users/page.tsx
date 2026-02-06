@@ -9,20 +9,21 @@ import {
     Shield,
     Mail,
     Pencil,
-    Search,
-    X,
-    Check,
-    Briefcase
+    Key,
+    Trash2
 } from 'lucide-react';
 import Pagination from '@/app/components/Pagination';
 import UserModal from '@/app/components/users/UserModal';
 import UserFilterBar from '@/app/components/users/UserFilterBar';
+import PasswordModal from '@/app/components/users/PasswordModal';
+import DeleteConfirmationModal from '@/app/components/DeleteConfirmationModal';
 
 interface User {
     id: number;
     name: string;
     email: string;
     roles: Role[];
+    is_active: boolean;
 }
 
 interface Role {
@@ -37,9 +38,13 @@ export default function UsersPage() {
     const [roles, setRoles] = useState<Role[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [editingUser, setEditingUser] = useState<User | null>(null);
-    const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
     const [isSaving, setIsSaving] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
+
+    const [passwordModal, setPasswordModal] = useState({ isOpen: false, userId: null as number | null });
+    const [deleteModal, setDeleteModal] = useState({ isOpen: false, userId: null as number | null });
+    const [isDeleting, setIsDeleting] = useState(false);
+
 
     const { t } = useLanguage();
 
@@ -59,7 +64,7 @@ export default function UsersPage() {
 
             if (usersRes.ok) {
                 const response = await usersRes.json();
-                setUsers(response.data.data);
+                setUsers(response.data.data.filter((user: User) => user.roles.some((role: Role) => role.slug !== 'admin')));
                 setMeta(prev => ({
                     ...prev,
                     current_page: response.data.current_page,
@@ -73,7 +78,6 @@ export default function UsersPage() {
                 setRoles(response.data.filter((role: Role) => role.slug !== 'admin'));
             }
         } catch (error) {
-            console.error('Failed to fetch data', error);
             toast.error(t('common.error'));
         } finally {
             setIsLoading(false);
@@ -82,37 +86,100 @@ export default function UsersPage() {
 
     const handleEdit = (user: User) => {
         setEditingUser(user);
-        setSelectedRoles(user.roles.map(r => r.slug));
+        // Roles now handled inside UserModal via initialData
     };
 
-    const handleSave = async () => {
+    const handleUpdateUser = async (updatedData: any) => {
         if (!editingUser) return;
         setIsSaving(true);
-
         try {
-            const res = await fetch(`${apiUrl}/users/${editingUser.id}/roles`, {
-                method: 'POST',
+            const res = await fetch(`${apiUrl}/users/${editingUser.id}`, {
+                method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`
+                    Authorization: `Bearer ${token}`,
+                    'Accept-Language': 'pt'
                 },
-                body: JSON.stringify({ roles: selectedRoles })
+                body: JSON.stringify(updatedData)
             });
 
             if (res.ok) {
-                await fetchData();
+                await fetchData(meta.current_page);
                 setEditingUser(null);
                 toast.success(t('users.update_success'));
             } else {
-                toast.error(t('users.update_error'));
+                const data = await res.json();
+                if (data.errors) {
+                    toast.error(Object.values(data.errors).flat().join('\n'));
+                } else {
+                    toast.error(t('users.update_error'));
+                }
             }
         } catch (error) {
-            console.error('Update failed', error);
             toast.error(t('common.error'));
         } finally {
             setIsSaving(false);
         }
     };
+
+    const handleUpdatePassword = async (password: string) => {
+        if (!passwordModal.userId) return;
+        setIsSaving(true);
+        try {
+            const res = await fetch(`${apiUrl}/users/${passwordModal.userId}/password`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                    'Accept-Language': 'pt'
+                },
+                body: JSON.stringify({ password, password_confirmation: password })
+            });
+
+            console.log(res);
+            if (res.ok) {
+                setPasswordModal({ isOpen: false, userId: null });
+                toast.success(t('users.password_success'));
+            } else {
+                const data = await res.json();
+                if (data.errors) {
+                    const messages = Object.values(data.errors).flat().join('\n');
+                    toast.error(messages);
+                } else {
+                    toast.error(data.message || t('common.error'));
+                }
+            }
+        } catch (error) {
+            toast.error(t('common.error'));
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    const handleDeleteUser = async () => {
+        if (!deleteModal.userId) return;
+        setIsDeleting(true);
+        try {
+            const res = await fetch(`${apiUrl}/users/${deleteModal.userId}`, {
+                method: 'DELETE',
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            if (res.ok) {
+                await fetchData(meta.current_page);
+                setDeleteModal({ isOpen: false, userId: null });
+                toast.success(t('users.delete_success'));
+            } else {
+                toast.error(t('users.delete_error'));
+            }
+        } catch (error) {
+            toast.error(t('common.error'));
+        } finally {
+            setIsDeleting(false);
+        }
+    };
+
+
 
     const filteredUsers = users.filter(user =>
         user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -185,6 +252,7 @@ export default function UsersPage() {
                                 <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{t('common.name')}</th>
                                 <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{t('users.email')}</th>
                                 <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{t('users.roles')}</th>
+                                <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{t('users.status')}</th>
                                 <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-right">{t('common.actions')}</th>
                             </tr>
                         </thead>
@@ -218,14 +286,38 @@ export default function UsersPage() {
                                             )}
                                         </div>
                                     </td>
+                                    <td className="px-6 py-4">
+                                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${user.is_active
+                                            ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/30'
+                                            : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700'
+                                            }`}>
+                                            {user.is_active ? (t('users.active') || 'Ativo') : (t('users.inactive') || 'Inativo')}
+                                        </span>
+                                    </td>
                                     <td className="px-6 py-4 text-right">
-                                        <button
-                                            onClick={() => handleEdit(user)}
-                                            className="p-2 text-slate-400 hover:text-slate-900 dark:hover:text-slate-50 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors border border-transparent hover:border-slate-200 dark:hover:border-slate-700"
-                                            title={t('Editar Permissões')}
-                                        >
-                                            <Pencil size={18} />
-                                        </button>
+                                        <div className="flex items-center justify-end gap-2">
+                                            <button
+                                                onClick={() => setPasswordModal({ isOpen: true, userId: user.id })}
+                                                className="p-2 text-slate-400 hover:text-amber-500 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-lg transition-colors"
+                                                title={t('users.password_title')}
+                                            >
+                                                <Key size={18} />
+                                            </button>
+                                            <button
+                                                onClick={() => handleEdit(user)}
+                                                className="p-2 text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors"
+                                                title={t('admin.edit')}
+                                            >
+                                                <Pencil size={18} />
+                                            </button>
+                                            <button
+                                                onClick={() => setDeleteModal({ isOpen: true, userId: user.id })}
+                                                className="p-2 text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                                                title={t('common.delete')}
+                                            >
+                                                <Trash2 size={18} />
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             ))}
@@ -257,86 +349,32 @@ export default function UsersPage() {
                 isSaving={isSaving}
             />
 
-            {/* Edit Modal */}
-            {editingUser && (
-                <div className="fixed inset-0 bg-slate-950/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fadeIn">
-                    <div className="w-full max-w-md bg-white dark:bg-slate-950 rounded-2xl shadow-xl overflow-hidden flex flex-col border border-slate-200 dark:border-slate-800 animate-scaleIn">
-                        {/* Modal Header */}
-                        <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/50">
-                            <div>
-                                <h2 className="text-lg font-bold text-slate-900 dark:text-slate-50">{t('users.edit_roles')}</h2>
-                                <p className="text-xs text-slate-500 dark:text-slate-400">{editingUser.name}</p>
-                            </div>
-                            <button onClick={() => setEditingUser(null)} className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 transition-colors">
-                                <X size={20} />
-                            </button>
-                        </div>
+            {/* Edit User Modal */}
+            <UserModal
+                isOpen={!!editingUser}
+                onClose={() => setEditingUser(null)}
+                onSubmit={handleUpdateUser}
+                roles={roles}
+                isSaving={isSaving}
+                initialData={editingUser}
+            />
 
-                        {/* Modal Body */}
-                        <div className="p-6 space-y-4">
-                            <p className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">{t('users.available_roles')}</p>
-                            <div className="space-y-2">
-                                {roles.map(role => {
-                                    const isSelected = selectedRoles.includes(role.slug);
-                                    return (
-                                        <label key={role.id}
-                                            className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all border ${isSelected
-                                                ? 'bg-slate-50 dark:bg-slate-900 border-slate-900 dark:border-slate-50 shadow-sm'
-                                                : 'bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
-                                                }`}
-                                        >
-                                            <div className={`w-5 h-5 rounded-md border flex items-center justify-center transition-colors ${isSelected
-                                                ? 'bg-slate-900 dark:bg-slate-50 border-slate-900 dark:border-slate-50 text-white dark:text-slate-900'
-                                                : 'border-slate-300 dark:border-slate-600'
-                                                }`}>
-                                                {isSelected && <Check size={14} strokeWidth={3} />}
-                                            </div>
-                                            <input
-                                                type="checkbox" // Changed to checkbox to allow multiple roles logic if needed, but handled as logic below
-                                                className="hidden"
-                                                checked={isSelected}
-                                                onChange={() => {
-                                                    // Allow Toggle logic: If user wants single role, we can change this. The original code seemed to support multiple roles visually but used radio logic. 
-                                                    // Let's assume radio logic for primary role as per previous behavior, OR toggle.
-                                                    // Original code: setSelectedRoles([role.slug]) -> Radio behavior.
-                                                    // Let's keep Radio behavior for safety unless user requested otherwise, but styled better.
-                                                    setSelectedRoles([role.slug]);
-                                                }}
-                                            />
-                                            <div className="flex-1">
-                                                <div className={`font-semibold ${isSelected ? 'text-slate-900 dark:text-slate-50' : 'text-slate-600 dark:text-slate-400'}`}>
-                                                    {role.name}
-                                                </div>
-                                                <div className="text-xs text-slate-400 dark:text-slate-500 font-mono">
-                                                    {role.slug}
-                                                </div>
-                                            </div>
-                                            <Briefcase size={18} className={isSelected ? 'text-slate-900 dark:text-slate-50' : 'text-slate-300'} />
-                                        </label>
-                                    );
-                                })}
-                            </div>
-                        </div>
+            {/* Password Modal */}
+            <PasswordModal
+                isOpen={passwordModal.isOpen}
+                onClose={() => setPasswordModal({ isOpen: false, userId: null })}
+                onSubmit={handleUpdatePassword}
+                isSaving={isSaving}
+            />
 
-                        {/* Modal Footer */}
-                        <div className="p-6 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex justify-end gap-3">
-                            <button
-                                onClick={() => setEditingUser(null)}
-                                className="px-4 py-2 rounded-lg text-slate-600 dark:text-slate-400 font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                            >
-                                {t('common.cancel')}
-                            </button>
-                            <button
-                                onClick={handleSave}
-                                disabled={isSaving}
-                                className="px-5 py-2 rounded-lg bg-slate-900 dark:bg-slate-50 text-white dark:text-slate-900 font-bold hover:bg-slate-800 dark:hover:bg-slate-200 transition-all shadow-sm disabled:opacity-70 disabled:cursor-wait flex items-center gap-2"
-                            >
-                                {isSaving ? <LoadingSpinner /> : <><Check size={18} /> {t('common.save')}</>}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            {/* Delete Confirmation */}
+            <DeleteConfirmationModal
+                isOpen={deleteModal.isOpen}
+                onClose={() => setDeleteModal({ isOpen: false, userId: null })}
+                onConfirm={handleDeleteUser}
+                isDeleting={isDeleting}
+                message={t('users.delete_confirm_message')}
+            />
         </div>
     );
 }

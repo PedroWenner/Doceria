@@ -26,6 +26,7 @@ class User extends Authenticatable implements JWTSubject, Auditable
         'email',
         'password',
         'role',
+        'is_active',
     ];
 
     /**
@@ -46,6 +47,7 @@ class User extends Authenticatable implements JWTSubject, Auditable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'is_active' => 'boolean',
     ];
 
     /**
