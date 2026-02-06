@@ -33,7 +33,7 @@ export default function ExpensesPage() {
             if (categoryId !== 'all') query.append('category_id', categoryId);
             if (status !== 'all') query.append('status', status);
 
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/expenses?${query.toString()}`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/expenses?${query.toString()}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await response.json();
@@ -51,7 +51,7 @@ export default function ExpensesPage() {
     const fetchCategories = async () => {
         const token = Cookies.get('admin_token');
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/expense-categories`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/expense-categories`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await response.json();
@@ -81,7 +81,7 @@ export default function ExpensesPage() {
 
         const token = Cookies.get('admin_token');
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/expenses/${id}`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/expenses/${id}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });

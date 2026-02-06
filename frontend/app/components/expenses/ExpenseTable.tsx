@@ -36,9 +36,9 @@ export default function ExpenseTable({ expenses, onEdit, onDelete, loading }: Ex
 
     return (
         <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-                <thead>
-                    <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700 delay-0">
+            <table className="w-full text-left">
+                <thead className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700">
+                    <tr>
                         <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{t('financial.description')}</th>
                         <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{t('financial.category')}</th>
                         <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{t('financial.date')}</th>
@@ -49,9 +49,11 @@ export default function ExpenseTable({ expenses, onEdit, onDelete, loading }: Ex
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                     {expenses.map((expense) => (
-                        <tr key={expense.id} className="group hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                            <td className="px-6 py-4 font-medium text-slate-900 dark:text-slate-100">
-                                {expense.description}
+                        <tr key={expense.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                            <td className="px-6 py-4">
+                                <div className="font-medium text-slate-900 dark:text-slate-100">
+                                    {expense.description}
+                                </div>
                                 <div className="text-xs text-slate-400 font-normal flex items-center gap-1 mt-0.5 md:hidden">
                                     {displayCurrency(expense.amount)}
                                 </div>
@@ -74,33 +76,33 @@ export default function ExpenseTable({ expenses, onEdit, onDelete, loading }: Ex
                                     {format(new Date(expense.date), 'dd/MM/yyyy')}
                                 </span>
                             </td>
-                            <td className="px-6 py-4 font-medium text-slate-700 dark:text-slate-300">
+                            <td className="px-6 py-4 font-medium text-slate-900 dark:text-slate-100">
                                 {displayCurrency(expense.amount)}
                             </td>
                             <td className="px-6 py-4 text-center">
                                 {expense.status === 'paid' ? (
-                                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
+                                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-900/30">
                                         {t('financial.paid')}
                                     </span>
                                 ) : (
-                                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-500/10 text-amber-600 border border-amber-500/20">
+                                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-100 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-900/30">
                                         {t('financial.pending')}
                                     </span>
                                 )}
                             </td>
                             <td className="px-6 py-4 text-right">
-                                <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <div className="flex items-center justify-end gap-2">
                                     <button
                                         onClick={() => onEdit(expense)}
-                                        className="p-1.5 rounded-lg text-slate-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                                        className="p-2 rounded-lg text-slate-400 hover:text-slate-900 dark:hover:text-slate-50 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                                     >
-                                        <Edit2 size={16} />
+                                        <Edit2 size={18} />
                                     </button>
                                     <button
                                         onClick={() => onDelete(expense.id)}
-                                        className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                                        className="p-2 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                                     >
-                                        <Trash2 size={16} />
+                                        <Trash2 size={18} />
                                     </button>
                                 </div>
                             </td>

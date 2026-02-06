@@ -56,8 +56,8 @@ export default function CategoryModal({ isOpen, onClose, onSuccess, category }: 
 
         const token = Cookies.get('admin_token');
         const url = category
-            ? `${process.env.NEXT_PUBLIC_API_URL}/api/expense-categories/${category.id}`
-            : `${process.env.NEXT_PUBLIC_API_URL}/api/expense-categories`;
+            ? `${process.env.NEXT_PUBLIC_API_URL}/expense-categories/${category.id}`
+            : `${process.env.NEXT_PUBLIC_API_URL}/expense-categories`;
 
         const method = category ? 'PUT' : 'POST';
 

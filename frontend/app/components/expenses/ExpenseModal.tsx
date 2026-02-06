@@ -50,7 +50,7 @@ export default function ExpenseModal({ isOpen, onClose, onSuccess, expense }: Ex
         const fetchCategories = async () => {
             const token = Cookies.get('admin_token');
             try {
-                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/expense-categories`, {
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/expense-categories`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 const data = await response.json();
@@ -99,8 +99,8 @@ export default function ExpenseModal({ isOpen, onClose, onSuccess, expense }: Ex
 
         const token = Cookies.get('admin_token');
         const url = expense
-            ? `${process.env.NEXT_PUBLIC_API_URL}/api/expenses/${expense.id}`
-            : `${process.env.NEXT_PUBLIC_API_URL}/api/expenses`;
+            ? `${process.env.NEXT_PUBLIC_API_URL}/expenses/${expense.id}`
+            : `${process.env.NEXT_PUBLIC_API_URL}/expenses`;
 
         const method = expense ? 'PUT' : 'POST';
 

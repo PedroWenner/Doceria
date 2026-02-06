@@ -28,7 +28,7 @@ export default function CategoriesPage() {
         setLoading(true);
         const token = Cookies.get('admin_token');
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/expense-categories`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/expense-categories`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -54,7 +54,7 @@ export default function CategoriesPage() {
 
         const token = Cookies.get('admin_token');
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/expense-categories/${id}`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/expense-categories/${id}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -125,46 +125,60 @@ export default function CategoriesPage() {
                     </div>
                 </div>
 
-                {/* Grid */}
+                {/* Table */}
                 {loading ? (
                     <div className="p-12 text-center text-slate-400">Loading...</div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
-                        {filteredCategories.map(category => (
-                            <div
-                                key={category.id}
-                                className="group relative bg-white dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 p-5 hover:border-blue-500 dark:hover:border-blue-500/50 transition-all hover:shadow-md"
-                            >
-                                <div className="flex justify-between items-start mb-3">
-                                    <div
-                                        className="w-10 h-10 rounded-lg flex items-center justify-center text-white shadow-sm"
-                                        style={{ backgroundColor: category.color || '#94a3b8' }}
-                                    >
-                                        <Tag size={20} />
-                                    </div>
-                                    <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <button
-                                            onClick={() => handleEdit(category)}
-                                            className="p-1.5 rounded-lg text-slate-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20"
-                                        >
-                                            <Edit2 size={16} />
-                                        </button>
-                                        <button
-                                            onClick={() => handleDelete(category.id)}
-                                            className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
-                                        >
-                                            <Trash2 size={16} />
-                                        </button>
-                                    </div>
-                                </div>
-                                <h3 className="font-bold text-slate-900 dark:text-white text-lg">{category.name}</h3>
-                                {category.description && (
-                                    <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 line-clamp-2">
-                                        {category.description}
-                                    </p>
-                                )}
-                            </div>
-                        ))}
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left">
+                            <thead className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700">
+                                <tr>
+                                    <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{t('common.name')}</th>
+                                    <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{t('common.description')}</th>
+                                    <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-center">{t('common.color')}</th>
+                                    <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-right">{t('common.actions')}</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                                {filteredCategories.map(category => (
+                                    <tr key={category.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                                        <td className="px-6 py-4">
+                                            <div className="font-bold text-slate-900 dark:text-white">
+                                                {category.name}
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 text-slate-500 dark:text-slate-400 text-sm max-w-xs truncate">
+                                            {category.description || '-'}
+                                        </td>
+                                        <td className="px-6 py-4 text-center">
+                                            <div
+                                                className="w-6 h-6 rounded-full mx-auto border border-slate-200 dark:border-slate-700 shadow-sm"
+                                                style={{ backgroundColor: category.color || '#94a3b8' }}
+                                                title={category.color}
+                                            />
+                                        </td>
+                                        <td className="px-6 py-4 text-right">
+                                            <div className="flex items-center justify-end gap-2">
+                                                <button
+                                                    onClick={() => handleEdit(category)}
+                                                    className="p-2 rounded-lg text-slate-400 hover:text-slate-900 dark:hover:text-slate-50 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                                                    title={t('common.edit')}
+                                                >
+                                                    <Edit2 size={18} />
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDelete(category.id)}
+                                                    className="p-2 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                                                    title={t('common.delete')}
+                                                >
+                                                    <Trash2 size={18} />
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
                     </div>
                 )}
 

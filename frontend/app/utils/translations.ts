@@ -17,7 +17,8 @@ export const translations = {
             yes: 'Sim',
             no: 'Não',
             error: 'Erro',
-            success: 'Sucesso'
+            success: 'Sucesso',
+            color: 'Cor'
         },
         auth: {
             login_title: 'SweetStore',
@@ -348,7 +349,8 @@ export const translations = {
             yes: 'Yes',
             no: 'No',
             error: 'Error',
-            success: 'Success'
+            success: 'Success',
+            color: 'Color'
         },
         auth: {
             login_title: 'SweetStore',
