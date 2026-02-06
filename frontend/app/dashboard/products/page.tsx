@@ -144,7 +144,6 @@ export default function ProductsPage() {
 
     const fetchPaymentMethods = async () => {
         try {
-            console.log('Fetching payment methods...');
             const res = await fetch(`${apiUrl}/payment-methods`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -153,7 +152,6 @@ export default function ProductsPage() {
             });
             if (res.ok) {
                 const response = await res.json();
-                console.log('Payment methods loaded:', response.data.length);
                 setPaymentMethods(response.data);
             } else {
                 console.error('Failed response:', res.status);

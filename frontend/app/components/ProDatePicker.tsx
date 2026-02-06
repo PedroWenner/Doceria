@@ -44,15 +44,18 @@ export default function ProDatePicker({ label, value, onChange, className = '', 
 
     const handleSelect = (date: Date | undefined) => {
         if (date) {
-            onChange(format(date, 'yyyy-MM-dd'));
+            const adjustedDate = new Date(date.getTime() + 12 * 60 * 60 * 1000);
+            onChange(format(adjustedDate, 'yyyy-MM-dd'));
             setIsOpen(false);
         } else {
             onChange('');
         }
     };
 
-    const displayValue = value && isValid(new Date(value))
-        ? format(new Date(value), 'PPP', { locale: language === 'pt' ? ptBR : enUS })
+    const parsedDate = value ? parse(value, 'yyyy-MM-dd', new Date()) : undefined;
+
+    const displayValue = parsedDate && isValid(parsedDate)
+        ? format(parsedDate, 'PPP', { locale: language === 'pt' ? ptBR : enUS })
         : '';
 
     return (
@@ -96,7 +99,6 @@ export default function ProDatePicker({ label, value, onChange, className = '', 
                     </button>
                 )}
 
-                {/* Popover Content */}
                 {isOpen && (
                     <div className="absolute top-full mb-2 left-0 z-50 mt-2 bg-white dark:bg-slate-900 rounded-xl shadow-xl border border-slate-200 dark:border-slate-800 p-2 animate-in fade-in zoom-in-95 duration-200 user-select-none">
                         <Calendar

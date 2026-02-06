@@ -545,7 +545,6 @@ export default function CheckoutPage() {
                                                 initialization={paymentInitialization}
                                                 customization={paymentCustomization}
                                                 onSubmit={handleBrickSubmit}
-                                                onReady={() => console.log('Brick payment ready')}
                                                 onError={(error) => {
                                                     console.error('Brick error:', error);
                                                 }}
