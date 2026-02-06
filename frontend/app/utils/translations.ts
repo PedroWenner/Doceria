@@ -40,7 +40,9 @@ export const translations = {
             audit: 'Auditoria',
             session_expires: 'Sessão expira em',
             payments_methods: 'Meios de Pagamento',
-            payments: 'Pagamentos'
+            payments: 'Pagamentos',
+            expenses: 'Despesas',
+            expense_categories: 'Categorias'
         },
         dashboard: {
             welcome: 'Bem-vindo de volta',
@@ -285,6 +287,49 @@ export const translations = {
                 success: 'Pagamento registrado com sucesso!',
                 error: 'Erro ao registrar pagamento.'
             }
+        },
+        financial: {
+            expenses: 'Despesas',
+            categories: 'Categorias',
+            new_expense: 'Nova Despesa',
+            new_category: 'Nova Categoria',
+            edit_category: 'Editar Categoria',
+            amount: 'Valor',
+            date: 'Data',
+            description: 'Descrição',
+            category: 'Categoria',
+            payment_method: 'Meio de Pagamento',
+            status: 'Status',
+            due_date: 'Vencimento',
+            paid_at: 'Pago em',
+            notes: 'Observações',
+            paid: 'Pago',
+            pending: 'Pendente',
+            color: 'Cor',
+            delete_category_error: 'Não é possível excluir categorias em uso.',
+            search_placeholder: 'Buscar despesas...',
+            all_categories: 'Todas as Categorias',
+            all_statuses: 'Todos os Status',
+            filter: 'Filtrar',
+            clear_filters: 'Limpar',
+            confirm_delete: 'Tem certeza que deseja excluir esta despesa?',
+            save_success: 'Salvo com sucesso!',
+            delete_success: 'Removido com sucesso!',
+            edit_expense: 'Editar Despesa',
+            expenses_subtitle: 'Controle todas as saídas e despesas da empresa.',
+            categories_subtitle: 'Gerencie as categorias de despesas do sistema.',
+            no_expenses: 'Nenhuma despesa encontrada.',
+            no_categories: 'Nenhuma categoria encontrada.',
+            confirm_delete_category: 'Tem certeza que deseja excluir?',
+            select_option: 'Selecione...',
+            value: 'Valor',
+            methods: {
+                money: 'Dinheiro',
+                pix: 'Pix',
+                card: 'Cartão',
+                transfer: 'Transferência',
+                boleto: 'Boleto'
+            }
         }
     },
     en: {
@@ -326,7 +371,9 @@ export const translations = {
             audit: 'Audit Logs',
             session_expires: 'Session expires in',
             payments_methods: 'Payment Methods',
-            payments: 'Payments'
+            payments: 'Payments',
+            expenses: 'Expenses',
+            expense_categories: 'Categories'
         },
         dashboard: {
             welcome: 'Welcome back',
@@ -572,6 +619,49 @@ export const translations = {
                 success: 'Payment registered successfully!',
                 error: 'Error registering payment.'
             }
+        },
+        financial: {
+            expenses: 'Expenses',
+            categories: 'Categories',
+            new_expense: 'New Expense',
+            new_category: 'New Category',
+            edit_category: 'Edit Category',
+            amount: 'Amount',
+            date: 'Date',
+            description: 'Description',
+            category: 'Category',
+            payment_method: 'Payment Method',
+            status: 'Status',
+            due_date: 'Due Date',
+            paid_at: 'Paid At',
+            notes: 'Notes',
+            paid: 'Paid',
+            pending: 'Pending',
+            color: 'Color',
+            delete_category_error: 'Cannot delete categories in use.',
+            search_placeholder: 'Search expenses...',
+            all_categories: 'All Categories',
+            all_statuses: 'All Statuses',
+            filter: 'Filter',
+            clear_filters: 'Clear',
+            confirm_delete: 'Are you sure you want to delete this expense?',
+            edit_expense: 'Edit Expense',
+            expenses_subtitle: 'Control all company outflows and expenses.',
+            categories_subtitle: 'Manage system expense categories.',
+            no_expenses: 'No expenses found.',
+            no_categories: 'No categories found.',
+            confirm_delete_category: 'Are you sure you want to delete?',
+            select_option: 'Select...',
+            value: 'Value',
+            methods: {
+                money: 'Cash',
+                pix: 'Pix',
+                card: 'Card',
+                transfer: 'Transfer',
+                boleto: 'Boleto'
+            },
+            save_success: 'Saved successfully!',
+            delete_success: 'Removed successfully!'
         }
     }
 };

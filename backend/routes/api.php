@@ -68,6 +68,10 @@ Route::group(['middleware' => ['api', 'auth:api', 'role:admin']], function () {
     Route::get('payments', [App\Http\Controllers\PaymentController::class, 'index']);
     Route::post('payments', [App\Http\Controllers\PaymentController::class, 'store']);
 
+    // Financial Module (Expenses)
+    Route::apiResource('expenses', App\Http\Controllers\ExpenseController::class);
+    Route::apiResource('expense-categories', App\Http\Controllers\ExpenseCategoryController::class);
+
     // Payment Methods (Admin)
     Route::get('payment-methods/admin', [App\Http\Controllers\PaymentMethodController::class, 'indexAdmin']);
     Route::post('payment-methods', [App\Http\Controllers\PaymentMethodController::class, 'store']);

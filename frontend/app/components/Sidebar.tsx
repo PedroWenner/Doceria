@@ -20,7 +20,9 @@ import {
     Menu,
     X,
     ShieldCheck,
-    Store
+    Store,
+    TrendingDown,
+    Tags
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -86,6 +88,18 @@ export default function Sidebar({
             icon: DollarSign,
             label: 'sidebar.payments',
             href: '/dashboard/payments',
+            roles: ['admin']
+        },
+        {
+            icon: TrendingDown,
+            label: 'sidebar.expenses',
+            href: '/dashboard/financial/expenses',
+            roles: ['admin']
+        },
+        {
+            icon: Tags,
+            label: 'sidebar.expense_categories',
+            href: '/dashboard/financial/categories',
             roles: ['admin']
         },
         {
