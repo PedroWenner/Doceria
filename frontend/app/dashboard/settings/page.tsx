@@ -133,6 +133,7 @@ export default function SettingsPage() {
                     'Accept': 'application/json'
                 }
             });
+
             if (res.ok) {
                 const response = await res.json();
                 setPaymentMethods(response.data);

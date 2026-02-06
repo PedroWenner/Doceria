@@ -95,7 +95,7 @@ class OrderController extends Controller
         try {
             // Pick a payment method to get credentials.
             // Assumption: All MP methods share the same credentials (unified form).
-            $paymentMethod = \App\Models\PaymentMethod::where('slug', 'carto_de_credito')->first();
+            $paymentMethod = \App\Models\PaymentMethod::where('slug', 'credit_card')->first();
 
             if (!$paymentMethod || !$paymentMethod->gateway_setting) {
                 return $this->error('Payment settings not found', 500);

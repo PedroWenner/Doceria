@@ -25,7 +25,13 @@ class AppServiceProvider extends ServiceProvider
         Schema::defaultStringLength(191);
 
         Gate::define('viewScramble', function (User $user) {
-            return true; // Allow everyone locally/dev. In prod, check $user->hasRole('admin')
+            return true; 
+        });
+
+        \Dedoc\Scramble\Scramble::extendOpenApi(function (\Dedoc\Scramble\Support\Generator\OpenApi $openApi) {
+            $openApi->secure(
+                \Dedoc\Scramble\Support\Generator\SecurityScheme::http('bearer')
+            );
         });
     }
 }

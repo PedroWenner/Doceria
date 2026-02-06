@@ -43,7 +43,7 @@ class WebhookController extends Controller
 
             try {
                 // Fetch credentials
-                $paymentMethod = PaymentMethod::where('slug', 'carto_de_credito')->first();
+                $paymentMethod = PaymentMethod::where('slug', 'credit_card')->first();
                 
                 if (!$paymentMethod || !$paymentMethod->gateway_setting) {
                     Log::error('Webhook: Payment Settings not found.');

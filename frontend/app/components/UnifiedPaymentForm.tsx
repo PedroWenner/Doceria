@@ -17,18 +17,16 @@ export default function UnifiedPaymentForm({ paymentMethods, setPaymentMethods, 
         </label>
     );
 
-    // Helper to update all relevant methods
     const updateAllMethods = (updater: (method: any) => any) => {
         setPaymentMethods(prev => prev.map(m => {
-            if (['pix', 'carto_de_credito', 'boleto'].includes(m.slug)) {
+            if (['pix', 'credit_card', 'boleto'].includes(m.slug)) {
                 return updater(m);
             }
             return m;
         }));
     };
 
-    // Get current state from one representative (e.g. Card)
-    const cardMethod = paymentMethods.find(m => m.slug === 'carto_de_credito');
+    const cardMethod = paymentMethods.find(m => m.slug === 'credit_card');
     const isActive = cardMethod?.gateway_setting?.is_active ?? false;
     const mode = cardMethod?.gateway_setting?.mode || 'sandbox';
     const credentials = cardMethod?.gateway_setting?.credentials || {};
@@ -49,7 +47,6 @@ export default function UnifiedPaymentForm({ paymentMethods, setPaymentMethods, 
                 <div className="py-12 flex justify-center"><LoadingSpinner /></div>
             ) : (
                 <div className="space-y-6">
-                    {/* Active Toggle */}
                     <div className="grid md:grid-cols-2 gap-6">
                         <div className="col-span-full">
                             <label className="flex items-center gap-3 p-4 border border-slate-200 dark:border-slate-700 rounded-lg cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
@@ -58,7 +55,10 @@ export default function UnifiedPaymentForm({ paymentMethods, setPaymentMethods, 
                                     checked={isActive}
                                     onChange={(e) => updateAllMethods(m => ({
                                         ...m,
-                                        gateway_setting: { ...m.gateway_setting, is_active: e.target.checked }
+                                        gateway_setting: {
+                                            ...(m.gateway_setting || { mode: 'sandbox', credentials: {} }),
+                                            is_active: e.target.checked
+                                        }
                                     }))}
                                     className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500 border-gray-300"
                                 />
@@ -69,7 +69,6 @@ export default function UnifiedPaymentForm({ paymentMethods, setPaymentMethods, 
                             </label>
                         </div>
 
-                        {/* Mode Switcher */}
                         <div>
                             <InputLabel>{t('settings.payments.mode')}</InputLabel>
                             <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-lg">
@@ -79,7 +78,10 @@ export default function UnifiedPaymentForm({ paymentMethods, setPaymentMethods, 
                                         type="button"
                                         onClick={() => updateAllMethods(method => ({
                                             ...method,
-                                            gateway_setting: { ...method.gateway_setting, mode: m }
+                                            gateway_setting: {
+                                                ...(method.gateway_setting || { is_active: false, credentials: {} }),
+                                                mode: m
+                                            }
                                         }))}
                                         className={`flex-1 py-2 text-sm font-medium rounded-md transition-all capitalize ${mode === m
                                             ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-sm'
@@ -94,7 +96,6 @@ export default function UnifiedPaymentForm({ paymentMethods, setPaymentMethods, 
 
                         <div className="col-span-full h-px bg-slate-100 dark:bg-slate-800 my-2" />
 
-                        {/* Credentials */}
                         <div className="col-span-full">
                             <InputLabel>{t('settings.payments.access_token')} ({mode})</InputLabel>
                             <div className="relative">
@@ -104,8 +105,8 @@ export default function UnifiedPaymentForm({ paymentMethods, setPaymentMethods, 
                                     onChange={(e) => updateAllMethods(m => ({
                                         ...m,
                                         gateway_setting: {
-                                            ...m.gateway_setting,
-                                            credentials: { ...m.gateway_setting?.credentials, access_token: e.target.value }
+                                            ...(m.gateway_setting || { mode: 'sandbox', is_active: false }),
+                                            credentials: { ...(m.gateway_setting?.credentials || {}), access_token: e.target.value }
                                         }
                                     }))}
                                     className="w-full h-10 px-3 pl-10 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-400 transition-all font-mono"
@@ -122,8 +123,8 @@ export default function UnifiedPaymentForm({ paymentMethods, setPaymentMethods, 
                                 onChange={(e) => updateAllMethods(m => ({
                                     ...m,
                                     gateway_setting: {
-                                        ...m.gateway_setting,
-                                        credentials: { ...m.gateway_setting?.credentials, client_id: e.target.value }
+                                        ...(m.gateway_setting || { mode: 'sandbox', is_active: false }),
+                                        credentials: { ...(m.gateway_setting?.credentials || {}), client_id: e.target.value }
                                     }
                                 }))}
                                 className="w-full h-10 px-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-400 transition-all"
@@ -138,8 +139,8 @@ export default function UnifiedPaymentForm({ paymentMethods, setPaymentMethods, 
                                 onChange={(e) => updateAllMethods(m => ({
                                     ...m,
                                     gateway_setting: {
-                                        ...m.gateway_setting,
-                                        credentials: { ...m.gateway_setting?.credentials, client_secret: e.target.value }
+                                        ...(m.gateway_setting || { mode: 'sandbox', is_active: false }),
+                                        credentials: { ...(m.gateway_setting?.credentials || {}), client_secret: e.target.value }
                                     }
                                 }))}
                                 className="w-full h-10 px-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-400 transition-all"
@@ -154,8 +155,8 @@ export default function UnifiedPaymentForm({ paymentMethods, setPaymentMethods, 
                                 onChange={(e) => updateAllMethods(m => ({
                                     ...m,
                                     gateway_setting: {
-                                        ...m.gateway_setting,
-                                        credentials: { ...m.gateway_setting?.credentials, public_key: e.target.value }
+                                        ...(m.gateway_setting || { mode: 'sandbox', is_active: false }),
+                                        credentials: { ...(m.gateway_setting?.credentials || {}), public_key: e.target.value }
                                     }
                                 }))}
                                 className="w-full h-10 px-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-400 transition-all"
@@ -167,9 +168,8 @@ export default function UnifiedPaymentForm({ paymentMethods, setPaymentMethods, 
                         <button
                             type="button"
                             onClick={async () => {
-                                // Save ALL relevant methods
                                 const promises = paymentMethods
-                                    .filter(m => ['pix', 'carto_de_credito', 'boleto'].includes(m.slug))
+                                    .filter(m => ['pix', 'credit_card', 'boleto'].includes(m.slug))
                                     .map(m => savePaymentSettings(m.id));
 
                                 await Promise.all(promises);
