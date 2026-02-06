@@ -5,7 +5,6 @@ import { useLanguage } from '@/app/context/LanguageContext';
 import { useAdminAuth, AdminAuthProvider } from '@/app/context/AdminAuthContext';
 import { toast, Toaster } from 'react-hot-toast';
 import { Eye, EyeOff, Lock, Mail, Check } from 'lucide-react';
-import ThemeToggle from '@/app/components/ThemeToggle';
 import LanguageToggle from '@/app/components/LanguageToggle';
 
 function LoginContent() {
@@ -93,7 +92,6 @@ function LoginContent() {
 
                 <div className="absolute top-6 right-6 flex items-center gap-4 z-20">
                     <LanguageToggle />
-                    <ThemeToggle />
                 </div>
 
                 <div className="w-full max-w-md space-y-8 relative z-10">

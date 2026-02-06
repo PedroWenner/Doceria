@@ -4,7 +4,6 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useLanguage } from '@/app/context/LanguageContext';
-import ThemeToggle from '@/app/components/ThemeToggle';
 import LanguageToggle from '@/app/components/LanguageToggle';
 import SessionTimer from '@/app/components/SessionTimer';
 import {
@@ -164,7 +163,6 @@ export default function Sidebar({
                     </p>
 
                     <div className="flex gap-2 mt-4">
-                        <ThemeToggle />
                         <LanguageToggle />
                     </div>
                 </div>

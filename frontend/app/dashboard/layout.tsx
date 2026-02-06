@@ -4,7 +4,6 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import Cookies from 'js-cookie'; // Added import for cookie usage
 import { useRouter, usePathname } from 'next/navigation';
-import ThemeToggle from '@/app/components/ThemeToggle';
 import LanguageToggle from '@/app/components/LanguageToggle';
 import { useLanguage } from '@/app/context/LanguageContext';
 // import { useAuth } from '@/app/context/AuthContext'; // Removed
