@@ -40,6 +40,13 @@ class AuthController extends Controller
             return $this->error('Unauthorized', 401);
         }
 
+        // Check if user is active
+        $user = auth('api')->user();
+        if (! $user->is_active) {
+            auth('api')->logout();
+            return $this->error('Somente usuários ativos podem logar.', 403);
+        }
+
         return $this->respondWithToken($token);
     }
 

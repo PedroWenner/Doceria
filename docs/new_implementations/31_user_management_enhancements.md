@@ -12,19 +12,23 @@ Este documento detalha as melhorias implementadas no módulo de gestão de usuá
     - Interface visual na lista de usuários (badges verde/cinza).
     - Toggle switch nos modais de criação e edição.
 
-### 2.2 Troca de Senha (Password Reset)
+### 2.2 Restrição de Login
+- **Segurança**: Apenas usuários com `is_active = true` podem realizar login.
+- **Feedback**: Tentativas de login por usuários inativos retornam a mensagem "Somente usuários ativos podem logar." e invalidam o token imediatamente.
+
+### 2.3 Troca de Senha (Password Reset)
 - **Decisão de UX**: Separar a troca de senha da edição de perfil para evitar edições acidentais e melhorar a segurança.
 - **Implementação**:
     - Novo modal `PasswordModal` acionado pelo ícone de chave.
     - Nova rota de API `PUT /api/users/{id}/password`.
     - **Novidade**: Adicionado toggle ("olhinho") para visualizar a senha digitada antes de salvar, prevenindo erros de digitação.
 
-### 2.3 Exclusão Lógica (Soft Deletes)
+### 2.4 Exclusão Lógica (Soft Deletes)
 - **Decisão de Arquitetura**: Manter histórico de dados. Usuários não são removidos fisicamente do banco.
 - **Técnica**: Uso do trait `SoftDeletes` do Laravel.
 - **Segurança**: Modal de confirmação `DeleteConfirmationModal` exige ação explícita do administrador.
 
-### 2.4 Edição de Usuário
+### 2.5 Edição de Usuário
 - **Reutilização**: O mesmo `UserModal` usado na criação foi adaptado para edição.
 - **Capacidades**: Atualização de Nome, E-mail, Cargo (Role) e Status.
 
