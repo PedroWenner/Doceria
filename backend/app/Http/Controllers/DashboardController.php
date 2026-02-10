@@ -74,10 +74,52 @@ class DashboardController extends Controller
                 ];
             });
 
+        // 5. Top Products (Revenue & Volume)
+        $topProducts = \App\Models\OrderItem::select(
+            'product_id',
+            DB::raw('SUM(quantity) as total_sold'),
+            DB::raw('SUM(quantity * unit_price) as total_revenue')
+        )
+            ->whereHas('order', function ($q) use ($startDate, $endDate) {
+                $q->where('payment_status', 'paid')
+                  ->whereBetween('created_at', [$startDate, $endDate]);
+            })
+            ->with('product:id,name,image_path')
+            ->groupBy('product_id')
+            ->orderByDesc('total_revenue')
+            ->limit(5)
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'id' => $item->product_id,
+                    'name' => $item->product->name ?? 'Produto Removido',
+                    'image' => $item->product->image_path ?? null,
+                    'sold' => $item->total_sold,
+                    'revenue' => $item->total_revenue
+                ];
+            });
+
+        // 6. Low Stock Alerts
+        $lowStock = \App\Models\Product::select('id', 'name', 'stock_quantity', 'min_stock_level', 'image_path')
+            ->whereColumn('stock_quantity', '<=', 'min_stock_level')
+            ->whereNull('deleted_at')
+            ->orderBy('stock_quantity', 'asc')
+            ->limit(5)
+            ->get();
+
+        // 7. Settings (for frontend toggles)
+        $settings = \App\Models\CompanySetting::first();
+        $stockControlEnabled = $settings ? $settings->enable_stock_control : false;
+
         return $this->success([
             'overview' => $months,
             'payment_status' => $paymentStatus,
-            'expenses_by_category' => $expensesByCategory
+            'expenses_by_category' => $expensesByCategory,
+            'top_products' => $topProducts,
+            'low_stock' => $lowStock,
+            'settings' => [
+                'enable_stock_control' => $stockControlEnabled
+            ]
         ]);
     }
 }

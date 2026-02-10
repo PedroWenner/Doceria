@@ -29,6 +29,7 @@ export const translations = {
             no_img: 'Sem Img',
             inactive: 'Inativo',
             delete_confirm_title: 'Confirmar Exclusão',
+            units_short: 'un'
         },
         auth: {
             login_title: 'AlcaTech',
@@ -375,6 +376,11 @@ export const translations = {
                 transfer: 'Transferência',
                 boleto: 'Boleto'
             },
+            top_products: 'Produtos Mais Vendidos',
+            units_sold: 'unidades',
+            low_stock: 'Alerta de Estoque',
+            stock_ok: 'Estoque saudável!',
+            no_data: 'Sem dados',
         }
     },
     en: {
@@ -405,6 +411,7 @@ export const translations = {
             no_img: 'No Image',
             inactive: 'Inactive',
             delete_confirm_title: 'Confirm Deletion',
+            units_short: 'un'
         },
         auth: {
             login_title: 'AlcaTech',
@@ -706,6 +713,11 @@ export const translations = {
             profit: 'Profit',
             failed: 'Failed',
             canceled: 'Canceled',
+            top_products: 'Top Selling Products',
+            units_sold: 'units',
+            low_stock: 'Low Stock Alert',
+            stock_ok: 'Healthy Stock!',
+            no_data: 'No data',
 
             expenses: 'Expenses',
             categories: 'Categories',
