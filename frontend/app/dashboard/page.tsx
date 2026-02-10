@@ -1,4 +1,5 @@
 import GlassCard from '@/app/components/GlassCard';
+import FinancialDashboard from '@/app/components/dashboard/FinancialDashboard';
 
 export default function DashboardHome() {
     return (
@@ -8,26 +9,11 @@ export default function DashboardHome() {
                 <div className="text-sm text-brand-choco/60">Welcome back, Patissier</div>
             </div>
 
-            {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <GlassCard className="p-6 border-brand-pink/30 bg-white/40">
-                    <p className="text-brand-choco/60 mb-2 font-medium">Total Revenue</p>
-                    <p className="text-3xl font-bold text-brand-choco">$12,450</p>
-                    <span className="text-xs text-green-600 font-bold bg-green-100 px-2 py-1 rounded-full mt-2 inline-block">+12%</span>
-                </GlassCard>
-                <GlassCard className="p-6 border-brand-pink/30 bg-white/40">
-                    <p className="text-brand-choco/60 mb-2 font-medium">Orders</p>
-                    <p className="text-3xl font-bold text-brand-choco">156</p>
-                </GlassCard>
-                <GlassCard className="p-6 border-brand-pink/30 bg-white/40">
-                    <p className="text-brand-choco/60 mb-2 font-medium">Pending</p>
-                    <p className="text-3xl font-bold text-brand-choco">23</p>
-                </GlassCard>
-                <GlassCard className="p-6 border-brand-pink/30 bg-white/40">
-                    <p className="text-brand-choco/60 mb-2 font-medium">Customers</p>
-                    <p className="text-3xl font-bold text-brand-choco">892</p>
-                </GlassCard>
-            </div>
+            {/* Financial Dashboard (Live Data) */}
+            <FinancialDashboard />
+
+            {/* Legacy Static Stats (Hidden/Removed) */}
+            {/* <div className="grid grid-cols-1 md:grid-cols-4 gap-6"> ... </div> */}
 
             {/* Recent Activity Area */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

@@ -43,6 +43,9 @@ Route::group(['middleware' => ['api', 'auth:api', 'role:admin']], function () {
         Route::delete('users/{id}', [App\Http\Controllers\UserController::class, 'destroy']);
     });
 
+    // Dashboard
+    Route::get('/dashboard/financial-summary', [App\Http\Controllers\DashboardController::class, 'financialSummary']);
+
     Route::post('users/{user}/roles', [App\Http\Controllers\UserController::class, 'updateRoles']); // Keep strict admin for changing roles
 
     // Orders (Kanban) - Allow Admin and Manager
