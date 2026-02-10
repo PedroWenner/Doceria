@@ -46,6 +46,7 @@ Route::group(['middleware' => ['api', 'auth:api', 'role:admin']], function () {
     // Dashboard
     Route::get('/dashboard/financial-summary', [App\Http\Controllers\DashboardController::class, 'financialSummary']);
     Route::get('/dashboard/financial-reports', [App\Http\Controllers\DashboardController::class, 'financialReports']);
+    Route::get('/dashboard/financial-report-widgets', [App\Http\Controllers\DashboardController::class, 'financialReportWidgets']);
     Route::get('/dashboard/financial-transactions', [App\Http\Controllers\DashboardController::class, 'financialTransactions']);
 
     Route::post('users/{user}/roles', [App\Http\Controllers\UserController::class, 'updateRoles']); // Keep strict admin for changing roles

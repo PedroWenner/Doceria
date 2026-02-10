@@ -283,4 +283,71 @@ class DashboardController extends Controller
 
         return $this->success($transactions);
     }
+
+    public function financialReportWidgets(Request $request)
+    {
+        $startDate = $request->get('start_date', Carbon::now()->startOfMonth()->format('Y-m-d'));
+        $endDate = $request->get('end_date', Carbon::now()->endOfMonth()->format('Y-m-d'));
+
+        // 1. Top Products (Revenue & Volume) for the Period
+        $topProducts = \App\Models\OrderItem::select(
+            'product_id',
+            DB::raw('SUM(quantity) as total_sold'),
+            DB::raw('SUM(quantity * unit_price) as total_revenue')
+        )
+            ->whereHas('order', function ($q) use ($startDate, $endDate) {
+                $q->where('payment_status', 'paid')
+                  ->whereBetween('created_at', [$startDate, $endDate]);
+            })
+            ->with('product:id,name,image_path')
+            ->groupBy('product_id')
+            ->orderByDesc('total_revenue')
+            ->limit(5)
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'id' => $item->product_id,
+                    'name' => $item->product->name ?? 'Items Removed',
+                    'image' => $item->product->image_path ?? null,
+                    'sold' => $item->total_sold,
+                    'revenue' => $item->total_revenue
+                ];
+            });
+
+        // 2. Expenses by Category for the Period
+        $expensesByCategory = \App\Models\Expense::with('category')
+            ->select('category_id', DB::raw('SUM(amount) as total'))
+            ->where('status', 'paid')
+            ->whereBetween('date', [$startDate, $endDate])
+            ->groupBy('category_id')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'name' => $item->category->name ?? 'Uncategorized',
+                    'color' => $item->category->color ?? '#cbd5e1',
+                    'total' => $item->total
+                ];
+            });
+
+        // 3. Income by Payment Method for the Period
+        $incomeByMethod = \App\Models\Payment::with('paymentMethod')
+            ->select('payment_method_id', DB::raw('SUM(amount) as total'), DB::raw('COUNT(*) as count'))
+            ->where('status', 'paid')
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->groupBy('payment_method_id')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'name' => $item->paymentMethod->name ?? 'Unknown',
+                    'total' => $item->total,
+                    'count' => $item->count
+                ];
+            });
+
+        return $this->success([
+            'top_products' => $topProducts,
+            'expenses_by_category' => $expensesByCategory,
+            'income_by_method' => $incomeByMethod
+        ]);
+    }
 }

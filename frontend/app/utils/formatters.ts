@@ -73,3 +73,21 @@ export const formatCNPJ = (value: string): string => {
         .replace(/(\d{4})(\d)/, '$1-$2')
         .substring(0, 18);
 };
+
+export const displayDate = (value: string | Date): string => {
+    if (!value) return '-';
+    const date = typeof value === 'string' ? new Date(value) : value;
+    return new Intl.DateTimeFormat('pt-BR').format(date);
+};
+
+export const displayDateTime = (value: string | Date): string => {
+    if (!value) return '-';
+    const date = typeof value === 'string' ? new Date(value) : value;
+    return new Intl.DateTimeFormat('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    }).format(date);
+};
