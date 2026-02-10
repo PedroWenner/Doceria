@@ -44,7 +44,7 @@ export default function ExpenseModal({ isOpen, onClose, onSuccess, expense }: Ex
     const [formData, setFormData] = useState({
         description: '',
         amount: '',
-        date: new Date().toISOString().split('T')[0],
+        date: new Date().toLocaleDateString('pt-BR').split('/').reverse().join('-'), // YYYY-MM-DD Local
         category_id: '',
         status: 'paid',
         payment_method: 'money',
@@ -77,7 +77,7 @@ export default function ExpenseModal({ isOpen, onClose, onSuccess, expense }: Ex
             setFormData({
                 description: expense.description,
                 amount: formatCurrency(expense.amount),
-                date: expense.date,
+                date: expense.date.split('T')[0],
                 category_id: expense.category_id.toString(),
                 status: expense.status,
                 payment_method: expense.payment_method,
@@ -88,7 +88,7 @@ export default function ExpenseModal({ isOpen, onClose, onSuccess, expense }: Ex
             setFormData({
                 description: '',
                 amount: '',
-                date: new Date().toISOString().split('T')[0],
+                date: new Date().toLocaleDateString('pt-BR').split('/').reverse().join('-'), // YYYY-MM-DD Local
                 category_id: '',
                 status: 'paid',
                 payment_method: 'money',

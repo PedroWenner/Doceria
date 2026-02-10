@@ -80,7 +80,7 @@ export default function ExpenseTable({ expenses, onEdit, onDelete, loading }: Ex
                             <td className="px-6 py-4 text-slate-500 dark:text-slate-400 text-sm">
                                 <span className="flex items-center gap-1.5">
                                     <Calendar size={14} className="opacity-70" />
-                                    {format(new Date(expense.date), 'dd/MM/yyyy')}
+                                    {format(new Date(expense.date.split('T')[0] + 'T00:00:00'), 'dd/MM/yyyy')}
                                 </span>
                             </td>
                             <td className="px-6 py-4 font-medium text-slate-900 dark:text-slate-100">
