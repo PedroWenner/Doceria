@@ -68,7 +68,7 @@ export default function DateRangeControls({
 
             <button
                 onClick={onRefresh}
-                className="p-2 bg-brand-primary text-white rounded-lg hover:bg-brand-primary/90 transition-colors"
+                className="p-2.5 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 rounded-lg hover:bg-slate-800 dark:hover:bg-slate-200 transition-colors shadow-sm"
                 title="Refresh Data"
             >
                 <RefreshCcw size={18} />

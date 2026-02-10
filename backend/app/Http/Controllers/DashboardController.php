@@ -182,25 +182,25 @@ class DashboardController extends Controller
 
         // Revenue Query
         $revenueQuery = \App\Models\Payment::select(
-            DB::raw("DATE_FORMAT(created_at, '$dateFormat') as date"),
+            DB::raw("DATE_FORMAT(created_at, '$dateFormat') as date_key"),
             DB::raw('SUM(amount) as total')
         )
             ->where('status', 'paid')
             ->whereBetween('created_at', [$startDate, $endDate])
-            ->groupBy('date')
+            ->groupBy('date_key')
             ->get()
-            ->keyBy('date');
+            ->keyBy('date_key');
 
         // Expenses Query
         $expensesQuery = \App\Models\Expense::select(
-            DB::raw("DATE_FORMAT(date, '$dateFormat') as date"),
+            DB::raw("DATE_FORMAT(date, '$dateFormat') as date_key"),
             DB::raw('SUM(amount) as total')
         )
             ->where('status', 'paid')
             ->whereBetween('date', [$startDate, $endDate])
-            ->groupBy('date')
+            ->groupBy('date_key')
             ->get()
-            ->keyBy('date');
+            ->keyBy('date_key');
 
         // Fill gaps
         $chartData = [];
@@ -236,5 +236,51 @@ class DashboardController extends Controller
             ],
             'chart_data' => $chartData
         ];
+    }
+    public function financialTransactions(Request $request)
+    {
+        $startDate = $request->get('start_date', Carbon::now()->startOfMonth()->format('Y-m-d'));
+        $endDate = $request->get('end_date', Carbon::now()->endOfMonth()->format('Y-m-d'));
+
+        // Payments (Income)
+        $incomes = \App\Models\Payment::with(['order:id,customer_name', 'paymentMethod:id,name'])
+            ->where('status', 'paid')
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'id' => $item->id,
+                    'date' => $item->created_at->format('Y-m-d H:i:s'),
+                    'description' => "Pedido #{$item->order_id} - " . ($item->order->customer_name ?? 'Cliente'),
+                    'category' => 'Venda',
+                    'type' => 'income',
+                    'amount' => $item->amount,
+                    'method' => $item->paymentMethod->name ?? 'N/A',
+                    'status' => 'paid'
+                ];
+            });
+
+        // Expenses (Outcome)
+        $expenses = \App\Models\Expense::with(['category:id,name,color', 'paymentMethod:id,name'])
+            ->where('status', 'paid')
+            ->whereBetween('date', [$startDate, $endDate])
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'id' => $item->id,
+                    'date' => $item->date . ' 00:00:00', // Expenses usually have just date
+                    'description' => $item->description,
+                    'category' => $item->category->name ?? 'Sem Categoria',
+                    'type' => 'expense',
+                    'amount' => $item->amount,
+                    'method' => $item->paymentMethod->name ?? 'N/A',
+                    'status' => 'paid'
+                ];
+            });
+
+        // Merge and Sort by Date Descending
+        $transactions = $incomes->concat($expenses)->sortByDesc('date')->values();
+
+        return $this->success($transactions);
     }
 }

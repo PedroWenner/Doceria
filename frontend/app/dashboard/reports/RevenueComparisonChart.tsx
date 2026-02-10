@@ -17,15 +17,13 @@ interface Props {
 }
 
 export default function RevenueComparisonChart({ primaryData, comparisonData }: Props) {
-    // Prepare Data for Chart
-    // We need to merge primary and comparison by "Day Index" (1st, 2nd, 3rd day of period) 
-    // since dates might not match (e.g. Jan vs Feb).
-
     const chartData = (primaryData || []).map((item, index) => {
         const compareItem = comparisonData && comparisonData[index];
         return {
-            x: item.formatted_date, // Label (e.g. 01/01)
+            x: item.formatted_date,
             primaryRevenue: Number(item.revenue),
+            primaryExpenses: Number(item.expenses),
+            primaryProfit: Number(item.profit),
             compareRevenue: compareItem ? Number(compareItem.revenue) : 0,
             compareDate: compareItem ? compareItem.formatted_date : ''
         };
@@ -50,6 +48,7 @@ export default function RevenueComparisonChart({ primaryData, comparisonData }: 
                         tickFormatter={(value) => `R$ ${value}`}
                     />
                     <Tooltip
+                        cursor={{ fill: '#f1f5f9', opacity: 0.5 }}
                         contentStyle={{
                             borderRadius: '12px',
                             border: 'none',
@@ -57,23 +56,39 @@ export default function RevenueComparisonChart({ primaryData, comparisonData }: 
                             backgroundColor: '#fff',
                             color: '#1e293b'
                         }}
-                        formatter={(value: number, name: string, props: any) => {
-                            const label = name === 'primaryRevenue' ? 'Current Period' : `Previous (${props.payload.compareDate})`;
-                            return [displayCurrency(value), label] as [string, string];
+                        formatter={(value: number, name: string) => {
+                            const labels: Record<string, string> = {
+                                primaryRevenue: 'Revenue',
+                                primaryExpenses: 'Expenses',
+                                primaryProfit: 'Profit',
+                                compareRevenue: 'Comparison Rev.'
+                            };
+                            return [displayCurrency(value), labels[name] || name] as [string, string];
                         }}
                     />
-                    <Legend />
+                    <Legend iconType="circle" />
                     <Bar
                         dataKey="primaryRevenue"
-                        name="Current Period"
+                        name="Revenue"
                         fill="#10b981"
                         radius={[4, 4, 0, 0]}
-                        barSize={20}
+                    />
+                    <Bar
+                        dataKey="primaryExpenses"
+                        name="Expenses"
+                        fill="#f43f5e"
+                        radius={[4, 4, 0, 0]}
+                    />
+                    <Bar
+                        dataKey="primaryProfit"
+                        name="Profit"
+                        fill="#3b82f6"
+                        radius={[4, 4, 0, 0]}
                     />
                     {comparisonData && (
                         <Bar
                             dataKey="compareRevenue"
-                            name="Comparison"
+                            name="Comp. Revenue"
                             fill="#cbd5e1"
                             radius={[4, 4, 0, 0]}
                             barSize={20}
