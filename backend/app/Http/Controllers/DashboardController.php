@@ -18,20 +18,17 @@ class DashboardController extends Controller
         $startDate = $request->get('start_date', Carbon::now()->subMonths(6)->startOfMonth()->format('Y-m-d'));
         $endDate = $request->get('end_date', Carbon::now()->endOfMonth()->format('Y-m-d'));
 
-        // 1. Monthly Revenue (Orders Paid)
-        $revenue = Order::select(
+        $revenue = \App\Models\Payment::select(
             DB::raw("DATE_FORMAT(created_at, '%Y-%m') as month"),
-            DB::raw('SUM(total_amount) as total')
+            DB::raw('SUM(amount) as total')
         )
-            ->where('status', '!=', 'canceled') // Assuming 'canceled' shouldn't count, or specifically 'paid'/'delivered' depending on business logic. Sticking to 'paid' payment_status is safer.
-            ->where('payment_status', 'paid')
+            ->where('status', 'paid')
             ->whereBetween('created_at', [$startDate, $endDate])
             ->groupBy('month')
             ->orderBy('month')
             ->get()
             ->keyBy('month');
 
-        // 2. Monthly Expenses
         $expenses = Expense::select(
             DB::raw("DATE_FORMAT(date, '%Y-%m') as month"),
             DB::raw('SUM(amount) as total')
@@ -43,7 +40,6 @@ class DashboardController extends Controller
             ->get()
             ->keyBy('month');
 
-        // Combine for Area Chart
         $months = [];
         $current = Carbon::parse($startDate);
         $end = Carbon::parse($endDate);
@@ -59,13 +55,11 @@ class DashboardController extends Controller
             $current->addMonth();
         }
 
-        // 3. Payment Status (Pie Chart)
-        $paymentStatus = Order::select('payment_status', DB::raw('count(*) as count'), DB::raw('sum(total_amount) as total'))
+        $paymentStatus = \App\Models\Payment::select('status as payment_status', DB::raw('count(*) as count'), DB::raw('sum(amount) as total'))
             ->whereBetween('created_at', [$startDate, $endDate])
-            ->groupBy('payment_status')
+            ->groupBy('status')
             ->get();
 
-        // 4. Expenses by Category (Bar Chart)
         $expensesByCategory = Expense::with('category')
             ->select('category_id', DB::raw('SUM(amount) as total'))
             ->where('status', 'paid') // Only paid expenses? Usually yes for cash flow.

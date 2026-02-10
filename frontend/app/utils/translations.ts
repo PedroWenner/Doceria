@@ -10,6 +10,7 @@ export const translations = {
             edit: 'Editar',
             delete: 'Excluir',
             actions: 'Ações',
+            transactions: 'Transações',
             status: 'Status',
             image: 'Imagem',
             name: 'Nome',
@@ -317,6 +318,19 @@ export const translations = {
             }
         },
         financial: {
+            dashboard_title: 'Dashboard Financeiro',
+            dashboard_subtitle: 'Visão geral do desempenho financeiro.',
+            total_revenue: 'Receita Total',
+            total_expenses: 'Despesas Totais',
+            net_profit: 'Lucro Líquido',
+            revenue_vs_expenses: 'Receita vs Despesas',
+            payment_status: 'Status dos Pagamentos',
+            top_expenses: 'Top Categorias de Despesas',
+            revenue: 'Receita',
+            profit: 'Lucro',
+            failed: 'Falhou',
+            canceled: 'Cancelado',
+
             expenses: 'Despesas',
             categories: 'Categorias',
             new_expense: 'Nova Despesa',
@@ -360,7 +374,7 @@ export const translations = {
                 card: 'Cartão',
                 transfer: 'Transferência',
                 boleto: 'Boleto'
-            }
+            },
         }
     },
     en: {
@@ -372,6 +386,7 @@ export const translations = {
             edit: 'Edit',
             delete: 'Delete',
             actions: 'Actions',
+            transactions: 'Transactions',
             status: 'Status',
             image: 'Image',
             name: 'Name',
@@ -679,6 +694,19 @@ export const translations = {
             }
         },
         financial: {
+            dashboard_title: 'Financial Dashboard',
+            dashboard_subtitle: 'Overview of financial performance.',
+            total_revenue: 'Total Revenue',
+            total_expenses: 'Total Expenses',
+            net_profit: 'Net Profit',
+            revenue_vs_expenses: 'Revenue vs Expenses',
+            payment_status: 'Payment Status',
+            top_expenses: 'Top Expense Categories',
+            revenue: 'Revenue',
+            profit: 'Profit',
+            failed: 'Failed',
+            canceled: 'Canceled',
+
             expenses: 'Expenses',
             categories: 'Categories',
             new_expense: 'New Expense',

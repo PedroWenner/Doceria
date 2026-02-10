@@ -35,15 +35,24 @@ export default function PaymentStatusChart({ data }: Props) {
     const CustomTooltip = ({ active, payload }: any) => {
         if (active && payload && payload.length) {
             const data = payload[0].payload;
+
+            const getLabel = (status: string) => {
+                switch (status) {
+                    case 'paid': return t('financial.paid');
+                    case 'pending': return t('financial.pending');
+                    case 'failed': return t('financial.failed');
+                    case 'canceled': return t('financial.canceled');
+                    default: return status;
+                }
+            };
+
             return (
                 <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-3 rounded-lg shadow-xl">
                     <p className="font-bold capitalize text-slate-700 dark:text-slate-200 mb-1">
-                        {data.name === 'paid' ? t('financial.paid') :
-                            data.name === 'pending' ? t('financial.pending') :
-                                data.name}
+                        {getLabel(data.name)}
                     </p>
                     <p className="text-sm text-slate-600 dark:text-slate-400">
-                        {data.value} {t('common.orders')}
+                        {data.value} {t('common.transactions')}
                     </p>
                     <p className="text-sm font-semibold text-slate-800 dark:text-slate-100 mt-1">
                         {displayCurrency(data.total)}
@@ -73,13 +82,15 @@ export default function PaymentStatusChart({ data }: Props) {
                     </Pie>
                     <Tooltip content={<CustomTooltip />} />
                     <Legend
-                        formatter={(value) => (
-                            <span className="capitalize text-slate-600 dark:text-slate-400">
-                                {value === 'paid' ? t('financial.paid') :
-                                    value === 'pending' ? t('financial.pending') :
-                                        value}
-                            </span>
-                        )}
+                        formatter={(value) => {
+                            switch (value) {
+                                case 'paid': return t('financial.paid');
+                                case 'pending': return t('financial.pending');
+                                case 'failed': return t('financial.failed');
+                                case 'canceled': return t('financial.canceled');
+                                default: return value;
+                            }
+                        }}
                         iconType="circle"
                     />
                 </PieChart>
