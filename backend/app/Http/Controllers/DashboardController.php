@@ -122,4 +122,119 @@ class DashboardController extends Controller
             ]
         ]);
     }
+
+    public function financialReports(Request $request)
+    {
+        $startDate = $request->get('start_date', Carbon::now()->startOfMonth()->format('Y-m-d'));
+        $endDate = $request->get('end_date', Carbon::now()->endOfMonth()->format('Y-m-d'));
+        $groupBy = $request->get('group_by', 'day'); // day, month, year
+        
+        // Optional Comparison Period
+        $compareStartDate = $request->get('compare_start_date');
+        $compareEndDate = $request->get('compare_end_date');
+
+        // 1. Primary Period Data
+        $primary = $this->getPeriodSummary($startDate, $endDate, $groupBy);
+        
+        // 2. Comparison Period Data (if provided)
+        $comparison = null;
+        if ($compareStartDate && $compareEndDate) {
+            $comparison = $this->getPeriodSummary($compareStartDate, $compareEndDate, $groupBy);
+        }
+
+        return $this->success([
+            'primary' => $primary,
+            'comparison' => $comparison
+        ]);
+    }
+
+    private function getPeriodSummary($startDate, $endDate, $groupBy = 'day')
+    {
+        // Totals (Always the same regardless of grouping)
+        $revenueTotal = \App\Models\Payment::where('status', 'paid')
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->sum('amount');
+
+        $expensesTotal = \App\Models\Expense::where('status', 'paid')
+            ->whereBetween('date', [$startDate, $endDate])
+            ->sum('amount');
+
+        // Determine SQL format and Date Interval based on GroupBy
+        $dateFormat = '%Y-%m-%d';
+        $keyFormat = 'Y-m-d';
+        $incrementMethod = 'addDay';
+        $labelFormat = 'd/m/Y';
+
+        switch ($groupBy) {
+            case 'month':
+                $dateFormat = '%Y-%m';
+                $keyFormat = 'Y-m';
+                $incrementMethod = 'addMonth';
+                $labelFormat = 'M Y';
+                break;
+            case 'year':
+                $dateFormat = '%Y';
+                $keyFormat = 'Y';
+                $incrementMethod = 'addYear';
+                $labelFormat = 'Y';
+                break;
+        }
+
+        // Revenue Query
+        $revenueQuery = \App\Models\Payment::select(
+            DB::raw("DATE_FORMAT(created_at, '$dateFormat') as date"),
+            DB::raw('SUM(amount) as total')
+        )
+            ->where('status', 'paid')
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->groupBy('date')
+            ->get()
+            ->keyBy('date');
+
+        // Expenses Query
+        $expensesQuery = \App\Models\Expense::select(
+            DB::raw("DATE_FORMAT(date, '$dateFormat') as date"),
+            DB::raw('SUM(amount) as total')
+        )
+            ->where('status', 'paid')
+            ->whereBetween('date', [$startDate, $endDate])
+            ->groupBy('date')
+            ->get()
+            ->keyBy('date');
+
+        // Fill gaps
+        $chartData = [];
+        $current = Carbon::parse($startDate);
+        $end = Carbon::parse($endDate);
+
+        // Adjust start/end for grouping to ensure full coverage
+        if ($groupBy === 'month') {
+            $current->startOfMonth();
+            $end->endOfMonth();
+        } elseif ($groupBy === 'year') {
+            $current->startOfYear();
+            $end->endOfYear();
+        }
+
+        while ($current <= $end) {
+            $dateKey = $current->format($keyFormat);
+            $chartData[] = [
+                'date' => $dateKey,
+                'formatted_date' => $current->translatedFormat($labelFormat),
+                'revenue' => $revenueQuery->get($dateKey)->total ?? 0,
+                'expenses' => $expensesQuery->get($dateKey)->total ?? 0,
+                'profit' => ($revenueQuery->get($dateKey)->total ?? 0) - ($expensesQuery->get($dateKey)->total ?? 0)
+            ];
+            $current->$incrementMethod();
+        }
+
+        return [
+            'totals' => [
+                'revenue' => $revenueTotal,
+                'expenses' => $expensesTotal,
+                'profit' => $revenueTotal - $expensesTotal
+            ],
+            'chart_data' => $chartData
+        ];
+    }
 }

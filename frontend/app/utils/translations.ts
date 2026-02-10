@@ -54,7 +54,8 @@ export const translations = {
             payments_methods: 'Meios de Pagamento',
             payments: 'Pagamentos',
             expenses: 'Despesas',
-            expense_categories: 'Categorias'
+            expense_categories: 'Categorias',
+            reports: 'Relatórios'
         },
         dashboard: {
             welcome: 'Bem-vindo de volta',
@@ -436,7 +437,8 @@ export const translations = {
             payments_methods: 'Payment Methods',
             payments: 'Payments',
             expenses: 'Expenses',
-            expense_categories: 'Categories'
+            expense_categories: 'Categories',
+            reports: 'Reports'
         },
         dashboard: {
             welcome: 'Welcome back',

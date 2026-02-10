@@ -60,6 +60,12 @@ export default function Sidebar({
             roles: ['admin', 'manager']
         },
         {
+            icon: FileText,
+            label: 'sidebar.reports',
+            href: '/dashboard/reports',
+            roles: ['admin', 'manager']
+        },
+        {
             icon: Users,
             label: 'sidebar.users',
             href: '/dashboard/users',
