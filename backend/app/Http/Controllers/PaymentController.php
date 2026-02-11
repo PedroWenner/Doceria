@@ -143,12 +143,8 @@ class PaymentController extends Controller
         ]);
 
         try {
-            // Update Core Fields (only if allowed)
-            $payment->update($request->only(['amount', 'method', 'status', 'notes'])); // Filter inside update if needed, but we validated above.
+            $payment->update($request->only(['amount', 'method', 'status', 'notes']));
             
-            // Handle Metadata/Notes update specifically if it's inside metadata in DB but we decided to use 'notes' in schema? 
-            // The schema has 'metadata' json column. The store method put notes inside metadata.
-            // Let's keep consistency.
             if ($request->has('notes')) {
                 $meta = $payment->metadata ?? [];
                 $meta['notes'] = $request->notes;
