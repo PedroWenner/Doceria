@@ -425,7 +425,9 @@ export const translations = {
             list: 'Lista',
             actions: {
                 refresh: 'Atualizar',
-                export_csv: 'Exportar CSV'
+                export_csv: 'Exportar CSV',
+                generate_pdf: 'Gerar PDF',
+                generate_excel: 'Gerar Excel'
             },
             types: {
                 income: 'Receitas',
@@ -931,13 +933,15 @@ export const translations = {
             list: 'List',
             actions: {
                 refresh: 'Refresh Data',
-                export_csv: 'Export CSV'
+                export_csv: 'Export CSV',
+                generate_pdf: 'Generate PDF',
+                generate_excel: 'Generate Excel'
             },
             types: {
                 income: 'Income',
                 expense: 'Expenses',
                 all: 'All Transactions'
-            }
+            },
         }
     }
 };

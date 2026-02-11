@@ -1,10 +1,12 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+
 import { useLanguage } from '@/app/context/LanguageContext';
 import Cookies from 'js-cookie';
 import { Loader2, Package, AlertTriangle, Archive, DollarSign, Filter, X, FileText } from 'lucide-react';
 import { displayCurrency, formatCurrency, parseCurrency } from '@/app/utils/formatters';
+import { generatePDF } from '@/app/utils/pdfGenerator';
 
 export default function ProductsReportView() {
     const { t } = useLanguage();
@@ -81,6 +83,33 @@ export default function ProductsReportView() {
     };
 
     const hasActiveFilters = Object.values(filters).some(val => val !== '');
+
+    const handleDownloadPDF = () => {
+        if (!data || !data.products) return;
+
+        const columns = [
+            t('reports.table.product'),
+            t('reports.table.category'),
+            t('reports.table.price'),
+            t('reports.table.stock'),
+            t('reports.table.status')
+        ];
+
+        const tableData = data.products.map((product: any) => [
+            product.name,
+            product.category?.name || '-',
+            displayCurrency(product.price),
+            product.stock_quantity.toString(),
+            product.status
+        ]);
+
+        generatePDF(
+            t('reports.tabs.products'),
+            columns,
+            tableData,
+            `relatorio-produtos-${new Date().toISOString().split('T')[0]}`
+        );
+    };
 
     return (
         <div className="space-y-6 animate-in fade-in duration-500">
@@ -205,7 +234,7 @@ export default function ProductsReportView() {
                         <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
                             <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">{t('reports.tabs.products')} {t('reports.list')}</h3>
                             <button
-                                onClick={() => window.print()}
+                                onClick={handleDownloadPDF}
                                 disabled={!data || data.products.length === 0}
                                 className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700 dark:hover:bg-slate-700 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed no-print"
                             >

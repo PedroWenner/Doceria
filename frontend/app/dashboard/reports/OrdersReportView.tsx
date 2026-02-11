@@ -6,6 +6,7 @@ import { useLanguage } from '@/app/context/LanguageContext';
 import { Loader2, ShoppingBag, DollarSign, Activity, Truck, X, FileText } from 'lucide-react';
 import { displayCurrency, displayDate, displayDateTime } from '@/app/utils/formatters';
 import ProDatePicker from '@/app/components/ProDatePicker';
+import { generatePDF } from '@/app/utils/pdfGenerator';
 
 export default function OrdersReportView() {
     const { t } = useLanguage();
@@ -60,6 +61,37 @@ export default function OrdersReportView() {
             payment_status: '',
             delivery_type: ''
         });
+    };
+
+    const handleDownloadPDF = () => {
+        if (!data || !data.orders) return;
+
+        const columns = [
+            t('reports.table.order_id'),
+            t('reports.table.date'),
+            t('reports.table.customer'),
+            t('reports.table.items'),
+            t('reports.table.total'),
+            t('reports.table.payment'),
+            t('reports.table.status')
+        ];
+
+        const tableData = data.orders.map((order: any) => [
+            `#${order.id}`,
+            displayDateTime(order.created_at),
+            order.customer_name,
+            (order.items?.length || 0).toString(),
+            displayCurrency(order.total_amount),
+            t(`orders.payment_status.${order.payment_status}`),
+            t(`orders.status.${order.status}`)
+        ]);
+
+        generatePDF(
+            t('reports.tabs.orders'),
+            columns,
+            tableData,
+            `relatorio-pedidos-${new Date().toISOString().split('T')[0]}`
+        );
     };
 
     return (
@@ -193,7 +225,7 @@ export default function OrdersReportView() {
                         <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
                             <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">{t('reports.tabs.orders')} {t('reports.list')}</h3>
                             <button
-                                onClick={() => window.print()}
+                                onClick={handleDownloadPDF}
                                 disabled={!data || data.orders.length === 0}
                                 className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700 dark:hover:bg-slate-700 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed no-print"
                             >
