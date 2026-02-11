@@ -229,3 +229,55 @@ a[aria-disabled="true"],
 .animate-bounce-slow {
   animation: bounce-slow 2s infinite;
 }
+
+/* --- PRINT STYLES --- */
+@media print {
+
+  /* Hide unnecessary elements */
+  aside,
+  header,
+  nav,
+  input,
+  select,
+  .no-print,
+  button:not(.always-print) {
+    display: none !important;
+  }
+
+  /* Reset layout for print */
+  body,
+  main {
+    background: white !important;
+    color: black !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  /* Ensure full width */
+  main {
+    margin-left: 0 !important;
+    max-width: 100% !important;
+  }
+
+  /* Improve table readability */
+  table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    font-size: 10pt;
+  }
+
+  th,
+  td {
+    border: 1px solid #ddd !important;
+    padding: 4px 8px !important;
+  }
+
+  /* Ensure graphics (like charts or badges) print correctly */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}

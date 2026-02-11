@@ -3,8 +3,9 @@
 import React, { useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
 import { useLanguage } from '@/app/context/LanguageContext';
-import { Loader2, ShoppingBag, DollarSign, Activity, Truck, X } from 'lucide-react';
+import { Loader2, ShoppingBag, DollarSign, Activity, Truck, X, FileText } from 'lucide-react';
 import { displayCurrency, displayDate, displayDateTime } from '@/app/utils/formatters';
+import ProDatePicker from '@/app/components/ProDatePicker';
 
 export default function OrdersReportView() {
     const { t } = useLanguage();
@@ -65,25 +66,21 @@ export default function OrdersReportView() {
         <div className="space-y-6 animate-in fade-in duration-500">
 
             {/* Filters Bar */}
-            <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col xl:flex-row gap-4 items-end">
+            <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col md:flex-row gap-4 items-end no-print">
 
-                <div className="flex gap-2 w-full xl:w-auto">
+                <div className="flex gap-2 w-full xl:w-1/3">
                     <div>
                         <label className="block text-xs font-medium text-slate-500 mb-1">{t('reports.filters.start_date')}</label>
-                        <input
-                            type="date"
+                        <ProDatePicker
                             value={filters.start_date}
-                            onChange={(e) => handleFilterChange('start_date', e.target.value)}
-                            className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border-none rounded-lg text-sm focus:ring-2 focus:ring-brand-primary/20"
+                            onChange={(val) => handleFilterChange('start_date', val)}
                         />
                     </div>
                     <div>
                         <label className="block text-xs font-medium text-slate-500 mb-1">{t('reports.filters.end_date')}</label>
-                        <input
-                            type="date"
+                        <ProDatePicker
                             value={filters.end_date}
-                            onChange={(e) => handleFilterChange('end_date', e.target.value)}
-                            className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border-none rounded-lg text-sm focus:ring-2 focus:ring-brand-primary/20"
+                            onChange={(val) => handleFilterChange('end_date', val)}
                         />
                     </div>
                 </div>
@@ -193,8 +190,16 @@ export default function OrdersReportView() {
 
                     {/* Data Table */}
                     <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden">
-                        <div className="p-6 border-b border-slate-100 dark:border-slate-800">
+                        <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
                             <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">{t('reports.tabs.orders')} {t('reports.list')}</h3>
+                            <button
+                                onClick={() => window.print()}
+                                disabled={!data || data.orders.length === 0}
+                                className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700 dark:hover:bg-slate-700 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed no-print"
+                            >
+                                <FileText size={16} />
+                                {t('reports.actions.generate_pdf')}
+                            </button>
                         </div>
                         <div className="overflow-x-auto">
                             <table className="w-full">

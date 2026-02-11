@@ -3,8 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '@/app/context/LanguageContext';
 import Cookies from 'js-cookie';
-import { Loader2, Package, AlertTriangle, Archive, DollarSign, Filter, X } from 'lucide-react';
-import { displayCurrency } from '@/app/utils/formatters';
+import { Loader2, Package, AlertTriangle, Archive, DollarSign, Filter, X, FileText } from 'lucide-react';
+import { displayCurrency, formatCurrency, parseCurrency } from '@/app/utils/formatters';
 
 export default function ProductsReportView() {
     const { t } = useLanguage();
@@ -45,7 +45,12 @@ export default function ProductsReportView() {
         const headers = { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' };
 
         try {
-            const query = new URLSearchParams(filters as any).toString();
+            const queryParams = {
+                ...filters,
+                min_price: filters.min_price ? parseCurrency(filters.min_price) : '',
+                max_price: filters.max_price ? parseCurrency(filters.max_price) : ''
+            };
+            const query = new URLSearchParams(queryParams as any).toString();
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/products/report?${query}`, { headers });
             if (response.ok) {
                 const result = await response.json();
@@ -66,6 +71,11 @@ export default function ProductsReportView() {
         setFilters(prev => ({ ...prev, [key]: value }));
     };
 
+    const handlePriceChange = (key: string, value: string) => {
+        const formatted = formatCurrency(value);
+        setFilters(prev => ({ ...prev, [key]: formatted }));
+    };
+
     const clearFilters = () => {
         setFilters({ category_id: '', stock_status: '', min_price: '', max_price: '' });
     };
@@ -76,7 +86,7 @@ export default function ProductsReportView() {
         <div className="space-y-6 animate-in fade-in duration-500">
 
             {/* Filters Bar */}
-            <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col md:flex-row gap-4 items-end">
+            <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col md:flex-row gap-4 items-end no-print">
                 <div className="w-full md:w-1/4">
                     <label className="block text-xs font-medium text-slate-500 mb-1">{t('reports.filters.category')}</label>
                     <select
@@ -109,20 +119,20 @@ export default function ProductsReportView() {
                     <div className="flex-1">
                         <label className="block text-xs font-medium text-slate-500 mb-1">{t('reports.filters.min_price')}</label>
                         <input
-                            type="number"
-                            placeholder="0.00"
+                            type="text"
+                            placeholder="R$ 0,00"
                             value={filters.min_price}
-                            onChange={(e) => handleFilterChange('min_price', e.target.value)}
+                            onChange={(e) => handlePriceChange('min_price', e.target.value)}
                             className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border-none rounded-lg text-sm focus:ring-2 focus:ring-brand-primary/20"
                         />
                     </div>
                     <div className="flex-1">
                         <label className="block text-xs font-medium text-slate-500 mb-1">{t('reports.filters.max_price')}</label>
                         <input
-                            type="number"
-                            placeholder="0.00"
+                            type="text"
+                            placeholder="R$ 0,00"
                             value={filters.max_price}
-                            onChange={(e) => handleFilterChange('max_price', e.target.value)}
+                            onChange={(e) => handlePriceChange('max_price', e.target.value)}
                             className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border-none rounded-lg text-sm focus:ring-2 focus:ring-brand-primary/20"
                         />
                     </div>
@@ -192,8 +202,16 @@ export default function ProductsReportView() {
 
                     {/* Data Table */}
                     <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden">
-                        <div className="p-6 border-b border-slate-100 dark:border-slate-800">
+                        <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
                             <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">{t('reports.tabs.products')} {t('reports.list')}</h3>
+                            <button
+                                onClick={() => window.print()}
+                                disabled={!data || data.products.length === 0}
+                                className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700 dark:hover:bg-slate-700 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed no-print"
+                            >
+                                <FileText size={16} />
+                                {t('reports.actions.generate_pdf')}
+                            </button>
                         </div>
                         <div className="overflow-x-auto">
                             <table className="w-full">
