@@ -241,34 +241,61 @@ class DashboardController extends Controller
     {
         $startDate = $request->get('start_date', Carbon::now()->startOfMonth()->format('Y-m-d'));
         $endDate = $request->get('end_date', Carbon::now()->endOfMonth()->format('Y-m-d'));
+        
+        // Filters
+        $type = $request->get('type'); // 'income', 'expense', or null
+        $categoryId = $request->get('category_id');
+        $paymentMethodId = $request->get('payment_method_id');
 
-        // Payments (Income)
-        $incomes = \App\Models\Payment::with(['order:id,customer_name', 'paymentMethod:id,name'])
-            ->where('status', 'paid')
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->get()
-            ->map(function ($item) {
+        $transactions = collect([]);
+
+        // 1. Fetch Incomes (if filtering allow)
+        if (!$type || $type === 'income') {
+            $incomesQuery = \App\Models\Payment::with(['order:id,customer_name', 'paymentMethod:id,name'])
+                ->where('status', 'paid')
+                ->whereBetween('created_at', [$startDate, $endDate]);
+
+            if ($paymentMethodId) {
+                $incomesQuery->where('payment_method_id', $paymentMethodId);
+            }
+
+            // Incomes don't have "expense categories", so if category_id is set, we might skip incomes 
+            // OR checks if we ever implement income categories. For now, skip if category_id is set.
+            if (!$categoryId) {
+                $incomes = $incomesQuery->get()->map(function ($item) {
+                    return [
+                        'id' => $item->id,
+                        'date' => $item->created_at->format('Y-m-d H:i:s'),
+                        'description' => "Pedido #{$item->order_id} - " . ($item->order->customer_name ?? 'Cliente'),
+                        'category' => 'Venda',
+                        'type' => 'income',
+                        'amount' => $item->amount,
+                        'method' => $item->paymentMethod->name ?? 'N/A',
+                        'status' => 'paid'
+                    ];
+                });
+                $transactions = $transactions->concat($incomes);
+            }
+        }
+
+        // 2. Fetch Expenses (if filtering allow)
+        if (!$type || $type === 'expense') {
+            $expensesQuery = \App\Models\Expense::with(['category:id,name,color', 'paymentMethod:id,name'])
+                ->where('status', 'paid')
+                ->whereBetween('date', [$startDate, $endDate]);
+
+            if ($paymentMethodId) {
+                $expensesQuery->where('payment_method_id', $paymentMethodId);
+            }
+
+            if ($categoryId) {
+                $expensesQuery->where('category_id', $categoryId);
+            }
+
+            $expenses = $expensesQuery->get()->map(function ($item) {
                 return [
                     'id' => $item->id,
-                    'date' => $item->created_at->format('Y-m-d H:i:s'),
-                    'description' => "Pedido #{$item->order_id} - " . ($item->order->customer_name ?? 'Cliente'),
-                    'category' => 'Venda',
-                    'type' => 'income',
-                    'amount' => $item->amount,
-                    'method' => $item->paymentMethod->name ?? 'N/A',
-                    'status' => 'paid'
-                ];
-            });
-
-        // Expenses (Outcome)
-        $expenses = \App\Models\Expense::with(['category:id,name,color', 'paymentMethod:id,name'])
-            ->where('status', 'paid')
-            ->whereBetween('date', [$startDate, $endDate])
-            ->get()
-            ->map(function ($item) {
-                return [
-                    'id' => $item->id,
-                    'date' => $item->date . ' 00:00:00', // Expenses usually have just date
+                    'date' => $item->date . ' 00:00:00',
                     'description' => $item->description,
                     'category' => $item->category->name ?? 'Sem Categoria',
                     'type' => 'expense',
@@ -277,11 +304,11 @@ class DashboardController extends Controller
                     'status' => 'paid'
                 ];
             });
+            $transactions = $transactions->concat($expenses);
+        }
 
-        // Merge and Sort by Date Descending
-        $transactions = $incomes->concat($expenses)->sortByDesc('date')->values();
-
-        return $this->success($transactions);
+        // Sort by Date Descending
+        return $this->success($transactions->sortByDesc('date')->values());
     }
 
     public function financialReportWidgets(Request $request)
