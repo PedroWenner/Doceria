@@ -78,7 +78,11 @@ Route::group(['middleware' => ['api', 'auth:api', 'role:admin']], function () {
     // Payments Dashboard (Admin)
     Route::post('payments/{id}/sync', [App\Http\Controllers\PaymentController::class, 'sync']);
     Route::get('payments', [App\Http\Controllers\PaymentController::class, 'index']);
+    Route::get('payments/{id}', [App\Http\Controllers\PaymentController::class, 'show']);
     Route::post('payments', [App\Http\Controllers\PaymentController::class, 'store']);
+    Route::post('payments/{id}', [App\Http\Controllers\PaymentController::class, 'update']);
+    Route::delete('payments/{id}', [App\Http\Controllers\PaymentController::class, 'destroy']);
+    Route::delete('payments/attachments/{id}', [App\Http\Controllers\PaymentController::class, 'destroyAttachment']);
 
     // Financial Module (Expenses)
     Route::apiResource('expenses', App\Http\Controllers\ExpenseController::class);

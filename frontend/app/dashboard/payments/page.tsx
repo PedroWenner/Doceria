@@ -16,6 +16,7 @@ export default function PaymentsPage() {
     const [payments, setPayments] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedPayment, setSelectedPayment] = useState<any | null>(null);
 
     // Pagination Meta
     const [meta, setMeta] = useState({ current_page: 1, last_page: 1, total: 0, per_page: 15 });
@@ -105,12 +106,24 @@ export default function PaymentsPage() {
                 onDateFromChange={(val) => setFilters(prev => ({ ...prev, date_from: val }))}
                 dateTo={filters.date_to}
                 onDateToChange={(val) => setFilters(prev => ({ ...prev, date_to: val }))}
-                onNewPayment={() => setIsModalOpen(true)}
+                onNewPayment={() => {
+                    setSelectedPayment(null);
+                    setIsModalOpen(true);
+                }}
             />
 
             {/* Table & Pagination */}
             <div className="space-y-4">
-                <PaymentTable payments={payments} isLoading={loading} token={token || undefined} onRefresh={() => fetchPayments(meta.current_page)} />
+                <PaymentTable
+                    payments={payments}
+                    isLoading={loading}
+                    token={token || undefined}
+                    onRefresh={() => fetchPayments(meta.current_page)}
+                    onEdit={(payment) => {
+                        setSelectedPayment(payment);
+                        setIsModalOpen(true);
+                    }}
+                />
 
                 {!loading && (
                     <Pagination
@@ -126,9 +139,13 @@ export default function PaymentsPage() {
             {/* Modal */}
             <NewPaymentModal
                 isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-                onSuccess={() => fetchPayments(1)}
+                onClose={() => {
+                    setIsModalOpen(false);
+                    setSelectedPayment(null);
+                }}
+                onSuccess={() => fetchPayments(meta.current_page)}
                 token={token}
+                payment={selectedPayment}
             />
         </div>
     );

@@ -18,7 +18,7 @@ class PaymentController extends Controller
      */
     public function index(Request $request)
     {
-        $query = \App\Models\Payment::with(['order.user']);
+        $query = \App\Models\Payment::with(['order.user', 'attachments']);
 
         // Search: External ID or Order ID
         if ($request->has('search') && !empty($request->search)) {
@@ -80,6 +80,20 @@ class PaymentController extends Controller
                 ]
             ]);
 
+            // Handle Attachments for new manual payments
+            if ($request->hasFile('documents')) {
+                foreach ($request->file('documents') as $file) {
+                    $path = $file->store('payment_attachments', 'public');
+                    
+                    $payment->attachments()->create([
+                        'file_path' => $path,
+                        'original_name' => $file->getClientOriginalName(),
+                        'mime_type' => $file->getClientMimeType(),
+                        'file_size' => $file->getSize(),
+                    ]);
+                }
+            }
+
             // Optional: Update Order if linked
             if ($payment->order_id && $payment->status === 'paid') {
                 $order = \App\Models\Order::find($payment->order_id);
@@ -94,6 +108,108 @@ class PaymentController extends Controller
             return $this->error($e->getMessage(), 500);
         }
     }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show($id)
+    {
+        $payment = \App\Models\Payment::with(['order', 'attachments'])->findOrFail($id);
+        return $this->success($payment);
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, $id)
+    {
+        $payment = \App\Models\Payment::findOrFail($id);
+
+        // RESTRICTION: If linked to an Order, deny core updates
+        if ($payment->order_id) {
+            if ($request->hasAny(['amount', 'method', 'status'])) {
+                 // For now, we just ignore or return error. Let's return error to be explicit.
+                 // Actually, the user asked to "edit only when manually registered".
+                 // So we should strictly forbid it.
+                 return $this->error('Pagamentos vinculados a pedidos não podem ter seus dados principais editados.', 403);
+            }
+        }
+
+        $validated = $request->validate([
+            'amount' => 'sometimes|numeric|min:0.01',
+            'method' => 'sometimes|string',
+            'status' => 'sometimes|in:paid,pending,failed',
+            'notes' => 'nullable|string'
+        ]);
+
+        try {
+            // Update Core Fields (only if allowed)
+            $payment->update($request->only(['amount', 'method', 'status', 'notes'])); // Filter inside update if needed, but we validated above.
+            
+            // Handle Metadata/Notes update specifically if it's inside metadata in DB but we decided to use 'notes' in schema? 
+            // The schema has 'metadata' json column. The store method put notes inside metadata.
+            // Let's keep consistency.
+            if ($request->has('notes')) {
+                $meta = $payment->metadata ?? [];
+                $meta['notes'] = $request->notes;
+                $payment->metadata = $meta;
+                $payment->save();
+            }
+
+            $fileCount = 0;
+            if ($request->hasFile('documents')) {
+                foreach ($request->file('documents') as $file) {
+                    $path = $file->store('payment_attachments', 'public');
+                    
+                    $payment->attachments()->create([
+                        'file_path' => $path,
+                        'original_name' => $file->getClientOriginalName(),
+                        'mime_type' => $file->getClientMimeType(),
+                        'file_size' => $file->getSize(),
+                    ]);
+                    $fileCount++;
+                }
+            }
+
+            return $this->success($payment->load('attachments'), "Pagamento atualizado. Arquivos processados: {$fileCount}");
+
+        } catch (Exception $e) {
+            return $this->error($e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy($id)
+    {
+        $payment = \App\Models\Payment::findOrFail($id);
+        
+        // Optional: Restrict deletion of automated payments?
+        // User didn't explicitly ask, but it's good practice.
+        if ($payment->order_id) {
+             return $this->error('Não é possível excluir pagamentos vinculados a pedidos.', 403);
+        }
+
+        $payment->delete();
+        return $this->success(null, 'Pagamento excluído com sucesso.');
+    }
+
+    /**
+     * Remove an attachment.
+     */
+    public function destroyAttachment($id)
+    {
+        try {
+            $attachment = \App\Models\PaymentAttachment::findOrFail($id);
+            // Storage::disk('public')->delete($attachment->file_path); // Optionally delete file
+            $attachment->delete();
+            return $this->success(null, 'Anexo removido.');
+        } catch (Exception $e) {
+            return $this->error($e->getMessage(), 500);
+        }
+    }
+
     /**
      * Process payment for an order (Customer Checkout).
      */

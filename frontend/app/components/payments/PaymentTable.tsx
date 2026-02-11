@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useLanguage } from '@/app/context/LanguageContext';
 import { displayCurrency } from '@/app/utils/formatters';
-import { Check, X, Clock, AlertCircle, CreditCard, Banknote, MoreHorizontal, Search, RefreshCw } from 'lucide-react';
+import { Check, X, Clock, CreditCard, Banknote, Search, RefreshCw, Edit } from 'lucide-react';
 import LoadingSpinner from '@/app/components/LoadingSpinner';
 import { toast } from 'react-hot-toast';
 
@@ -23,9 +23,10 @@ interface Props {
   isLoading: boolean;
   token?: string;
   onRefresh?: () => void;
+  onEdit?: (payment: Payment) => void;
 }
 
-export default function PaymentTable({ payments, isLoading, token, onRefresh }: Props) {
+export default function PaymentTable({ payments, isLoading, token, onRefresh, onEdit }: Props) {
   const { t } = useLanguage();
   const [syncingId, setSyncingId] = useState<number | null>(null);
 
@@ -155,6 +156,13 @@ export default function PaymentTable({ payments, isLoading, token, onRefresh }: 
                   {getStatusBadge(payment.status)}
                 </td>
                 <td className="px-6 py-4 text-right flex justify-end gap-2">
+                  <button
+                    onClick={(e) => { e.stopPropagation(); if (onEdit) onEdit(payment); }}
+                    className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-brand-primary transition-colors"
+                    title={t('common.edit')}
+                  >
+                    <Edit size={16} />
+                  </button>
                   <button
                     onClick={(e) => { e.stopPropagation(); handleSync(payment.id); }}
                     disabled={(syncingId === payment.id || !token || payment.status === 'paid')}

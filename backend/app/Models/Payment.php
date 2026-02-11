@@ -28,4 +28,9 @@ class Payment extends Model
     {
         return $this->belongsTo(Order::class);
     }
+
+    public function attachments()
+    {
+        return $this->hasMany(PaymentAttachment::class);
+    }
 }

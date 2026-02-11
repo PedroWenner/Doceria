@@ -310,6 +310,7 @@ export const translations = {
             },
             modal: {
                 title: 'Novo Pagamento',
+                edit_title: 'Editar Pagamento',
                 amount: 'Valor',
                 method: 'Método',
                 date: 'Data',
@@ -784,6 +785,7 @@ export const translations = {
             },
             modal: {
                 title: 'New Payment',
+                edit_title: 'Edit Payment',
                 amount: 'Amount',
                 method: 'Method',
                 date: 'Date',
