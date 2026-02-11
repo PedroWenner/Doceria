@@ -78,13 +78,13 @@ export default function ProductsReportView() {
             {/* Filters Bar */}
             <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col md:flex-row gap-4 items-end">
                 <div className="w-full md:w-1/4">
-                    <label className="block text-xs font-medium text-slate-500 mb-1">Category</label>
+                    <label className="block text-xs font-medium text-slate-500 mb-1">{t('reports.filters.category')}</label>
                     <select
                         value={filters.category_id}
                         onChange={(e) => handleFilterChange('category_id', e.target.value)}
                         className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border-none rounded-lg text-sm focus:ring-2 focus:ring-brand-primary/20"
                     >
-                        <option value="">All Categories</option>
+                        <option value="">{t('reports.placeholders.select_category')}</option>
                         {categories.map(cat => (
                             <option key={cat.id} value={cat.id}>{cat.name}</option>
                         ))}
@@ -92,22 +92,22 @@ export default function ProductsReportView() {
                 </div>
 
                 <div className="w-full md:w-1/4">
-                    <label className="block text-xs font-medium text-slate-500 mb-1">Stock Status</label>
+                    <label className="block text-xs font-medium text-slate-500 mb-1">{t('reports.filters.stock_status')}</label>
                     <select
                         value={filters.stock_status}
                         onChange={(e) => handleFilterChange('stock_status', e.target.value)}
                         className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border-none rounded-lg text-sm focus:ring-2 focus:ring-brand-primary/20"
                     >
-                        <option value="">All Statuses</option>
-                        <option value="in_stock">In Stock</option>
-                        <option value="low_stock">Low Stock</option>
-                        <option value="out_of_stock">Out of Stock</option>
+                        <option value="">{t('reports.placeholders.select_status')}</option>
+                        <option value="in_stock">{t('reports.placeholders.in_stock')}</option>
+                        <option value="low_stock">{t('reports.placeholders.low_stock')}</option>
+                        <option value="out_of_stock">{t('reports.placeholders.out_of_stock')}</option>
                     </select>
                 </div>
 
                 <div className="w-full md:w-1/4 flex gap-2">
                     <div className="flex-1">
-                        <label className="block text-xs font-medium text-slate-500 mb-1">Min Price</label>
+                        <label className="block text-xs font-medium text-slate-500 mb-1">{t('reports.filters.min_price')}</label>
                         <input
                             type="number"
                             placeholder="0.00"
@@ -117,7 +117,7 @@ export default function ProductsReportView() {
                         />
                     </div>
                     <div className="flex-1">
-                        <label className="block text-xs font-medium text-slate-500 mb-1">Max Price</label>
+                        <label className="block text-xs font-medium text-slate-500 mb-1">{t('reports.filters.max_price')}</label>
                         <input
                             type="number"
                             placeholder="0.00"
@@ -135,7 +135,7 @@ export default function ProductsReportView() {
                             className="px-4 py-2 text-sm font-medium text-rose-500 bg-rose-50 dark:bg-rose-900/20 rounded-lg hover:bg-rose-100 dark:hover:bg-rose-900/40 transition-colors flex items-center gap-2"
                         >
                             <X size={16} />
-                            Clear
+                            {t('reports.filters.clear')}
                         </button>
                     )}
                 </div>
@@ -154,7 +154,7 @@ export default function ProductsReportView() {
                                 <Package size={24} />
                             </div>
                             <div>
-                                <p className="text-sm text-slate-500 dark:text-slate-400">Total Products</p>
+                                <p className="text-sm text-slate-500 dark:text-slate-400">{t('reports.metrics.total_products')}</p>
                                 <p className="text-xl font-bold text-slate-800 dark:text-slate-100">{data.metrics.total_products}</p>
                             </div>
                         </div>
@@ -164,7 +164,7 @@ export default function ProductsReportView() {
                                 <DollarSign size={24} />
                             </div>
                             <div>
-                                <p className="text-sm text-slate-500 dark:text-slate-400">Inventory Value</p>
+                                <p className="text-sm text-slate-500 dark:text-slate-400">{t('reports.metrics.inventory_value')}</p>
                                 <p className="text-xl font-bold text-slate-800 dark:text-slate-100">{displayCurrency(data.metrics.total_inventory_value)}</p>
                             </div>
                         </div>
@@ -174,7 +174,7 @@ export default function ProductsReportView() {
                                 <AlertTriangle size={24} />
                             </div>
                             <div>
-                                <p className="text-sm text-slate-500 dark:text-slate-400">Low Stock</p>
+                                <p className="text-sm text-slate-500 dark:text-slate-400">{t('reports.metrics.low_stock')}</p>
                                 <p className="text-xl font-bold text-slate-800 dark:text-slate-100">{data.metrics.low_stock_count}</p>
                             </div>
                         </div>
@@ -184,7 +184,7 @@ export default function ProductsReportView() {
                                 <Archive size={24} />
                             </div>
                             <div>
-                                <p className="text-sm text-slate-500 dark:text-slate-400">Out of Stock</p>
+                                <p className="text-sm text-slate-500 dark:text-slate-400">{t('reports.metrics.out_of_stock')}</p>
                                 <p className="text-xl font-bold text-slate-800 dark:text-slate-100">{data.metrics.out_of_stock_count}</p>
                             </div>
                         </div>
@@ -193,17 +193,17 @@ export default function ProductsReportView() {
                     {/* Data Table */}
                     <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden">
                         <div className="p-6 border-b border-slate-100 dark:border-slate-800">
-                            <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">Products List</h3>
+                            <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">{t('reports.tabs.products')} {t('reports.list')}</h3>
                         </div>
                         <div className="overflow-x-auto">
                             <table className="w-full">
                                 <thead className="bg-slate-50 dark:bg-slate-800/50">
                                     <tr>
-                                        <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Product</th>
-                                        <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Category</th>
-                                        <th className="px-6 py-3 text-right text-xs font-semibold text-slate-500 uppercase tracking-wider">Price</th>
-                                        <th className="px-6 py-3 text-center text-xs font-semibold text-slate-500 uppercase tracking-wider">Stock</th>
-                                        <th className="px-6 py-3 text-center text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</th>
+                                        <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">{t('reports.table.product')}</th>
+                                        <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">{t('reports.table.category')}</th>
+                                        <th className="px-6 py-3 text-right text-xs font-semibold text-slate-500 uppercase tracking-wider">{t('reports.table.price')}</th>
+                                        <th className="px-6 py-3 text-center text-xs font-semibold text-slate-500 uppercase tracking-wider">{t('reports.table.stock')}</th>
+                                        <th className="px-6 py-3 text-center text-xs font-semibold text-slate-500 uppercase tracking-wider">{t('reports.table.status')}</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -256,7 +256,7 @@ export default function ProductsReportView() {
                                     ) : (
                                         <tr>
                                             <td colSpan={5} className="px-6 py-12 text-center text-slate-500 dark:text-slate-400">
-                                                No products found matching filters.
+                                                {t('products.no_found_matches')}
                                             </td>
                                         </tr>
                                     )}

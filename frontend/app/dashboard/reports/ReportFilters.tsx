@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
+import { useLanguage } from '@/app/context/LanguageContext';
 import { Filter, X } from 'lucide-react';
 
 interface Props {
@@ -14,6 +15,7 @@ interface Props {
 }
 
 export default function ReportFilters({ filters, onFilterChange, onClear }: Props) {
+    const { t } = useLanguage();
     const [categories, setCategories] = useState<any[]>([]);
     const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
 
@@ -50,28 +52,28 @@ export default function ReportFilters({ filters, onFilterChange, onClear }: Prop
 
             {/* Type Filter */}
             <div className="w-full md:w-1/4">
-                <label className="block text-xs font-medium text-slate-500 mb-1">Type</label>
+                <label className="block text-xs font-medium text-slate-500 mb-1">{t('reports.filters.type')}</label>
                 <select
                     value={filters.type}
                     onChange={(e) => onFilterChange('type', e.target.value)}
                     className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border-none rounded-lg text-sm focus:ring-2 focus:ring-brand-primary/20"
                 >
-                    <option value="">All Transactions</option>
-                    <option value="income">Income (Receitas)</option>
-                    <option value="expense">Expenses (Despesas)</option>
+                    <option value="">{t('reports.filters.all_types')}</option>
+                    <option value="income">{t('reports.types.income')}</option>
+                    <option value="expense">{t('reports.types.expense')}</option>
                 </select>
             </div>
 
             {/* Category Filter */}
             <div className="w-full md:w-1/4">
-                <label className="block text-xs font-medium text-slate-500 mb-1">Category</label>
+                <label className="block text-xs font-medium text-slate-500 mb-1">{t('reports.filters.category')}</label>
                 <select
                     value={filters.category_id}
                     onChange={(e) => onFilterChange('category_id', e.target.value)}
                     disabled={filters.type === 'income'} // Incomes don't have categories yet
                     className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border-none rounded-lg text-sm focus:ring-2 focus:ring-brand-primary/20 disabled:opacity-50"
                 >
-                    <option value="">All Categories</option>
+                    <option value="">{t('reports.filters.all_categories')}</option>
                     {categories.map((cat) => (
                         <option key={cat.id} value={cat.id}>
                             {cat.name}
@@ -82,13 +84,13 @@ export default function ReportFilters({ filters, onFilterChange, onClear }: Prop
 
             {/* Payment Method Filter */}
             <div className="w-full md:w-1/4">
-                <label className="block text-xs font-medium text-slate-500 mb-1">Payment Method</label>
+                <label className="block text-xs font-medium text-slate-500 mb-1">{t('reports.filters.payment_method')}</label>
                 <select
                     value={filters.payment_method_id}
                     onChange={(e) => onFilterChange('payment_method_id', e.target.value)}
                     className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border-none rounded-lg text-sm focus:ring-2 focus:ring-brand-primary/20"
                 >
-                    <option value="">All Methods</option>
+                    <option value="">{t('reports.filters.all_methods')}</option>
                     {paymentMethods.map((pm) => (
                         <option key={pm.id} value={pm.id}>
                             {pm.name}
@@ -105,7 +107,7 @@ export default function ReportFilters({ filters, onFilterChange, onClear }: Prop
                         className="px-4 py-2 text-sm font-medium text-rose-500 bg-rose-50 dark:bg-rose-900/20 rounded-lg hover:bg-rose-100 dark:hover:bg-rose-900/40 transition-colors flex items-center gap-2"
                     >
                         <X size={16} />
-                        Clear
+                        {t('reports.filters.clear')}
                     </button>
                 )}
             </div>

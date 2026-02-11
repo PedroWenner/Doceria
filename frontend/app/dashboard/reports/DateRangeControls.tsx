@@ -31,7 +31,7 @@ export default function DateRangeControls({
                 {/* Primary Date Range */}
                 <div className="flex items-center gap-2">
                     <Calendar size={18} className="text-slate-400" />
-                    <span className="text-sm font-medium text-slate-600 dark:text-slate-300">Period:</span>
+                    <span className="text-sm font-medium text-slate-600 dark:text-slate-300">{t('reports.filters.date_range')}:</span>
                     <div className="w-auto">
                         <ProDatePicker
                             value={startDate}
@@ -49,7 +49,7 @@ export default function DateRangeControls({
 
                 {/* Comparison Date Range */}
                 <div className="flex items-center gap-2 border-l border-slate-200 dark:border-slate-700 pl-4">
-                    <span className="text-sm font-medium text-slate-500 dark:text-slate-400">Compare:</span>
+                    <span className="text-sm font-medium text-slate-500 dark:text-slate-400">{t('reports.filters.compare_to')}:</span>
                     <div className="w-auto">
                         <ProDatePicker
                             value={compareStartDate}
@@ -69,7 +69,7 @@ export default function DateRangeControls({
             <button
                 onClick={onRefresh}
                 className="p-2.5 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 rounded-lg hover:bg-slate-800 dark:hover:bg-slate-200 transition-colors shadow-sm"
-                title="Refresh Data"
+                title={t('reports.actions.refresh')}
             >
                 <RefreshCcw size={18} />
             </button>

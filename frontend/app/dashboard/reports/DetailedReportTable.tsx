@@ -24,13 +24,13 @@ export default function DetailedReportTable({ data, isLoading }: Props) {
     const { t } = useLanguage();
 
     if (isLoading) {
-        return <div className="p-8 text-center text-slate-500">Loading transactions...</div>;
+        return <div className="p-8 text-center text-slate-500">{t('common.loading')}</div>;
     }
 
     if (!data || data.length === 0) {
         return (
             <div className="p-8 text-center bg-white dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800">
-                <p className="text-slate-500">No transactions found for this period.</p>
+                <p className="text-slate-500">{t('reports.placeholders.no_data') || 'No transactions found.'}</p>
             </div>
         );
     }
@@ -64,14 +64,14 @@ export default function DetailedReportTable({ data, isLoading }: Props) {
         <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden">
             <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
                 <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">
-                    Detailed Transactions or "Extrato"
+                    {t('reports.transactions')}
                 </h3>
                 <button
                     onClick={downloadCSV}
                     className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
                 >
                     <Download size={16} />
-                    Export CSV
+                    {t('reports.actions.export_csv')}
                 </button>
             </div>
 
@@ -79,11 +79,11 @@ export default function DetailedReportTable({ data, isLoading }: Props) {
                 <table className="w-full text-left text-sm">
                     <thead className="bg-slate-50 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 font-medium">
                         <tr>
-                            <th className="px-6 py-4">Date</th>
-                            <th className="px-6 py-4">Description</th>
-                            <th className="px-6 py-4">Category</th>
-                            <th className="px-6 py-4">Method</th>
-                            <th className="px-6 py-4 text-right">Amount</th>
+                            <th className="px-6 py-4">{t('reports.table.date')}</th>
+                            <th className="px-6 py-4">{t('reports.table.description')}</th>
+                            <th className="px-6 py-4">{t('reports.table.category')}</th>
+                            <th className="px-6 py-4">{t('reports.table.method')}</th>
+                            <th className="px-6 py-4 text-right">{t('reports.table.amount')}</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-slate-600 dark:text-slate-300">

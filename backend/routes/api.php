@@ -53,6 +53,7 @@ Route::group(['middleware' => ['api', 'auth:api', 'role:admin']], function () {
 
     // Orders (Kanban) - Allow Admin and Manager
     Route::group(['middleware' => ['role:admin,manager']], function () {
+        Route::get('orders/report', [App\Http\Controllers\OrderController::class, 'report']);
         Route::get('orders', [App\Http\Controllers\OrderController::class, 'index']);
         Route::put('orders/{order}/status', [App\Http\Controllers\OrderController::class, 'updateStatus']);
     });

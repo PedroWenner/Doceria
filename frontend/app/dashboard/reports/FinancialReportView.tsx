@@ -135,7 +135,7 @@ export default function FinancialReportView() {
                                 }
                             `}
                         >
-                            {view}
+                            {t(`reports.filters.${view}`)}
                         </button>
                     ))}
                 </div>
@@ -165,14 +165,14 @@ export default function FinancialReportView() {
                 <>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <ComparisonSummary
-                            title="Total Revenue"
+                            title={t('reports.metrics.total_revenue')}
                             primaryValue={Number(data.primary.totals.revenue)}
                             comparisonValue={Number(data.comparison?.totals.revenue || 0)}
                             icon={<TrendingUp size={24} />}
                             colorClass="text-emerald-600 dark:text-emerald-400"
                         />
                         <ComparisonSummary
-                            title="Total Expenses"
+                            title={t('reports.metrics.total_expenses')}
                             primaryValue={Number(data.primary.totals.expenses)}
                             comparisonValue={Number(data.comparison?.totals.expenses || 0)}
                             icon={<TrendingDown size={24} />}
@@ -180,7 +180,7 @@ export default function FinancialReportView() {
                             invertTrend
                         />
                         <ComparisonSummary
-                            title="Net Profit"
+                            title={t('reports.metrics.net_profit')}
                             primaryValue={Number(data.primary.totals.profit)}
                             comparisonValue={Number(data.comparison?.totals.profit || 0)}
                             icon={<DollarSign size={24} />}
@@ -190,7 +190,7 @@ export default function FinancialReportView() {
 
                     <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
                         <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-6 capitalize">
-                            Revenue Comparison ({groupBy})
+                            {t('reports.chart.revenue_comparison')} ({t(`reports.filters.${groupBy}`)})
                         </h3>
                         <RevenueComparisonChart
                             primaryData={data.primary.chart_data}
@@ -205,14 +205,14 @@ export default function FinancialReportView() {
                                 className={`pb-3 px-2 text-sm font-medium flex items-center gap-2 transition-colors border-b-2 ${activeTab === 'insights' ? 'border-brand-primary text-brand-primary' : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'}`}
                             >
                                 <PieChart size={18} />
-                                Insights & Widgets
+                                {t('reports.insights')}
                             </button>
                             <button
                                 onClick={() => setActiveTab('transactions')}
                                 className={`pb-3 px-2 text-sm font-medium flex items-center gap-2 transition-colors border-b-2 ${activeTab === 'transactions' ? 'border-brand-primary text-brand-primary' : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'}`}
                             >
                                 <List size={18} />
-                                Detailed Transactions
+                                {t('reports.transactions')}
                             </button>
                         </div>
 

@@ -171,4 +171,57 @@ class OrderController extends Controller
         
         return $this->success($order->load(['items.product', 'latestPayment']));
     }
+
+    /**
+     * Get order report data.
+     */
+    public function report(Request $request)
+    {
+        // Start Query
+        $query = Order::query();
+
+        // Filters
+        // 1. Date Range (Created At)
+        if ($request->has('start_date') && $request->start_date) {
+            $query->whereDate('created_at', '>=', $request->start_date);
+        }
+        if ($request->has('end_date') && $request->end_date) {
+            $query->whereDate('created_at', '<=', $request->end_date);
+        }
+
+        // 2. Status
+        if ($request->has('status') && $request->status) {
+            $query->where('status', $request->status);
+        }
+
+        // 3. Payment Status
+        if ($request->has('payment_status') && $request->payment_status) {
+            $query->where('payment_status', $request->payment_status);
+        }
+
+        // 4. Delivery Type
+        if ($request->has('delivery_type') && $request->delivery_type) {
+            $query->where('delivery_type', $request->delivery_type);
+        }
+
+        $orders = $query->with(['user', 'items'])->latest()->get();
+
+        // Metrics Calculation
+        $totalOrders = $orders->count();
+        $totalRevenue = $orders->where('payment_status', 'paid')->sum('total_amount');
+        $averageTicket = $totalOrders > 0 ? $orders->sum('total_amount') / $totalOrders : 0;
+        
+        // Grouping for Charts (e.g., Status Distribution)
+        $ordersByStatus = $orders->groupBy('status')->map->count();
+
+        return $this->success([
+            'metrics' => [
+                'total_orders' => $totalOrders,
+                'total_revenue' => $totalRevenue,
+                'average_ticket' => $averageTicket,
+                'orders_by_status' => $ordersByStatus
+            ],
+            'orders' => $orders
+        ]);
+    }
 }

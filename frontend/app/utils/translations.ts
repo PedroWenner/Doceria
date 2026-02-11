@@ -129,7 +129,8 @@ export const translations = {
             discounts_section: 'Descontos por Pagamento',
             add_rule: 'Adicionar Regra',
             no_discounts: 'Nenhum desconto configurado.',
-            select_method: 'Selecione o Meio...'
+            select_method: 'Selecione o Meio...',
+            no_found_matches: 'Nenhum produto encontrado com os filtros.'
         },
         audit: {
             title: 'Logs de Auditoria',
@@ -192,7 +193,8 @@ export const translations = {
                 refunded: 'Estornado'
             },
             next_update: 'Próxima atualização',
-            force_refresh: 'Clique para forçar'
+            force_refresh: 'Clique para forçar',
+            no_found_matches: 'Nenhum pedido encontrado com os filtros.'
         },
         settings: {
             title: 'Parâmetros do Sistema',
@@ -382,6 +384,93 @@ export const translations = {
             low_stock: 'Alerta de Estoque',
             stock_ok: 'Estoque saudável!',
             no_data: 'Sem dados',
+        },
+        reports: {
+            title: 'Central de Relatórios',
+            subtitle: 'Selecione o tipo de relatório que deseja visualizar.',
+            tabs: {
+                financial: 'Financeiro',
+                products: 'Produtos',
+                orders: 'Pedidos',
+                customers: 'Clientes'
+            },
+
+            metrics: {
+                total_revenue: 'Receita Total',
+                total_expenses: 'Despesas Totais',
+                net_profit: 'Lucro Líquido',
+                total_products: 'Total de Produtos',
+                inventory_value: 'Valor do Inventário',
+                low_stock: 'Baixo Estoque',
+                out_of_stock: 'Esgotado',
+                total_orders: 'Total de Pedidos',
+                average_ticket: 'Ticket Médio',
+                delivered_orders: 'Entregues'
+            },
+
+            placeholders: {
+                select_category: 'Todas Categorias',
+                select_status: 'Todos Status',
+                select_payment: 'Todos Pagamentos',
+                select_delivery: 'Todas Entregas',
+                in_stock: 'Em Estoque',
+                out_of_stock: 'Sem Estoque',
+                low_stock: 'Baixo Estoque'
+            },
+            chart: {
+                revenue_comparison: 'Comparativo de Receita'
+            },
+            insights: 'Insights & Widgets',
+            transactions: 'Transações Detalhadas',
+            list: 'Lista',
+            actions: {
+                refresh: 'Atualizar',
+                export_csv: 'Exportar CSV'
+            },
+            types: {
+                income: 'Receitas',
+                expense: 'Despesas',
+                all: 'Todas Transações'
+            },
+            filters: {
+                date_range: 'Período',
+                start_date: 'Data Inicial',
+                end_date: 'Data Final',
+                compare_to: 'Comparar com',
+                status: 'Status',
+                type: 'Tipo',
+                category: 'Categoria',
+                payment_method: 'Meio de Pagamento',
+                min_price: 'Preço Mínimo',
+                max_price: 'Preço Máximo',
+                delivery_type: 'Tipo de Entrega',
+                clear: 'Limpar Filtros',
+                apply: 'Aplicar',
+                group_by: 'Agrupar por',
+                day: 'Dia',
+                month: 'Mês',
+                year: 'Ano',
+                stock_status: 'Status de Estoque',
+                all_types: 'Todos Tipos',
+                all_categories: 'Todas Categorias',
+                all_methods: 'Todos Métodos'
+            },
+            table: {
+                product: 'Produto',
+                category: 'Categoria',
+                price: 'Preço',
+                stock: 'Estoque',
+                status: 'Status',
+                order_id: 'ID',
+                customer: 'Cliente',
+                items: 'Itens',
+                total: 'Total',
+                date: 'Data',
+                payment: 'Pagamento',
+                description: 'Descrição',
+                method: 'Método',
+                amount: 'Valor'
+            }
         }
     },
     en: {
@@ -511,7 +600,8 @@ export const translations = {
             discounts_section: 'Payment Discounts',
             add_rule: 'Add Rule',
             no_discounts: 'No discounts configured.',
-            select_method: 'Select Method...'
+            select_method: 'Select Method...',
+            no_found_matches: 'No products found matching filters.'
         },
         audit: {
             title: 'Audit Logs',
@@ -574,7 +664,8 @@ export const translations = {
                 refunded: 'Refunded'
             },
             next_update: 'Next update',
-            force_refresh: 'Click to force'
+            force_refresh: 'Click to force',
+            no_found_matches: 'No orders found matching filters.'
         },
         settings: {
             title: 'System Settings',
@@ -765,6 +856,88 @@ export const translations = {
             },
             save_success: 'Saved successfully!',
             delete_success: 'Removed successfully!'
+        },
+        reports: {
+            title: 'Report Center',
+            subtitle: 'Select the report type you want to view.',
+            tabs: {
+                financial: 'Financial',
+                products: 'Products',
+                orders: 'Orders',
+                customers: 'Customers'
+            },
+            filters: {
+                date_range: 'Date Range',
+                start_date: 'Start Date',
+                end_date: 'End Date',
+                compare_to: 'Compare to',
+                status: 'Status',
+                category: 'Category',
+                payment_method: 'Payment Method',
+                min_price: 'Min Price',
+                max_price: 'Max Price',
+                delivery_type: 'Delivery Type',
+                clear: 'Clear',
+                apply: 'Apply',
+                group_by: 'Group by',
+                day: 'Day',
+                month: 'Month',
+                year: 'Year',
+                stock_status: 'Stock Status',
+                all_types: 'All Types',
+                all_categories: 'All Categories',
+                all_methods: 'All Methods',
+                type: 'Type',
+            },
+            metrics: {
+                total_revenue: 'Total Revenue',
+                total_expenses: 'Total Expenses',
+                net_profit: 'Net Profit',
+                total_products: 'Total Products',
+                inventory_value: 'Inventory Value',
+                low_stock: 'Low Stock',
+                out_of_stock: 'Out of Stock',
+                total_orders: 'Total Orders',
+                average_ticket: 'Average Ticket',
+                delivered_orders: 'Delivered'
+            },
+            table: {
+                product: 'Product',
+                category: 'Category',
+                price: 'Price',
+                stock: 'Stock',
+                status: 'Status',
+                order_id: 'ID',
+                customer: 'Customer',
+                items: 'Items',
+                total: 'Total',
+                date: 'Date',
+                payment: 'Payment'
+            },
+            placeholders: {
+                select_category: 'All Categories',
+                select_status: 'All Statuses',
+                select_payment: 'All Payments',
+                select_delivery: 'All Delivery Types',
+                in_stock: 'In Stock',
+                out_of_stock: 'Out of Stock',
+                low_stock: 'Low Stock'
+            },
+            chart: {
+                revenue_comparison: 'Revenue Comparison'
+            },
+            insights: 'Insights & Widgets',
+            transactions: 'Detailed Transactions',
+            list: 'List',
+            actions: {
+                refresh: 'Refresh Data',
+                export_csv: 'Export CSV'
+            },
+            types: {
+                income: 'Income',
+                expense: 'Expenses',
+                all: 'All Transactions'
+            }
         }
     }
 };

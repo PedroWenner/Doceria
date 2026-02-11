@@ -5,6 +5,7 @@ import { useLanguage } from '@/app/context/LanguageContext';
 import { LayoutDashboard, Package, ShoppingBag, Users } from 'lucide-react';
 import FinancialReportView from './FinancialReportView';
 import ProductsReportView from './ProductsReportView';
+import OrdersReportView from './OrdersReportView';
 
 type ReportType = 'financial' | 'products' | 'orders' | 'customers';
 
@@ -13,10 +14,10 @@ export default function ReportsPage() {
     const [selectedReport, setSelectedReport] = useState<ReportType>('financial');
 
     const reportTypes = [
-        { id: 'financial', label: 'Financeiro', icon: <LayoutDashboard size={18} /> },
-        { id: 'products', label: 'Produtos', icon: <Package size={18} /> },
-        { id: 'orders', label: 'Pedidos', icon: <ShoppingBag size={18} /> },
-        { id: 'customers', label: 'Clientes', icon: <Users size={18} /> },
+        { id: 'financial', label: t('reports.tabs.financial'), icon: <LayoutDashboard size={18} /> },
+        { id: 'products', label: t('reports.tabs.products'), icon: <Package size={18} /> },
+        { id: 'orders', label: t('reports.tabs.orders'), icon: <ShoppingBag size={18} /> },
+        { id: 'customers', label: t('reports.tabs.customers'), icon: <Users size={18} /> },
     ];
 
     return (
@@ -25,10 +26,10 @@ export default function ReportsPage() {
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
                     <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100">
-                        Central de Relatórios
+                        {t('reports.title')}
                     </h2>
                     <p className="text-slate-500 dark:text-slate-400">
-                        Selecione o tipo de relatório que deseja visualizar.
+                        {t('reports.subtitle')}
                     </p>
                 </div>
             </div>
@@ -57,19 +58,14 @@ export default function ReportsPage() {
             <div className="min-h-[500px]">
                 {selectedReport === 'financial' && <FinancialReportView />}
                 {selectedReport === 'products' && <ProductsReportView />}
-
-                {selectedReport === 'orders' && (
-                    <div className="p-12 text-center text-slate-400 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700">
-                        <ShoppingBag size={48} className="mx-auto mb-4 opacity-50" />
-                        <h3 className="text-lg font-medium text-slate-600 dark:text-slate-300">Relatório de Pedidos</h3>
-                        <p>Em breve: Histórico detalhado, status e performance de entrega.</p>
-                    </div>
-                )}
+                {selectedReport === 'orders' && <OrdersReportView />}
 
                 {selectedReport === 'customers' && (
                     <div className="p-12 text-center text-slate-400 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700">
                         <Users size={48} className="mx-auto mb-4 opacity-50" />
-                        <h3 className="text-lg font-medium text-slate-600 dark:text-slate-300">Relatório de Clientes</h3>
+                        <h3 className="text-lg font-medium text-slate-600 dark:text-slate-300">
+                            {t('reports.tabs.customers')}
+                        </h3>
                         <p>Em breve: Melhores clientes e frequência de compra.</p>
                     </div>
                 )}
