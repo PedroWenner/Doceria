@@ -58,6 +58,7 @@ Route::group(['middleware' => ['api', 'auth:api', 'role:admin']], function () {
     });
     
     // Admin Product Management (Write)
+    Route::get('products/report', [App\Http\Controllers\ProductController::class, 'report']);
     Route::post('/categories', [App\Http\Controllers\CategoryController::class, 'store']);
     Route::put('/categories/{category}', [App\Http\Controllers\CategoryController::class, 'update']);
     Route::delete('/categories/{category}', [App\Http\Controllers\CategoryController::class, 'destroy']);

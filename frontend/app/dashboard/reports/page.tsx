@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useLanguage } from '@/app/context/LanguageContext';
 import { LayoutDashboard, Package, ShoppingBag, Users } from 'lucide-react';
 import FinancialReportView from './FinancialReportView';
+import ProductsReportView from './ProductsReportView';
 
 type ReportType = 'financial' | 'products' | 'orders' | 'customers';
 
@@ -55,14 +56,7 @@ export default function ReportsPage() {
             {/* Report Content */}
             <div className="min-h-[500px]">
                 {selectedReport === 'financial' && <FinancialReportView />}
-
-                {selectedReport === 'products' && (
-                    <div className="p-12 text-center text-slate-400 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700">
-                        <Package size={48} className="mx-auto mb-4 opacity-50" />
-                        <h3 className="text-lg font-medium text-slate-600 dark:text-slate-300">Relatório de Produtos</h3>
-                        <p>Em breve: Análise de estoque, produtos mais vendidos e margem.</p>
-                    </div>
-                )}
+                {selectedReport === 'products' && <ProductsReportView />}
 
                 {selectedReport === 'orders' && (
                     <div className="p-12 text-center text-slate-400 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700">
