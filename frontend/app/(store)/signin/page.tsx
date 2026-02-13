@@ -99,6 +99,29 @@ export default function SigninPage() {
                         />
                     </div>
 
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center">
+                            <input
+                                id="remember-me"
+                                name="remember-me"
+                                type="checkbox"
+                                className="h-4 w-4 rounded border-[var(--store-border)] text-[var(--store-primary)] focus:ring-[var(--brand-gold)] bg-[var(--store-bg)]"
+                            />
+                            <label htmlFor="remember-me" className="ml-2 block text-sm text-[var(--store-text)]">
+                                Lembrar-me
+                            </label>
+                        </div>
+
+                        <div className="text-sm">
+                            <Link
+                                href="/auth/forgot-password"
+                                className="font-medium text-[var(--brand-gold)] hover:text-[var(--brand-choco)] transition-colors"
+                            >
+                                Esqueceu sua senha?
+                            </Link>
+                        </div>
+                    </div>
+
                     <button
                         type="submit"
                         disabled={isLoading}

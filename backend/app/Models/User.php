@@ -87,4 +87,9 @@ class User extends Authenticatable implements JWTSubject, Auditable
     {
         return $this->roles->flatMap->permissions->pluck('slug')->contains($permission);
     }
+
+    public function sendPasswordResetNotification($token)
+    {
+        $this->notify(new \App\Notifications\ResetPasswordNotification($token));
+    }
 }

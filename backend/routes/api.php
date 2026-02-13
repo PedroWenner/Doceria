@@ -26,6 +26,9 @@ Route::group([
     Route::post('me', [App\Http\Controllers\AuthController::class, 'me']);
 });
 
+Route::post('forgot-password', [App\Http\Controllers\Auth\NewPasswordController::class, 'forgotPassword']);
+Route::post('reset-password', [App\Http\Controllers\Auth\NewPasswordController::class, 'resetPassword']);
+
 // Fallback for Auth Middleware Redirects
 Route::get('login', function() { 
     return response()->json(['message' => 'Unauthenticated.'], 401); 
