@@ -7,7 +7,7 @@ export declare class TenantsService {
     constructor(tenantRepository: Repository<Tenant>);
     create(createTenantDto: CreateTenantDto): Promise<Tenant>;
     findAll(): Promise<Tenant[]>;
-    findOne(id: string): Promise<Tenant | null>;
+    findOne(id: string): Promise<Tenant>;
     update(id: string, updateTenantDto: UpdateTenantDto): Promise<import("typeorm").UpdateResult>;
     remove(id: string): Promise<import("typeorm").DeleteResult>;
 }

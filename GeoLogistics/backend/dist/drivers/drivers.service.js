@@ -18,7 +18,6 @@ const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const driver_entity_1 = require("./entities/driver.entity");
 let DriversService = class DriversService {
-    driverRepository;
     constructor(driverRepository) {
         this.driverRepository = driverRepository;
     }

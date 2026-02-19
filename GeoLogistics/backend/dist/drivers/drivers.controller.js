@@ -19,7 +19,6 @@ const create_driver_dto_1 = require("./dto/create-driver.dto");
 const update_driver_dto_1 = require("./dto/update-driver.dto");
 const update_driver_location_dto_1 = require("./dto/update-driver-location.dto");
 let DriversController = class DriversController {
-    driversService;
     constructor(driversService) {
         this.driversService = driversService;
     }

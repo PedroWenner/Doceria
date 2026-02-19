@@ -18,7 +18,6 @@ const tenants_service_1 = require("./tenants.service");
 const create_tenant_dto_1 = require("./dto/create-tenant.dto");
 const update_tenant_dto_1 = require("./dto/update-tenant.dto");
 let TenantsController = class TenantsController {
-    tenantsService;
     constructor(tenantsService) {
         this.tenantsService = tenantsService;
     }

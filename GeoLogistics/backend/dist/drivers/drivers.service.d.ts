@@ -8,7 +8,7 @@ export declare class DriversService {
     constructor(driverRepository: Repository<Driver>);
     create(createDriverDto: CreateDriverDto): Promise<CreateDriverDto & Driver>;
     findAll(): Promise<Driver[]>;
-    findOne(id: string): Promise<Driver | null>;
+    findOne(id: string): Promise<Driver>;
     update(id: string, updateDriverDto: UpdateDriverDto): Promise<import("typeorm").UpdateResult>;
     updateLocation(id: string, locationDto: UpdateDriverLocationDto): Promise<import("typeorm").UpdateResult>;
     remove(id: string): Promise<import("typeorm").DeleteResult>;

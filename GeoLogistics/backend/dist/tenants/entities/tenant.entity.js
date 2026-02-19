@@ -12,12 +12,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Tenant = void 0;
 const typeorm_1 = require("typeorm");
 let Tenant = class Tenant {
-    id;
-    name;
-    slug;
-    api_key;
-    created_at;
-    updated_at;
 };
 exports.Tenant = Tenant;
 __decorate([

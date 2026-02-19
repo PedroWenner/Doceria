@@ -14,6 +14,8 @@ const app_controller_1 = require("./app.controller");
 const app_service_1 = require("./app.service");
 const tenants_module_1 = require("./tenants/tenants.module");
 const drivers_module_1 = require("./drivers/drivers.module");
+const routing_module_1 = require("./routing/routing.module");
+const orders_module_1 = require("./orders/orders.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -39,6 +41,8 @@ exports.AppModule = AppModule = __decorate([
             }),
             tenants_module_1.TenantsModule,
             drivers_module_1.DriversModule,
+            routing_module_1.RoutingModule,
+            orders_module_1.OrdersModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],

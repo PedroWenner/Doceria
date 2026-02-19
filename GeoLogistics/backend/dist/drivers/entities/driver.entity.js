@@ -18,12 +18,6 @@ var DriverStatus;
     DriverStatus["OFFLINE"] = "OFFLINE";
 })(DriverStatus || (exports.DriverStatus = DriverStatus = {}));
 let Driver = class Driver {
-    id;
-    name;
-    status;
-    location;
-    created_at;
-    updated_at;
 };
 exports.Driver = Driver;
 __decorate([
