@@ -24,8 +24,8 @@ let TenantsController = class TenantsController {
     create(createTenantDto) {
         return this.tenantsService.create(createTenantDto);
     }
-    findAll() {
-        return this.tenantsService.findAll();
+    findAll(slug) {
+        return this.tenantsService.findAll(slug);
     }
     findOne(id) {
         return this.tenantsService.findOne(id);
@@ -47,8 +47,9 @@ __decorate([
 ], TenantsController.prototype, "create", null);
 __decorate([
     (0, common_1.Get)(),
+    __param(0, (0, common_1.Query)('slug')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], TenantsController.prototype, "findAll", null);
 __decorate([

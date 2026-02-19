@@ -18,7 +18,10 @@ export class TenantsService {
     return this.tenantRepository.save(tenant);
   }
 
-  findAll() {
+  findAll(slug?: string) {
+    if (slug) {
+      return this.tenantRepository.find({ where: { slug } });
+    }
     return this.tenantRepository.find();
   }
 

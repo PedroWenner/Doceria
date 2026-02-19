@@ -26,7 +26,10 @@ let TenantsService = class TenantsService {
         tenant.api_key = 'sk_' + crypto.randomUUID();
         return this.tenantRepository.save(tenant);
     }
-    findAll() {
+    findAll(slug) {
+        if (slug) {
+            return this.tenantRepository.find({ where: { slug } });
+        }
         return this.tenantRepository.find();
     }
     findOne(id) {
