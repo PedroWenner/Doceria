@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Driver = exports.DriverStatus = void 0;
+exports.Driver = exports.DriverType = exports.DriverStatus = void 0;
 const typeorm_1 = require("typeorm");
 var DriverStatus;
 (function (DriverStatus) {
@@ -17,6 +17,11 @@ var DriverStatus;
     DriverStatus["BUSY"] = "BUSY";
     DriverStatus["OFFLINE"] = "OFFLINE";
 })(DriverStatus || (exports.DriverStatus = DriverStatus = {}));
+var DriverType;
+(function (DriverType) {
+    DriverType["OWN_FLEET"] = "OWN_FLEET";
+    DriverType["FREELANCER"] = "FREELANCER";
+})(DriverType || (exports.DriverType = DriverType = {}));
 let Driver = class Driver {
 };
 exports.Driver = Driver;
@@ -28,6 +33,14 @@ __decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", String)
 ], Driver.prototype, "name", void 0);
+__decorate([
+    (0, typeorm_1.Column)({
+        type: 'enum',
+        enum: DriverType,
+        default: DriverType.FREELANCER,
+    }),
+    __metadata("design:type", String)
+], Driver.prototype, "type", void 0);
 __decorate([
     (0, typeorm_1.Column)({
         type: 'enum',

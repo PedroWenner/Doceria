@@ -6,6 +6,11 @@ export enum DriverStatus {
     OFFLINE = 'OFFLINE',
 }
 
+export enum DriverType {
+    OWN_FLEET = 'OWN_FLEET',
+    FREELANCER = 'FREELANCER',
+}
+
 @Entity('drivers')
 export class Driver {
     @PrimaryGeneratedColumn('uuid')
@@ -13,6 +18,13 @@ export class Driver {
 
     @Column()
     name: string;
+
+    @Column({
+        type: 'enum',
+        enum: DriverType,
+        default: DriverType.FREELANCER,
+    })
+    type: DriverType;
 
     @Column({
         type: 'enum',

@@ -3,9 +3,14 @@ export declare enum DriverStatus {
     BUSY = "BUSY",
     OFFLINE = "OFFLINE"
 }
+export declare enum DriverType {
+    OWN_FLEET = "OWN_FLEET",
+    FREELANCER = "FREELANCER"
+}
 export declare class Driver {
     id: string;
     name: string;
+    type: DriverType;
     status: DriverStatus;
     latitude: number;
     longitude: number;

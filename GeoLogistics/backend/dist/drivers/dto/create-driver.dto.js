@@ -21,6 +21,11 @@ __decorate([
     __metadata("design:type", String)
 ], CreateDriverDto.prototype, "name", void 0);
 __decorate([
+    (0, class_validator_1.IsEnum)(driver_entity_1.DriverType),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateDriverDto.prototype, "type", void 0);
+__decorate([
     (0, class_validator_1.IsEnum)(driver_entity_1.DriverStatus),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)

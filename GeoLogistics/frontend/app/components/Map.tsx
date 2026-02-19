@@ -19,6 +19,7 @@ interface Driver {
     latitude: number;
     longitude: number;
     status: string;
+    type?: 'OWN_FLEET' | 'FREELANCER';
 }
 
 export default function Map({ drivers }: { drivers: Driver[] }) {
@@ -40,6 +41,7 @@ export default function Map({ drivers }: { drivers: Driver[] }) {
                     >
                         <Popup>
                             <strong>{driver.name}</strong><br />
+                            <span className="text-xs text-zinc-500">{driver.type === 'OWN_FLEET' ? 'Frota Própria' : 'Parceiro'}</span><br />
                             Status: {driver.status}
                         </Popup>
                     </Marker>
