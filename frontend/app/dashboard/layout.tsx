@@ -24,6 +24,7 @@ function DashboardInnerLayout({
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [logoUrl, setLogoUrl] = useState<string | null>(null);
     const [systemName, setSystemName] = useState<string>('Dashboard');
+    const [useFixedDriver, setUseFixedDriver] = useState(false);
     const { t } = useLanguage();
     const { user, logout, isLoading } = useAdminAuth(); // Use specific Admin Auth
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
@@ -41,6 +42,7 @@ function DashboardInnerLayout({
                         const data = await res.json();
                         if (data.data.logo_url) setLogoUrl(data.data.logo_url);
                         if (data.data.system_name) setSystemName(data.data.system_name);
+                        if (data.data.use_fixed_driver) setUseFixedDriver(data.data.use_fixed_driver);
                     }
                 }
             } catch (e) {
@@ -112,6 +114,7 @@ function DashboardInnerLayout({
                 logoUrl={logoUrl}
                 systemName={systemName}
                 apiUrl={apiUrl}
+                useFixedDriver={useFixedDriver}
             />
 
             {/* Main Content */}

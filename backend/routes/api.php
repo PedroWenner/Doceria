@@ -107,6 +107,8 @@ Route::group(['middleware' => ['api']], function () {
     Route::get('products/{product}', [App\Http\Controllers\ProductController::class, 'show']);
     Route::get('settings', [App\Http\Controllers\CompanySettingController::class, 'show']);
     Route::get('payment-methods', [App\Http\Controllers\PaymentMethodController::class, 'index']);
+    Route::get('/drivers', [App\Http\Controllers\DriverController::class, 'index']);
+    Route::post('/drivers', [App\Http\Controllers\DriverController::class, 'store']);
 });
 
 // Webhooks (Public)

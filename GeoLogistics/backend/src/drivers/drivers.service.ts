@@ -17,7 +17,10 @@ export class DriversService {
     return this.driverRepository.save(createDriverDto);
   }
 
-  findAll() {
+  findAll(type?: string) {
+    if (type) {
+      return this.driverRepository.find({ where: { type: type as any } });
+    }
     return this.driverRepository.find();
   }
 

@@ -18,9 +18,13 @@ export class TenantsService {
     return this.tenantRepository.save(tenant);
   }
 
-  findAll(slug?: string) {
-    if (slug) {
-      return this.tenantRepository.find({ where: { slug } });
+  findAll(slug?: string, api_key?: string) {
+    const where: any = {};
+    if (slug) where.slug = slug;
+    if (api_key) where.api_key = api_key;
+
+    if (Object.keys(where).length > 0) {
+      return this.tenantRepository.find({ where });
     }
     return this.tenantRepository.find();
   }

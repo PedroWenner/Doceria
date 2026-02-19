@@ -24,7 +24,10 @@ let DriversService = class DriversService {
     create(createDriverDto) {
         return this.driverRepository.save(createDriverDto);
     }
-    findAll() {
+    findAll(type) {
+        if (type) {
+            return this.driverRepository.find({ where: { type: type } });
+        }
         return this.driverRepository.find();
     }
     findOne(id) {

@@ -55,7 +55,8 @@ export const translations = {
             payments: 'Pagamentos',
             expenses: 'Despesas',
             expense_categories: 'Categorias',
-            reports: 'Relatórios'
+            reports: 'Relatórios',
+            drivers: 'Entregadores'
         },
         dashboard: {
             welcome: 'Bem-vindo de volta',
@@ -537,7 +538,8 @@ export const translations = {
             payments: 'Payments',
             expenses: 'Expenses',
             expense_categories: 'Categories',
-            reports: 'Reports'
+            reports: 'Reports',
+            drivers: 'Drivers'
         },
         dashboard: {
             welcome: 'Welcome back',

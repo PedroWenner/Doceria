@@ -50,9 +50,44 @@ class GeoLogisticsService
     /**
      * Get all drivers
      */
-    public function getDrivers()
+    public function getDrivers(array $params = [])
     {
-        return $this->client()->get('/drivers')->json();
+        return $this->client()->get('/drivers', $params)->json();
+    }
+
+    /**
+     * Check if the tenant has an active contract (valid API Key)
+     */
+    public function checkContractStatus()
+    {
+        try {
+            // Check if we can find the tenant by the configured API Key
+            $response = $this->client()->get('/tenants', [
+                'api_key' => $this->apiKey
+            ]);
+
+            if ($response->successful()) {
+                $tenants = $response->json();
+                return is_array($tenants) && count($tenants) > 0;
+            }
+            return false;
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
+
+    /**
+     * Register a new driver in GeoLogistics
+     */
+    public function createDriver(array $data)
+    {
+        $response = $this->client()->post('/drivers', $data);
+
+        if ($response->failed()) {
+            throw new \Exception('Failed to register driver in GeoLogistics: ' . $response->body());
+        }
+
+        return $response->json();
     }
 
     /**

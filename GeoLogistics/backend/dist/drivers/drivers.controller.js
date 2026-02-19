@@ -25,8 +25,8 @@ let DriversController = class DriversController {
     create(createDriverDto) {
         return this.driversService.create(createDriverDto);
     }
-    findAll() {
-        return this.driversService.findAll();
+    findAll(type) {
+        return this.driversService.findAll(type);
     }
     findOne(id) {
         return this.driversService.findOne(id);
@@ -51,8 +51,9 @@ __decorate([
 ], DriversController.prototype, "create", null);
 __decorate([
     (0, common_1.Get)(),
+    __param(0, (0, common_1.Query)('type')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], DriversController.prototype, "findAll", null);
 __decorate([

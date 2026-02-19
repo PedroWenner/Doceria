@@ -13,8 +13,8 @@ export class TenantsController {
   }
 
   @Get()
-  findAll(@Query('slug') slug?: string) {
-    return this.tenantsService.findAll(slug);
+  findAll(@Query('slug') slug?: string, @Query('api_key') apiKey?: string) {
+    return this.tenantsService.findAll(slug, apiKey);
   }
 
   @Get(':id')

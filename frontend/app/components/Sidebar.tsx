@@ -11,6 +11,7 @@ import {
     ShoppingBag,
     Users,
     Package,
+    Truck,
     FileText,
     CreditCard,
     DollarSign,
@@ -32,6 +33,7 @@ interface SidebarProps {
     logoUrl: string | null;
     systemName: string;
     apiUrl: string;
+    useFixedDriver: boolean;
 }
 
 export default function Sidebar({
@@ -41,7 +43,8 @@ export default function Sidebar({
     logout,
     logoUrl,
     systemName,
-    apiUrl
+    apiUrl,
+    useFixedDriver
 }: SidebarProps) {
     const pathname = usePathname();
     const { t } = useLanguage();
@@ -59,6 +62,12 @@ export default function Sidebar({
             href: '/dashboard/orders',
             roles: ['admin', 'manager']
         },
+        ...(useFixedDriver ? [{
+            icon: Truck,
+            label: 'sidebar.drivers',
+            href: '/dashboard/drivers',
+            roles: ['admin', 'manager']
+        }] : []),
         {
             icon: FileText,
             label: 'sidebar.reports',
