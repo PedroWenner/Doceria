@@ -21,14 +21,11 @@ export class Driver {
     })
     status: DriverStatus;
 
-    @Index({ spatial: true })
-    @Column({
-        type: 'geography',
-        spatialFeatureType: 'Point',
-        srid: 4326,
-        nullable: true,
-    })
-    location: any;
+    @Column({ type: 'decimal', precision: 10, scale: 6, nullable: true })
+    latitude: number;
+
+    @Column({ type: 'decimal', precision: 10, scale: 6, nullable: true })
+    longitude: number;
 
     @CreateDateColumn()
     created_at: Date;

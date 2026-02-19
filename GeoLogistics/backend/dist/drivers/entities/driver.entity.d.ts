@@ -7,7 +7,8 @@ export declare class Driver {
     id: string;
     name: string;
     status: DriverStatus;
-    location: any;
+    latitude: number;
+    longitude: number;
     created_at: Date;
     updated_at: Date;
 }

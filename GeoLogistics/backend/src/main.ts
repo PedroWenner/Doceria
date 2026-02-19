@@ -3,17 +3,19 @@ import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    cors: {
+      origin: '*',
+      methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+      allowedHeaders: 'Content-Type, Accept',
+    },
+  });
   app.useGlobalPipes(new ValidationPipe({
     whitelist: true,
     transform: true,
     transformOptions: { enableImplicitConversion: true }
   }));
-  await app.enableCors({
-    origin: '*',
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    allowedHeaders: 'Content-Type, Accept',
-  });
+  // await app.enableCors(...); // Removed in favor of factory option
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();

@@ -37,15 +37,13 @@ __decorate([
     __metadata("design:type", String)
 ], Driver.prototype, "status", void 0);
 __decorate([
-    (0, typeorm_1.Index)({ spatial: true }),
-    (0, typeorm_1.Column)({
-        type: 'geography',
-        spatialFeatureType: 'Point',
-        srid: 4326,
-        nullable: true,
-    }),
-    __metadata("design:type", Object)
-], Driver.prototype, "location", void 0);
+    (0, typeorm_1.Column)({ type: 'decimal', precision: 10, scale: 6, nullable: true }),
+    __metadata("design:type", Number)
+], Driver.prototype, "latitude", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'decimal', precision: 10, scale: 6, nullable: true }),
+    __metadata("design:type", Number)
+], Driver.prototype, "longitude", void 0);
 __decorate([
     (0, typeorm_1.CreateDateColumn)(),
     __metadata("design:type", Date)

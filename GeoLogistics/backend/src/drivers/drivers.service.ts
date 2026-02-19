@@ -33,13 +33,9 @@ export class DriversService {
     const driver = await this.findOne(id);
     if (!driver) throw new NotFoundException('Driver not found');
 
-    const point = {
-      type: 'Point',
-      coordinates: [locationDto.longitude, locationDto.latitude],
-    };
-
     return this.driverRepository.update(id, {
-      location: point as any,
+      latitude: locationDto.latitude,
+      longitude: locationDto.longitude,
     });
   }
 
