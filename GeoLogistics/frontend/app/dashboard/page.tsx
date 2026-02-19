@@ -7,7 +7,8 @@ import { LogOut, Package, Map as MapIcon, RotateCw, Settings } from 'lucide-reac
 import { useRouter } from 'next/navigation';
 
 // Dynamically import Map with no SSR
-const Map = dynamic(() => import('../../components/dashboard/Map'), {
+// Dynamically import Map with no SSR
+const Map = dynamic(() => import('../components/Map'), {
     ssr: false,
     loading: () => <div className="h-full w-full bg-zinc-100 flex items-center justify-center text-zinc-400">Carregando Mapa...</div>
 });
@@ -15,6 +16,7 @@ const Map = dynamic(() => import('../../components/dashboard/Map'), {
 export default function DashboardPage() {
     const [tenantName, setTenantName] = useState('');
     const [orders, setOrders] = useState<any[]>([]);
+    const [drivers, setDrivers] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const router = useRouter();
 
@@ -29,16 +31,20 @@ export default function DashboardPage() {
         }
 
         setTenantName(storedTenant || 'Empresa');
-        fetchOrders();
+        fetchData();
     }, [router]);
 
-    const fetchOrders = async () => {
+    const fetchData = async () => {
         setLoading(true);
         try {
-            const response = await api.get('/orders');
-            setOrders(response.data);
+            const [ordersRes, driversRes] = await Promise.all([
+                api.get('/orders'),
+                api.get('/drivers')
+            ]);
+            setOrders(ordersRes.data);
+            setDrivers(driversRes.data);
         } catch (error) {
-            console.error('Failed to fetch orders', error);
+            console.error('Failed to fetch dashboard data', error);
         } finally {
             setLoading(false);
         }
@@ -87,7 +93,7 @@ export default function DashboardPage() {
                 <header className="h-16 bg-white border-b border-zinc-200 flex items-center justify-between px-6">
                     <h2 className="font-semibold text-zinc-700">Monitoramento em Tempo Real</h2>
                     <button
-                        onClick={fetchOrders}
+                        onClick={fetchData}
                         className="p-2 text-zinc-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-full transition-all"
                         title="Atualizar"
                     >
@@ -139,8 +145,7 @@ export default function DashboardPage() {
                     {/* Map View */}
                     <div className="lg:col-span-2 bg-zinc-200 rounded-xl overflow-hidden shadow-sm border border-zinc-300 relative">
                         <Map
-                            center={[-23.550520, -46.633309]} // SP Center fallback
-                            orders={orders}
+                            drivers={drivers}
                         />
                     </div>
                 </div>
