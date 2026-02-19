@@ -111,6 +111,7 @@ Route::group(['middleware' => ['api']], function () {
 
 // Webhooks (Public)
 Route::post('/webhooks/mercadopago', [App\Http\Controllers\WebhookController::class, 'handleMercadoPago']);
+Route::post('/webhooks/geologistics', [App\Http\Controllers\WebhookController::class, 'handleGeoLogistics']);
 
 // Authenticated Routes (Customers & Admins)
 Route::group(['middleware' => ['api', 'auth:api']], function () {

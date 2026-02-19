@@ -44,6 +44,8 @@ class CompanySettingController extends Controller
             // Stock & Operations
             'enable_stock_control' => 'nullable|boolean', 
             'global_min_stock' => 'nullable|integer|min:0',
+            'use_delivery_routine' => 'nullable|boolean',
+            'use_fixed_driver' => 'nullable|boolean',
             
             // Visual
             'logo_url' => 'nullable', 
@@ -60,6 +62,12 @@ class CompanySettingController extends Controller
         // Handle boolean conversion explicitly for stock control if it comes as string
         if ($request->has('enable_stock_control')) {
             $validated['enable_stock_control'] = filter_var($request->enable_stock_control, FILTER_VALIDATE_BOOLEAN);
+        }
+        if ($request->has('use_delivery_routine')) {
+            $validated['use_delivery_routine'] = filter_var($request->use_delivery_routine, FILTER_VALIDATE_BOOLEAN);
+        }
+        if ($request->has('use_fixed_driver')) {
+            $validated['use_fixed_driver'] = filter_var($request->use_fixed_driver, FILTER_VALIDATE_BOOLEAN);
         }
 
         // Handle File Uploads

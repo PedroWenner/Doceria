@@ -105,4 +105,20 @@ class WebhookController extends Controller
             default => 'pending'
         };
     }
+
+    /**
+     * Handle GeoLogistics Webhook
+     */
+    public function handleGeoLogistics(Request $request)
+    {
+        $payload = $request->all();
+        $event = $payload['event'] ?? 'unknown';
+        $data = $payload['data'] ?? [];
+
+        Log::info("GeoLogistics Webhook [{$event}]", $data);
+
+        // TODO: Implement logic to update local Order status
+        
+        return response()->json(['message' => 'Webhook received']);
+    }
 }

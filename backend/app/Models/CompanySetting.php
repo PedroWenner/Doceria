@@ -37,7 +37,9 @@ class CompanySetting extends Model implements Auditable
         'whatsapp_number',
         'delivery_message',
         'latitude',
-        'longitude'
+        'longitude',
+        'use_delivery_routine',
+        'use_fixed_driver'
     ];
 
     protected $casts = [
@@ -45,5 +47,7 @@ class CompanySetting extends Model implements Auditable
         'pagination_limit' => 'integer',
         'latitude' => 'float',
         'longitude' => 'float',
+        'use_delivery_routine' => 'boolean',
+        'use_fixed_driver' => 'boolean',
     ];
 }

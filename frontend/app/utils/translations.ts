@@ -238,7 +238,14 @@ export const translations = {
                 enable_stock: 'Habilitar Controle de Estoque',
                 min_stock: 'Estoque Mínimo Global (Alerta)',
                 whatsapp: 'WhatsApp da Loja',
-                delivery_msg: 'Mensagem de Despacho'
+                delivery_msg: 'Mensagem de Despacho',
+                logistics: 'Logística',
+                use_fixed_driver: 'Usar Entregador Fixo',
+                fixed_driver_desc: 'Priorizar entregadores da frota própria.',
+                fixed_driver_id: 'Entregador Padrão',
+                fixed_driver_id_hint: 'Usuário que será selecionado automaticamente para entregas.',
+                use_delivery_routine: 'Usar Rotina de Entrega',
+                delivery_routine_desc: 'Habilita atribuição automática de pedidos e acompanhamento de entregas.'
             },
             visual: {
                 title: 'Identidade Visual',
@@ -713,7 +720,14 @@ export const translations = {
                 min_stock: 'Global Min Stock (Alert)',
                 currency: 'Currency Symbol',
                 whatsapp: 'Store WhatsApp',
-                delivery_msg: 'Dispatch Message'
+                delivery_msg: 'Dispatch Message',
+                logistics: 'Logistics',
+                use_fixed_driver: 'Use Fixed Driver',
+                fixed_driver_desc: 'Prioritize drivers from the own fleet.',
+                fixed_driver_id: 'Default Driver',
+                fixed_driver_id_hint: 'User who will be automatically selected for deliveries.',
+                use_delivery_routine: 'Use Delivery Routine',
+                delivery_routine_desc: 'Enable automatic order assignment and delivery tracking.'
             },
             visual: {
                 title: 'Visual Identity',
