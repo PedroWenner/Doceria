@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import api from '../lib/api';
-import { LogOut, Package, Map as MapIcon, RotateCw } from 'lucide-react';
+import { LogOut, Package, Map as MapIcon, RotateCw, Settings } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 // Dynamically import Map with no SSR
@@ -57,9 +57,13 @@ export default function DashboardPage() {
                 </div>
 
                 <nav className="flex-1 p-4 space-y-1">
-                    <a href="#" className="flex items-center gap-3 px-4 py-3 bg-emerald-50 text-emerald-700 rounded-lg font-medium">
+                    <a href="/dashboard" className="flex items-center gap-3 px-4 py-3 bg-emerald-50 text-emerald-700 rounded-lg font-medium">
                         <Package className="w-5 h-5" />
                         Pedidos
+                    </a>
+                    <a href="/settings" className="flex items-center gap-3 px-4 py-3 text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 rounded-lg font-medium transition-colors">
+                        <Settings className="w-5 h-5" />
+                        Configurações
                     </a>
                 </nav>
 

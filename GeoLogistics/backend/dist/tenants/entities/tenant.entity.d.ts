@@ -3,6 +3,9 @@ export declare class Tenant {
     name: string;
     slug: string;
     api_key: string;
+    base_fare: number;
+    price_per_km: number;
+    price_per_min: number;
     created_at: Date;
     updated_at: Date;
 }

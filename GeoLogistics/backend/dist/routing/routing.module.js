@@ -12,12 +12,13 @@ const axios_1 = require("@nestjs/axios");
 const routing_service_1 = require("./routing.service");
 const pricing_service_1 = require("./pricing.service");
 const routing_controller_1 = require("./routing.controller");
+const tenants_module_1 = require("../tenants/tenants.module");
 let RoutingModule = class RoutingModule {
 };
 exports.RoutingModule = RoutingModule;
 exports.RoutingModule = RoutingModule = __decorate([
     (0, common_1.Module)({
-        imports: [axios_1.HttpModule],
+        imports: [axios_1.HttpModule, tenants_module_1.TenantsModule],
         controllers: [routing_controller_1.RoutingController],
         providers: [routing_service_1.RoutingService, pricing_service_1.PricingService],
         exports: [pricing_service_1.PricingService],

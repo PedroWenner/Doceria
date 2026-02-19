@@ -26,12 +26,14 @@ export class RoutingController {
 
   @Get('estimate')
   estimatePrice(
+    @Query('tenantId') tenantId: string,
     @Query('originLat') originLat: string,
     @Query('originLon') originLon: string,
     @Query('destLat') destLat: string,
     @Query('destLon') destLon: string,
   ) {
     return this.pricingService.calculatePrice(
+      tenantId,
       parseFloat(originLat),
       parseFloat(originLon),
       parseFloat(destLat),

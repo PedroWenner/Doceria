@@ -35,8 +35,12 @@ let TenantsService = class TenantsService {
     findOne(id) {
         return this.tenantRepository.findOneBy({ id });
     }
-    update(id, updateTenantDto) {
-        return this.tenantRepository.update(id, updateTenantDto);
+    async update(id, updateTenantDto) {
+        const result = await this.tenantRepository.update(id, updateTenantDto);
+        if (result.affected === 0) {
+            throw new Error(`Tenant with ID ${id} not found`);
+        }
+        return result;
     }
     remove(id) {
         return this.tenantRepository.delete(id);

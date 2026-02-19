@@ -31,6 +31,7 @@ let TenantsController = class TenantsController {
         return this.tenantsService.findOne(id);
     }
     update(id, updateTenantDto) {
+        console.log(`[TenantsController] Updating tenant ${id} with data:`, updateTenantDto);
         return this.tenantsService.update(id, updateTenantDto);
     }
     remove(id) {

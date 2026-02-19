@@ -12,15 +12,20 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.PricingService = void 0;
 const common_1 = require("@nestjs/common");
 const routing_service_1 = require("./routing.service");
+const tenants_service_1 = require("../tenants/tenants.service");
 let PricingService = class PricingService {
-    constructor(routingService) {
+    constructor(routingService, tenantsService) {
         this.routingService = routingService;
+        this.tenantsService = tenantsService;
     }
-    async calculatePrice(originLat, originLon, destLat, destLon) {
+    async calculatePrice(tenantId, originLat, originLon, destLat, destLon) {
+        const tenant = await this.tenantsService.findOne(tenantId);
+        if (!tenant)
+            throw new common_1.NotFoundException('Tenant not found for pricing');
         const route = await this.routingService.getRoute(originLat, originLon, destLat, destLon);
-        const BASE_FARE = 5.00;
-        const RATE_PER_KM = 2.00;
-        const RATE_PER_MIN = 0.50;
+        const BASE_FARE = Number(tenant.base_fare);
+        const RATE_PER_KM = Number(tenant.price_per_km);
+        const RATE_PER_MIN = Number(tenant.price_per_min);
         const distanceKm = route.distance / 1000;
         const durationMin = route.duration / 60;
         const price = BASE_FARE + (distanceKm * RATE_PER_KM) + (durationMin * RATE_PER_MIN);
@@ -38,6 +43,7 @@ let PricingService = class PricingService {
 exports.PricingService = PricingService;
 exports.PricingService = PricingService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [routing_service_1.RoutingService])
+    __metadata("design:paramtypes", [routing_service_1.RoutingService,
+        tenants_service_1.TenantsService])
 ], PricingService);
 //# sourceMappingURL=pricing.service.js.map

@@ -20,6 +20,7 @@ exports.TenantsModule = TenantsModule = __decorate([
         imports: [typeorm_1.TypeOrmModule.forFeature([tenant_entity_1.Tenant])],
         controllers: [tenants_controller_1.TenantsController],
         providers: [tenants_service_1.TenantsService],
+        exports: [tenants_service_1.TenantsService],
     })
 ], TenantsModule);
 //# sourceMappingURL=tenants.module.js.map

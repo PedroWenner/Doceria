@@ -16,7 +16,7 @@ export declare class RoutingController {
             lon: number;
         };
     }>;
-    estimatePrice(originLat: string, originLon: string, destLat: string, destLon: string): Promise<{
+    estimatePrice(tenantId: string, originLat: string, originLon: string, destLat: string, destLon: string): Promise<{
         price: number;
         breakdown: {
             base: number;

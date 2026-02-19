@@ -24,7 +24,7 @@ let OrdersService = class OrdersService {
         this.pricingService = pricingService;
     }
     async create(createOrderDto) {
-        const pricing = await this.pricingService.calculatePrice(createOrderDto.pickup_lat, createOrderDto.pickup_lon, createOrderDto.dropoff_lat, createOrderDto.dropoff_lon);
+        const pricing = await this.pricingService.calculatePrice(createOrderDto.tenant_id, createOrderDto.pickup_lat, createOrderDto.pickup_lon, createOrderDto.dropoff_lat, createOrderDto.dropoff_lon);
         const order = this.orderRepository.create({
             ...createOrderDto,
             price: pricing.price,

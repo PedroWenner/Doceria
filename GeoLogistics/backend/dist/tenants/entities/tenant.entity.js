@@ -31,6 +31,18 @@ __decorate([
     __metadata("design:type", String)
 ], Tenant.prototype, "api_key", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ type: 'decimal', precision: 10, scale: 2, default: 5.00 }),
+    __metadata("design:type", Number)
+], Tenant.prototype, "base_fare", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'decimal', precision: 10, scale: 2, default: 2.00 }),
+    __metadata("design:type", Number)
+], Tenant.prototype, "price_per_km", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'decimal', precision: 10, scale: 2, default: 0.50 }),
+    __metadata("design:type", Number)
+], Tenant.prototype, "price_per_min", void 0);
+__decorate([
     (0, typeorm_1.CreateDateColumn)(),
     __metadata("design:type", Date)
 ], Tenant.prototype, "created_at", void 0);

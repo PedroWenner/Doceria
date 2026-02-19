@@ -24,6 +24,7 @@ export class TenantsController {
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateTenantDto: UpdateTenantDto) {
+    console.log(`[TenantsController] Updating tenant ${id} with data:`, updateTenantDto);
     return this.tenantsService.update(id, updateTenantDto);
   }
 

@@ -24,8 +24,8 @@ let RoutingController = class RoutingController {
     calculateRoute(originLat, originLon, destLat, destLon) {
         return this.routingService.getRoute(parseFloat(originLat), parseFloat(originLon), parseFloat(destLat), parseFloat(destLon));
     }
-    estimatePrice(originLat, originLon, destLat, destLon) {
-        return this.pricingService.calculatePrice(parseFloat(originLat), parseFloat(originLon), parseFloat(destLat), parseFloat(destLon));
+    estimatePrice(tenantId, originLat, originLon, destLat, destLon) {
+        return this.pricingService.calculatePrice(tenantId, parseFloat(originLat), parseFloat(originLon), parseFloat(destLat), parseFloat(destLon));
     }
 };
 exports.RoutingController = RoutingController;
@@ -41,12 +41,13 @@ __decorate([
 ], RoutingController.prototype, "calculateRoute", null);
 __decorate([
     (0, common_1.Get)('estimate'),
-    __param(0, (0, common_1.Query)('originLat')),
-    __param(1, (0, common_1.Query)('originLon')),
-    __param(2, (0, common_1.Query)('destLat')),
-    __param(3, (0, common_1.Query)('destLon')),
+    __param(0, (0, common_1.Query)('tenantId')),
+    __param(1, (0, common_1.Query)('originLat')),
+    __param(2, (0, common_1.Query)('originLon')),
+    __param(3, (0, common_1.Query)('destLat')),
+    __param(4, (0, common_1.Query)('destLon')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, String, String]),
+    __metadata("design:paramtypes", [String, String, String, String, String]),
     __metadata("design:returntype", void 0)
 ], RoutingController.prototype, "estimatePrice", null);
 exports.RoutingController = RoutingController = __decorate([
