@@ -5,6 +5,8 @@ import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { Order, OrderStatus } from './entities/order.entity';
 import { PricingService } from '../routing/pricing.service';
+import { WebhookService } from '../webhooks/webhook.service';
+import { TenantsService } from '../tenants/tenants.service';
 
 @Injectable()
 export class OrdersService {
@@ -12,6 +14,8 @@ export class OrdersService {
     @InjectRepository(Order)
     private orderRepository: Repository<Order>,
     private readonly pricingService: PricingService,
+    private readonly webhookService: WebhookService,
+    private readonly tenantsService: TenantsService,
   ) { }
 
   async create(createOrderDto: CreateOrderDto) {
@@ -32,7 +36,15 @@ export class OrdersService {
       status: OrderStatus.PENDING,
     });
 
-    return this.orderRepository.save(order);
+    const savedOrder = await this.orderRepository.save(order);
+
+    // 3. Trigger Webhook
+    const tenant = await this.tenantsService.findOne(createOrderDto.tenant_id);
+    if (tenant?.webhook_url) {
+      this.webhookService.notify(tenant.webhook_url, 'order.created', savedOrder);
+    }
+
+    return savedOrder;
   }
 
   findAll() {

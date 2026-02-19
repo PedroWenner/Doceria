@@ -13,6 +13,8 @@ const orders_service_1 = require("./orders.service");
 const orders_controller_1 = require("./orders.controller");
 const order_entity_1 = require("./entities/order.entity");
 const routing_module_1 = require("../routing/routing.module");
+const tenants_module_1 = require("../tenants/tenants.module");
+const webhook_module_1 = require("../webhooks/webhook.module");
 let OrdersModule = class OrdersModule {
 };
 exports.OrdersModule = OrdersModule;
@@ -21,6 +23,8 @@ exports.OrdersModule = OrdersModule = __decorate([
         imports: [
             typeorm_1.TypeOrmModule.forFeature([order_entity_1.Order]),
             routing_module_1.RoutingModule,
+            tenants_module_1.TenantsModule,
+            webhook_module_1.WebhookModule,
         ],
         controllers: [orders_controller_1.OrdersController],
         providers: [orders_service_1.OrdersService],

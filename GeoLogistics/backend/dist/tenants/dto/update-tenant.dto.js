@@ -31,4 +31,9 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Number)
 ], UpdateTenantDto.prototype, "price_per_min", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], UpdateTenantDto.prototype, "webhook_url", void 0);
 //# sourceMappingURL=update-tenant.dto.js.map

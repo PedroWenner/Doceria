@@ -23,6 +23,9 @@ export class Tenant {
     @Column({ type: 'decimal', precision: 10, scale: 2, default: 0.50 })
     price_per_min: number;
 
+    @Column({ nullable: true })
+    webhook_url: string;
+
     @CreateDateColumn()
     created_at: Date;
 

@@ -1,6 +1,6 @@
 import { PartialType } from '@nestjs/mapped-types';
 import { CreateTenantDto } from './create-tenant.dto';
-import { IsNumber, IsOptional } from 'class-validator';
+import { IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class UpdateTenantDto extends PartialType(CreateTenantDto) {
     @IsNumber()
@@ -14,4 +14,8 @@ export class UpdateTenantDto extends PartialType(CreateTenantDto) {
     @IsNumber()
     @IsOptional()
     price_per_min?: number;
+
+    @IsString()
+    @IsOptional()
+    webhook_url?: string;
 }

@@ -43,6 +43,10 @@ __decorate([
     __metadata("design:type", Number)
 ], Tenant.prototype, "price_per_min", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], Tenant.prototype, "webhook_url", void 0);
+__decorate([
     (0, typeorm_1.CreateDateColumn)(),
     __metadata("design:type", Date)
 ], Tenant.prototype, "created_at", void 0);

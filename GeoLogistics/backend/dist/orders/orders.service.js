@@ -18,10 +18,14 @@ const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const order_entity_1 = require("./entities/order.entity");
 const pricing_service_1 = require("../routing/pricing.service");
+const webhook_service_1 = require("../webhooks/webhook.service");
+const tenants_service_1 = require("../tenants/tenants.service");
 let OrdersService = class OrdersService {
-    constructor(orderRepository, pricingService) {
+    constructor(orderRepository, pricingService, webhookService, tenantsService) {
         this.orderRepository = orderRepository;
         this.pricingService = pricingService;
+        this.webhookService = webhookService;
+        this.tenantsService = tenantsService;
     }
     async create(createOrderDto) {
         const pricing = await this.pricingService.calculatePrice(createOrderDto.tenant_id, createOrderDto.pickup_lat, createOrderDto.pickup_lon, createOrderDto.dropoff_lat, createOrderDto.dropoff_lon);
@@ -31,7 +35,12 @@ let OrdersService = class OrdersService {
             distance_km: pricing.route.distance / 1000,
             status: order_entity_1.OrderStatus.PENDING,
         });
-        return this.orderRepository.save(order);
+        const savedOrder = await this.orderRepository.save(order);
+        const tenant = await this.tenantsService.findOne(createOrderDto.tenant_id);
+        if (tenant?.webhook_url) {
+            this.webhookService.notify(tenant.webhook_url, 'order.created', savedOrder);
+        }
+        return savedOrder;
     }
     findAll() {
         return this.orderRepository.find({
@@ -53,6 +62,8 @@ exports.OrdersService = OrdersService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(order_entity_1.Order)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
-        pricing_service_1.PricingService])
+        pricing_service_1.PricingService,
+        webhook_service_1.WebhookService,
+        tenants_service_1.TenantsService])
 ], OrdersService);
 //# sourceMappingURL=orders.service.js.map
