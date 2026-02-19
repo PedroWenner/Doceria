@@ -64,4 +64,28 @@ export class OrdersService {
   remove(id: string) {
     return this.orderRepository.delete(id);
   }
+  async getStats() {
+    const totalOrders = await this.orderRepository.count();
+
+    // Status Breakdwon
+    const statusCounts = await this.orderRepository
+      .createQueryBuilder('order')
+      .select('order.status', 'status')
+      .addSelect('COUNT(order.status)', 'count')
+      .groupBy('order.status')
+      .getRawMany();
+
+    // Revenue
+    const revenue = await this.orderRepository
+      .createQueryBuilder('order')
+      .select('SUM(order.price)', 'total')
+      .where('order.status = :status', { status: OrderStatus.DELIVERED })
+      .getRawOne();
+
+    return {
+      totalOrders,
+      statusCounts: statusCounts.reduce((acc, curr) => ({ ...acc, [curr.status]: Number(curr.count) }), {}),
+      totalRevenue: Number(revenue?.total || 0),
+    };
+  }
 }

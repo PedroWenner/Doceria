@@ -21,6 +21,9 @@ let OrdersController = class OrdersController {
     constructor(ordersService) {
         this.ordersService = ordersService;
     }
+    getStats() {
+        return this.ordersService.getStats();
+    }
     create(createOrderDto) {
         return this.ordersService.create(createOrderDto);
     }
@@ -38,6 +41,12 @@ let OrdersController = class OrdersController {
     }
 };
 exports.OrdersController = OrdersController;
+__decorate([
+    (0, common_1.Get)('stats'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], OrdersController.prototype, "getStats", null);
 __decorate([
     (0, common_1.Post)(),
     __param(0, (0, common_1.Body)()),

@@ -16,4 +16,9 @@ export declare class OrdersService {
     findOne(id: string): Promise<Order>;
     update(id: string, updateOrderDto: UpdateOrderDto): Promise<import("typeorm").UpdateResult>;
     remove(id: string): Promise<import("typeorm").DeleteResult>;
+    getStats(): Promise<{
+        totalOrders: number;
+        statusCounts: any;
+        totalRevenue: number;
+    }>;
 }

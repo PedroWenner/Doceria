@@ -3,8 +3,9 @@
 import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import api from '../lib/api';
-import { LogOut, Package, Map as MapIcon, RotateCw, Settings } from 'lucide-react';
+import { LogOut, Package, Map as MapIcon, RotateCw, Settings, TrendingUp, PieChart as PieIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
 // Dynamically import Map with no SSR
 // Dynamically import Map with no SSR
@@ -15,34 +16,37 @@ const Map = dynamic(() => import('../components/Map'), {
 
 export default function DashboardPage() {
     const [tenantName, setTenantName] = useState('');
+    const [stats, setStats] = useState({
+        totalOrders: 0,
+        totalRevenue: 0,
+        statusCounts: {} as Record<string, number>
+    });
     const [orders, setOrders] = useState<any[]>([]);
     const [drivers, setDrivers] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const router = useRouter();
 
     useEffect(() => {
-        // Check auth
-        const storedTenant = localStorage.getItem('tenant_name');
         const storedId = localStorage.getItem('tenant_id');
-
         if (!storedId) {
             router.push('/login');
             return;
         }
-
-        setTenantName(storedTenant || 'Empresa');
+        setTenantName(localStorage.getItem('tenant_name') || 'Empresa');
         fetchData();
     }, [router]);
 
     const fetchData = async () => {
         setLoading(true);
         try {
-            const [ordersRes, driversRes] = await Promise.all([
+            const [ordersRes, driversRes, statsRes] = await Promise.all([
                 api.get('/orders'),
-                api.get('/drivers')
+                api.get('/drivers'),
+                api.get('/orders/stats')
             ]);
             setOrders(ordersRes.data);
             setDrivers(driversRes.data);
+            setStats(statsRes.data);
         } catch (error) {
             console.error('Failed to fetch dashboard data', error);
         } finally {
@@ -102,51 +106,70 @@ export default function DashboardPage() {
                 </header>
 
                 {/* Content Grid */}
-                <div className="flex-1 p-6 grid grid-cols-1 lg:grid-cols-3 gap-6 overflow-hidden">
-                    {/* Orders List */}
-                    <div className="bg-white rounded-xl shadow-sm border border-zinc-200 flex flex-col overflow-hidden">
-                        <div className="p-4 border-b border-zinc-100 font-medium text-zinc-700 flex justify-between">
-                            <h3>Lista de Pedidos</h3>
-                            <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full">{orders.length} ativo(s)</span>
+                {/* Stats Cards */}
+                <div className="px-6 mb-6 mt-6 grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div className="bg-white rounded-xl shadow-sm border border-zinc-200 p-6">
+                        <h2 className="text-sm font-medium text-zinc-500 mb-2">Total de Pedidos</h2>
+                        <div className="flex items-end gap-2">
+                            <span className="text-3xl font-bold text-zinc-900">{stats.totalOrders}</span>
                         </div>
-                        <div className="flex-1 overflow-y-auto p-2 space-y-2">
-                            {orders.map(order => (
-                                <div key={order.id} className="p-3 rounded-lg border border-zinc-100 hover:border-emerald-200 hover:bg-emerald-50/30 transition-all cursor-pointer group">
-                                    <div className="flex justify-between items-start mb-2">
-                                        <span className="text-xs font-mono text-zinc-400">#{order.id.slice(0, 8)}</span>
-                                        <span className="text-xs font-bold text-emerald-600">R$ {order.price}</span>
-                                    </div>
-                                    <div className="space-y-1">
-                                        <div className="flex items-center gap-2">
-                                            <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-                                            <p className="text-sm text-zinc-600 truncate" title={order.pickup_address || 'Origem'}>
-                                                {order.pickup_address || `Lat: ${order.pickup_lat.toFixed(4)}`}
-                                            </p>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
-                                            <p className="text-sm text-zinc-600 truncate" title={order.dropoff_address || 'Destino'}>
-                                                {order.dropoff_address || `Lat: ${order.dropoff_lat.toFixed(4)}`}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
+                    </div>
+                    <div className="bg-white rounded-xl shadow-sm border border-zinc-200 p-6">
+                        <h2 className="text-sm font-medium text-zinc-500 mb-2">Faturamento (Entregues)</h2>
+                        <div className="flex items-end gap-2">
+                            <span className="text-3xl font-bold text-emerald-600">R$ {stats.totalRevenue.toFixed(2)}</span>
+                        </div>
+                    </div>
+                    {/* Placeholder for more stats */}
+                </div>
 
-                            {orders.length === 0 && !loading && (
-                                <div className="p-8 text-center text-zinc-400">
-                                    <Package className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                                    <p className="text-sm">Nenhum pedido encontrado.</p>
-                                </div>
-                            )}
+                {/* Content Grid */}
+                <div className="flex-1 px-6 pb-6 grid grid-cols-1 lg:grid-cols-3 gap-6 overflow-hidden">
+
+                    {/* Charts Column */}
+                    <div className="space-y-6">
+                        <div className="bg-white rounded-xl shadow-sm border border-zinc-200 p-6 h-[300px]">
+                            <h3 className="text-sm font-semibold text-zinc-700 mb-4 flex items-center gap-2">
+                                <PieIcon className="w-4 h-4" /> Distribuição por Status
+                            </h3>
+                            <ResponsiveContainer width="100%" height="100%">
+                                <PieChart>
+                                    <Pie
+                                        data={Object.entries(stats.statusCounts).map(([name, value]) => ({ name, value }))}
+                                        innerRadius={60}
+                                        outerRadius={80}
+                                        paddingAngle={5}
+                                        dataKey="value"
+                                    >
+                                        <Cell fill="#fbbf24" /> {/* PENDING */}
+                                        <Cell fill="#3b82f6" /> {/* IN_TRANSIT */}
+                                        <Cell fill="#10b981" /> {/* DELIVERED */}
+                                    </Pie>
+                                    <Tooltip />
+                                </PieChart>
+                            </ResponsiveContainer>
+                        </div>
+                        <div className="bg-white rounded-xl shadow-sm border border-zinc-200 p-6 flex-1 overflow-y-auto">
+                            <h3 className="text-sm font-semibold text-zinc-700 mb-4">Pedidos Recentes</h3>
+                            <div className="space-y-2">
+                                {orders.slice(0, 5).map(order => (
+                                    <div key={order.id} className="flex justify-between items-center text-sm border-b border-zinc-50 py-2">
+                                        <span className="text-zinc-600">#{order.id.slice(0, 6)}</span>
+                                        <span className={`px-2 py-0.5 rounded-full text-xs ${order.status === 'DELIVERED' ? 'bg-emerald-100 text-emerald-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                                            {order.status}
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     </div>
 
-                    {/* Map View */}
-                    <div className="lg:col-span-2 bg-zinc-200 rounded-xl overflow-hidden shadow-sm border border-zinc-300 relative">
-                        <Map
-                            drivers={drivers}
-                        />
+                    {/* Map View - Takes up 2 columns */}
+                    <div className="lg:col-span-2 bg-zinc-200 rounded-xl overflow-hidden shadow-sm border border-zinc-300 relative flex flex-col">
+                        <div className="absolute top-4 left-4 z-[1000] bg-white/90 backdrop-blur px-3 py-1 rounded-full text-xs font-medium text-zinc-600 shadow-sm">
+                            Mapa em Tempo Real ({drivers.length} entregadores)
+                        </div>
+                        <Map drivers={drivers} />
                     </div>
                 </div>
             </main>

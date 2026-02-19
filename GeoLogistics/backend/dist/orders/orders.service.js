@@ -56,6 +56,25 @@ let OrdersService = class OrdersService {
     remove(id) {
         return this.orderRepository.delete(id);
     }
+    async getStats() {
+        const totalOrders = await this.orderRepository.count();
+        const statusCounts = await this.orderRepository
+            .createQueryBuilder('order')
+            .select('order.status', 'status')
+            .addSelect('COUNT(order.status)', 'count')
+            .groupBy('order.status')
+            .getRawMany();
+        const revenue = await this.orderRepository
+            .createQueryBuilder('order')
+            .select('SUM(order.price)', 'total')
+            .where('order.status = :status', { status: order_entity_1.OrderStatus.DELIVERED })
+            .getRawOne();
+        return {
+            totalOrders,
+            statusCounts: statusCounts.reduce((acc, curr) => ({ ...acc, [curr.status]: Number(curr.count) }), {}),
+            totalRevenue: Number(revenue?.total || 0),
+        };
+    }
 };
 exports.OrdersService = OrdersService;
 exports.OrdersService = OrdersService = __decorate([
