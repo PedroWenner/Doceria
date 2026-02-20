@@ -338,7 +338,7 @@ export default function ExpenseModal({ isOpen, onClose, onSuccess, expense }: Ex
                                             </div>
                                             <div>
                                                 <a
-                                                    href={`${process.env.NEXT_PUBLIC_API_URL.replace('/api', '')}/storage/${att.file_path}`}
+                                                    href={`${(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api').replace('/api', '')}/storage/${att.file_path}`}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
                                                     className="text-sm font-medium text-slate-700 dark:text-slate-200 hover:underline hover:text-blue-600"

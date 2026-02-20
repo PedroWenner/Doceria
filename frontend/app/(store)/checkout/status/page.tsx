@@ -2,7 +2,8 @@
 
 import React, { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { useAuth } from '@/app/context/StoreAuthContext';
+import { useStoreAuth } from '@/app/context/StoreAuthContext';
+import Cookies from 'js-cookie';
 import { CheckCircle2, XCircle, AlertCircle, Loader2, ArrowRight, ShoppingBag } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'react-hot-toast';
@@ -10,7 +11,8 @@ import { toast } from 'react-hot-toast';
 function StatusContent() {
     const searchParams = useSearchParams();
     const router = useRouter();
-    const { token } = useAuth();
+    const { user } = useStoreAuth();
+    const token = Cookies.get('store_token');
 
     // MP Params: payment_id, status, external_reference, preference_id
     const paymentId = searchParams.get('payment_id');

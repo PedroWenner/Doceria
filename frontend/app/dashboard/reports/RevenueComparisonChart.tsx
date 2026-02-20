@@ -56,14 +56,14 @@ export default function RevenueComparisonChart({ primaryData, comparisonData }: 
                             backgroundColor: '#fff',
                             color: '#1e293b'
                         }}
-                        formatter={(value: number, name: string) => {
+                        formatter={(value: any, name: any) => {
                             const labels: Record<string, string> = {
                                 primaryRevenue: 'Revenue',
                                 primaryExpenses: 'Expenses',
                                 primaryProfit: 'Profit',
                                 compareRevenue: 'Comparison Rev.'
                             };
-                            return [displayCurrency(value), labels[name] || name] as [string, string];
+                            return [displayCurrency(Number(value) || 0), labels[name] || name] as [string, string];
                         }}
                     />
                     <Legend iconType="circle" />

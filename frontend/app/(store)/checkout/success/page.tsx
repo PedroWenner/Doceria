@@ -2,13 +2,13 @@
 
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useCart } from '@/app/context/CartContext';
 import confetti from 'canvas-confetti';
 import jsCookie from 'js-cookie';
 import { toast } from 'react-hot-toast';
 
-export default function CheckoutSuccessPage() {
+function SuccessContent() {
     const searchParams = useSearchParams();
     const orderId = searchParams.get('order_id');
     const { clearCart } = useCart();
@@ -180,5 +180,13 @@ export default function CheckoutSuccessPage() {
             </div>
 
         </div>
+    );
+}
+
+export default function CheckoutSuccessPage() {
+    return (
+        <Suspense fallback={<div className="min-h-[60vh] flex items-center justify-center">Carregando...</div>}>
+            <SuccessContent />
+        </Suspense>
     );
 }

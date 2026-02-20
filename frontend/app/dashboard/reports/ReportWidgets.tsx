@@ -47,7 +47,7 @@ export default function ReportWidgets({ data, isLoading }: Props) {
                                         <Cell key={`cell-${index}`} fill={entry.color || COLORS[index % COLORS.length]} />
                                     ))}
                                 </Pie>
-                                <Tooltip formatter={(value: number) => displayCurrency(value)} />
+                                <Tooltip formatter={(value: any) => displayCurrency(Number(value) || 0)} />
                                 <Legend />
                             </PieChart>
                         </ResponsiveContainer>
@@ -81,7 +81,7 @@ export default function ReportWidgets({ data, isLoading }: Props) {
                                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                                     ))}
                                 </Pie>
-                                <Tooltip formatter={(value: number) => displayCurrency(value)} />
+                                <Tooltip formatter={(value: any) => displayCurrency(Number(value) || 0)} />
                                 <Legend />
                             </PieChart>
                         </ResponsiveContainer>

@@ -159,6 +159,47 @@ class OrderController extends Controller
         
         return $this->success($orders);
     }
+
+    /**
+     * Estimate Delivery Fee
+     */
+    public function estimateDelivery(Request $request)
+    {
+        $validated = $request->validate([
+            'address_id' => 'required|exists:customer_addresses,id'
+        ]);
+
+        $address = $request->user()->addresses()->findOrFail($validated['address_id']);
+
+        if (!$address->latitude || !$address->longitude) {
+            return $this->error('The selected address does not have valid coordinates. Please delete and recreate it.', 400);
+        }
+
+        // Get origin from CompanySettings
+        $setting = \App\Models\CompanySetting::first();
+        if (!$setting || !$setting->latitude || !$setting->longitude) {
+            return $this->error('The store does not have valid origin coordinates configured.', 400);
+        }
+
+        try {
+            /** @var \App\Services\GeoLogisticsService $geoService */
+            $geoService = app(\App\Services\GeoLogisticsService::class);
+            $estimate = $geoService->estimate(
+                (float) $setting->latitude, 
+                (float) $setting->longitude, 
+                (float) $address->latitude, 
+                (float) $address->longitude
+            );
+
+            return $this->success([
+                'distance_meters' => $estimate['distance'] ?? 0,
+                'duration_seconds' => $estimate['duration'] ?? 0,
+                'fee' => $estimate['price'] ?? 0
+            ], 'Delivery fee estimated successfully');
+        } catch (\Exception $e) {
+            return $this->error('Failed to estimate delivery fee: ' . $e->getMessage(), 500);
+        }
+    }
     public function show(Request $request, Order $order)
     {
         // Security: Ensure user owns the order

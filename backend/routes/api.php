@@ -117,9 +117,14 @@ Route::post('/webhooks/geologistics', [App\Http\Controllers\WebhookController::c
 
 // Authenticated Routes (Customers & Admins)
 Route::group(['middleware' => ['api', 'auth:api']], function () {
+    // Orders
     Route::get('orders/my-orders', [App\Http\Controllers\OrderController::class, 'myOrders']);
     Route::post('orders', [App\Http\Controllers\OrderController::class, 'store']);
     Route::post('orders/{order}/pay', [App\Http\Controllers\PaymentController::class, 'payOrder']);
     Route::post('orders/{order}/verify-payment', [App\Http\Controllers\OrderController::class, 'verifyPayment']);
     Route::get('orders/{order}', [App\Http\Controllers\OrderController::class, 'show']);
+
+    // Customer Addresses
+    Route::apiResource('addresses', App\Http\Controllers\CustomerAddressController::class);
+    Route::post('delivery/estimate', [App\Http\Controllers\OrderController::class, 'estimateDelivery']);
 });

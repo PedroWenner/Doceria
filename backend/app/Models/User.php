@@ -92,4 +92,9 @@ class User extends Authenticatable implements JWTSubject, Auditable
     {
         $this->notify(new \App\Notifications\ResetPasswordNotification($token));
     }
+
+    public function addresses()
+    {
+        return $this->hasMany(CustomerAddress::class);
+    }
 }

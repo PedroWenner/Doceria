@@ -3,9 +3,9 @@
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useCart } from '@/app/context/CartContext';
-import { useEffect } from 'react';
+import { useEffect, Suspense } from 'react';
 
-export default function CheckoutPendingPage() {
+function PendingContent() {
     const searchParams = useSearchParams();
     const orderId = searchParams.get('order_id');
     const { clearCart } = useCart();
@@ -33,5 +33,13 @@ export default function CheckoutPendingPage() {
                 </Link>
             </div>
         </div>
+    );
+}
+
+export default function CheckoutPendingPage() {
+    return (
+        <Suspense fallback={<div className="min-h-[60vh] flex items-center justify-center">Carregando...</div>}>
+            <PendingContent />
+        </Suspense>
     );
 }

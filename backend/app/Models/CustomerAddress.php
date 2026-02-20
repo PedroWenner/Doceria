@@ -20,6 +20,8 @@ class CustomerAddress extends Model
         'city',
         'state',
         'zip_code',
+        'latitude',
+        'longitude',
         'is_default'
     ];
 

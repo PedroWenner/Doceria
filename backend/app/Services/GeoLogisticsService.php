@@ -103,15 +103,39 @@ class GeoLogisticsService
     }
 
     /**
+     * Get the tenant info associated with the API Key
+     */
+    public function getTenant()
+    {
+        $response = $this->client()->get('/tenants', [
+            'api_key' => $this->apiKey
+        ]);
+
+        if ($response->successful()) {
+            $tenants = $response->json();
+            if (is_array($tenants) && count($tenants) > 0) {
+                return $tenants[0]; // Returning the first matched tenant
+            }
+        }
+        return null;
+    }
+
+    /**
      * Estimate shipping cost
      */
     public function estimate(float $pLat, float $pLon, float $dLat, float $dLon)
     {
+        $tenant = $this->getTenant();
+        if (!$tenant) {
+            throw new \Exception('Tenant configuration missing or invalid API Key.');
+        }
+
         return $this->client()->get('/routing/estimate', [
-            'origin_lat' => $pLat,
-            'origin_lon' => $pLon,
-            'dest_lat' => $dLat,
-            'dest_lon' => $dLon,
+            'tenantId' => $tenant['id'],
+            'originLat' => $pLat,
+            'originLon' => $pLon,
+            'destLat' => $dLat,
+            'destLon' => $dLon,
         ])->json();
     }
 }

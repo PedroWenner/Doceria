@@ -69,6 +69,9 @@ function StoreLayoutContent({ children }: { children: React.ReactNode }) {
                         <Link href="/orders" className="block w-full text-left px-4 py-2 text-sm text-gray-500 hover:text-gray-900 hover:bg-gray-50 font-bold transition-colors flex items-center gap-2">
                             <span>📦</span> Meus Pedidos
                         </Link>
+                        <Link href="/profile/addresses" className="block w-full text-left px-4 py-2 text-sm text-gray-500 hover:text-gray-900 hover:bg-gray-50 font-bold transition-colors flex items-center gap-2">
+                            <span>📍</span> Meus Endereços
+                        </Link>
                         <button
                             onClick={() => { setShowProfileMenu(false); logout(); }}
                             className="w-full text-left px-4 py-2 text-sm text-gray-500 hover:text-gray-900 hover:bg-gray-50 font-bold transition-colors flex items-center gap-2"
@@ -144,13 +147,16 @@ function StoreLayoutContent({ children }: { children: React.ReactNode }) {
                             {/* Desktop Menu */}
                             {showProfileMenu && (
                                 <div className="absolute top-full right-0 mt-3 w-48 bg-white rounded-xl shadow-xl border overflow-hidden py-2 animate-fadeIn ring-1"
-                                    style={{ borderColor: 'var(--store-border)', ringColor: 'var(--store-ring)' }}>
+                                    style={{ borderColor: 'var(--store-border)', '--tw-ring-color': 'var(--store-ring)' } as React.CSSProperties}>
                                     <div className="px-4 py-3 border-b mb-1" style={{ borderColor: 'var(--store-border)' }}>
                                         <p className="text-xs mb-0.5" style={{ color: 'var(--store-text-muted)' }}>Logado como</p>
                                         <p className="font-bold truncate text-sm" style={{ color: 'var(--store-text)' }}>{user.name}</p>
                                     </div>
                                     <Link href="/orders" className="block w-full text-left px-4 py-2.5 text-sm font-medium transition-colors flex items-center gap-2 hover:bg-gray-50" style={{ color: 'var(--store-text-muted)' }}>
                                         <span>📦</span> Meus Pedidos
+                                    </Link>
+                                    <Link href="/profile/addresses" className="block w-full text-left px-4 py-2.5 text-sm font-medium transition-colors flex items-center gap-2 hover:bg-gray-50" style={{ color: 'var(--store-text-muted)' }}>
+                                        <span>📍</span> Meus Endereços
                                     </Link>
                                     <button
                                         onClick={() => {
@@ -245,6 +251,9 @@ function StoreLayoutContent({ children }: { children: React.ReactNode }) {
                     </div>
                     <Link href="/orders" className="block w-full text-left px-4 py-2 text-sm text-gray-500 hover:text-gray-900 hover:bg-gray-50 font-medium transition-colors flex items-center gap-2">
                         <span>📦</span> Meus Pedidos
+                    </Link>
+                    <Link href="/profile/addresses" className="block w-full text-left px-4 py-2 text-sm text-gray-500 hover:text-gray-900 hover:bg-gray-50 font-medium transition-colors flex items-center gap-2">
+                        <span>📍</span> Meus Endereços
                     </Link>
                     <button
                         onClick={() => {

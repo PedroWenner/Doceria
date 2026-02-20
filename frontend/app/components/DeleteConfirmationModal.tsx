@@ -5,11 +5,12 @@ interface DeleteConfirmationModalProps {
     isOpen: boolean;
     onClose: () => void;
     onConfirm: () => void;
+    title?: string;
     message?: string;
     isDeleting?: boolean;
 }
 
-export default function DeleteConfirmationModal({ isOpen, onClose, onConfirm, message, isDeleting = false }: DeleteConfirmationModalProps) {
+export default function DeleteConfirmationModal({ isOpen, onClose, onConfirm, title, message, isDeleting = false }: DeleteConfirmationModalProps) {
     const { t } = useLanguage();
 
     if (!isOpen) return null;
@@ -21,7 +22,7 @@ export default function DeleteConfirmationModal({ isOpen, onClose, onConfirm, me
                     <div className="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto text-red-600 dark:text-red-500">
                         <AlertTriangle size={24} />
                     </div>
-                    <h3 className="text-lg font-bold text-slate-900 dark:text-slate-50">{t('common.delete_confirm_title') || 'Confirmar Exclusão'}</h3>
+                    <h3 className="text-lg font-bold text-slate-900 dark:text-slate-50">{title || t('common.delete_confirm_title') || 'Confirmar Exclusão'}</h3>
                     <p className="text-slate-600 dark:text-slate-400 text-sm">
                         {message || t('common.delete_confirm_message') || 'Tem certeza que deseja excluir este item? Esta ação não pode ser desfeita.'}
                     </p>

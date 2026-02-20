@@ -8,8 +8,13 @@ import { toast } from 'react-hot-toast';
 import Link from 'next/link';
 import jsCookie from 'js-cookie';
 import LoadingSpinner from '@/app/components/LoadingSpinner';
-import LocationMap from '@/app/components/LocationMap';
-import { MapPin, X } from 'lucide-react';
+import AddressModal from '@/app/components/store/AddressModal';
+import dynamic from 'next/dynamic';
+const LocationMap = dynamic(() => import('@/app/components/LocationMap'), {
+    ssr: false,
+    loading: () => <div className="animate-pulse bg-gray-100 rounded-xl h-[300px] w-full" />
+});
+import { MapPin, Plus, Home, Briefcase, X } from 'lucide-react';
 import { initMercadoPago, Payment } from '@mercadopago/sdk-react';
 
 interface PaymentMethod {
@@ -48,6 +53,14 @@ export default function CheckoutPage() {
     const [settings, setSettings] = useState<CompanySettings | null>(null);
     const [isMapOpen, setIsMapOpen] = useState(false);
     const [isLoadingSettings, setIsLoadingSettings] = useState(true);
+
+    // Delivery States
+    const [deliveryType, setDeliveryType] = useState<'pickup' | 'delivery'>('pickup');
+    const [customerAddresses, setCustomerAddresses] = useState<any[]>([]);
+    const [selectedAddressId, setSelectedAddressId] = useState<number | null>(null);
+    const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
+    const [deliveryFee, setDeliveryFee] = useState(0);
+    const [isCalculatingFee, setIsCalculatingFee] = useState(false);
 
     // Derived State & Memoization (Moved up to avoid Hook Order errors)
     const isMoney = paymentMethods.find(m => m.id === selectedMethodId)?.slug.includes('money') ||
@@ -106,6 +119,45 @@ export default function CheckoutPage() {
         }
     }, [paymentMethods, initializationRef]);
 
+    // Calculate Delivery Fee
+    useEffect(() => {
+        const calculateDeliveryFee = async () => {
+            if (deliveryType === 'pickup' || !selectedAddressId) {
+                setDeliveryFee(0);
+                return;
+            }
+
+            setIsCalculatingFee(true);
+            try {
+                const token = jsCookie.get('store_token');
+                const res = await fetch(`${apiUrl}/delivery/estimate`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ address_id: selectedAddressId })
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    setDeliveryFee(data.data?.fee || 0);
+                } else {
+                    const err = await res.json();
+                    toast.error(err.message || 'Erro ao calcular frete.');
+                    setDeliveryFee(0);
+                }
+            } catch (error) {
+                console.error('Error calculating delivery fee', error);
+                setDeliveryFee(0);
+            } finally {
+                setIsCalculatingFee(false);
+            }
+        };
+
+        calculateDeliveryFee();
+    }, [deliveryType, selectedAddressId, apiUrl]);
+
     // Fetch Payment Methods
     useEffect(() => {
         const fetchMethods = async () => {
@@ -156,6 +208,34 @@ export default function CheckoutPage() {
         fetchSettings();
     }, [apiUrl]);
 
+    // Fetch Customer Addresses
+    useEffect(() => {
+        const fetchAddresses = async () => {
+            if (!user) return;
+            try {
+                const token = jsCookie.get('store_token');
+                const res = await fetch(`${apiUrl}/addresses`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    setCustomerAddresses(data.data || []);
+                    // Auto-select default address
+                    const defaultAddr = data.data?.find((a: any) => a.is_default);
+                    if (defaultAddr) setSelectedAddressId(defaultAddr.id);
+                }
+            } catch (error) {
+                console.error('Error fetching addresses', error);
+            }
+        };
+
+        if (user) {
+            fetchAddresses();
+        }
+    }, [apiUrl, user]);
+
     // Calculate Discount
     useEffect(() => {
         if (!selectedMethodId) return;
@@ -196,7 +276,6 @@ export default function CheckoutPage() {
 
     if (isLoadingMethods) return <LoadingSpinner />;
 
-    // Handle Brick Submission (Pay Online)
     const handleBrickSubmit = async (param: any) => {
         const { formData } = param;
         if (!user || !selectedMethodId) return false;
@@ -204,6 +283,23 @@ export default function CheckoutPage() {
         try {
             const token = jsCookie.get('store_token');
             const selectedMethod = paymentMethods.find(m => m.id === selectedMethodId);
+
+            // Format delivery address if needed
+            let formattedAddress = null;
+            if (deliveryType === 'delivery' && selectedAddressId) {
+                const addr = customerAddresses.find(a => a.id === selectedAddressId);
+                if (addr) {
+                    formattedAddress = {
+                        street: addr.street,
+                        number: addr.number,
+                        neighborhood: addr.neighborhood,
+                        city: addr.city,
+                        state: addr.state,
+                        zip_code: addr.zip_code,
+                        complement: addr.complement
+                    };
+                }
+            }
 
             // 1. Create Order
             const orderData = {
@@ -215,11 +311,11 @@ export default function CheckoutPage() {
                 })),
                 total_amount: finalTotal,
                 payment_method: selectedMethod?.slug,
-                delivery_type: 'pickup',
-                delivery_address: null,
+                delivery_type: deliveryType,
+                delivery_address: formattedAddress,
                 notes: JSON.stringify({
                     change_for: null,
-                    pickup_info: 'Retirada em Rua das Gostosuras, 123'
+                    pickup_info: deliveryType === 'pickup' ? 'Retirada na loja' : `Entregar em: ${formattedAddress?.street}, ${formattedAddress?.number}`
                 })
             };
 
@@ -284,6 +380,23 @@ export default function CheckoutPage() {
 
         const selectedMethod = paymentMethods.find(m => m.id === selectedMethodId);
 
+        // Format delivery address if needed
+        let formattedAddress = null;
+        if (deliveryType === 'delivery' && selectedAddressId) {
+            const addr = customerAddresses.find(a => a.id === selectedAddressId);
+            if (addr) {
+                formattedAddress = {
+                    street: addr.street,
+                    number: addr.number,
+                    neighborhood: addr.neighborhood,
+                    city: addr.city,
+                    state: addr.state,
+                    zip_code: addr.zip_code,
+                    complement: addr.complement
+                };
+            }
+        }
+
         const orderData = {
             items: items.map(item => ({
                 product_id: item.product.id,
@@ -293,11 +406,11 @@ export default function CheckoutPage() {
             })),
             total_amount: finalTotal,
             payment_method: selectedMethod?.slug,
-            delivery_type: 'pickup',
-            delivery_address: null,
+            delivery_type: deliveryType,
+            delivery_address: formattedAddress,
             notes: JSON.stringify({
                 change_for: selectedMethod?.slug === 'money' || selectedMethod?.slug === 'dinheiro' ? changeFor : null,
-                pickup_info: 'Retirada em Rua das Gostosuras, 123'
+                pickup_info: deliveryType === 'pickup' ? 'Retirada na loja' : `Entregar em: ${formattedAddress?.street}, ${formattedAddress?.number}`
             })
         };
 
@@ -356,44 +469,88 @@ export default function CheckoutPage() {
                     {/* Left Column - Forms */}
                     <div className="md:col-span-2 space-y-6">
 
-                        {/* 1. Withdrawal Info */}
+                        {/* 1. Delivery Options */}
                         <section className="p-6 rounded-xl shadow-sm border"
                             style={{
                                 backgroundColor: 'var(--store-card)',
                                 borderColor: 'var(--store-border)'
                             }}>
-                            <div className="flex items-start gap-5">
-                                <div className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl grayscale"
-                                    style={{ backgroundColor: 'var(--store-bg)' }}>
-                                    🏪
-                                </div>
-                                <div>
-                                    <h3 className="font-bold text-lg" style={{ color: 'var(--store-text)' }}>Retirada na Loja</h3>
-                                    <div className="leading-relaxed text-sm mb-4" style={{ color: 'var(--store-text-muted)' }}>
-                                        {settings ? (
-                                            <>
-                                                {settings.street || 'Endereço não configurado'}, {settings.number}<br />
-                                                {settings.neighborhood && <>{settings.neighborhood},</>} {settings.city} {settings.state ? `- ${settings.state}` : ''}
-                                            </>
-                                        ) : (
-                                            <span className="animate-pulse bg-gray-200 h-4 w-32 block rounded"></span>
-                                        )}
+                            <h3 className="font-bold text-lg mb-4" style={{ color: 'var(--store-text)' }}>Opções de Entrega</h3>
+                            <div className="grid grid-cols-2 gap-4 mb-6">
+                                <button
+                                    onClick={() => setDeliveryType('pickup')}
+                                    className={`flex p-3 rounded-lg border-2 font-bold text-sm items-center justify-center gap-2 transition-colors ${deliveryType === 'pickup' ? 'opacity-100 shadow-sm' : 'opacity-60'}`}
+                                    style={{ borderColor: deliveryType === 'pickup' ? 'var(--store-text)' : 'var(--store-border)', backgroundColor: 'transparent', color: 'var(--store-text)' }}
+                                >
+                                    🏪 Retirar
+                                </button>
+                                <button
+                                    onClick={() => setDeliveryType('delivery')}
+                                    className={`flex p-3 rounded-lg border-2 font-bold text-sm items-center justify-center gap-2 transition-colors ${deliveryType === 'delivery' ? 'opacity-100 shadow-sm' : 'opacity-60'}`}
+                                    style={{ borderColor: deliveryType === 'delivery' ? 'var(--store-text)' : 'var(--store-border)', backgroundColor: 'transparent', color: 'var(--store-text)' }}
+                                >
+                                    🛵 Entrega
+                                </button>
+                            </div>
+
+                            {deliveryType === 'pickup' ? (
+                                <div className="flex items-start gap-4 p-4 rounded-xl" style={{ backgroundColor: 'var(--store-bg)' }}>
+                                    <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl grayscale bg-white shadow-sm border" style={{ borderColor: 'var(--store-border)' }}>
+                                        🏪
                                     </div>
-                                    <div className="mt-4 flex items-center gap-3">
-                                        <button
-                                            type="button"
-                                            onClick={() => setIsMapOpen(true)}
-                                            disabled={!settings?.latitude || !settings.longitude}
-                                            className="text-xs font-bold hover:underline flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed group transition-all"
-                                            style={{ color: 'var(--store-text)' }}
-                                            title={(!settings?.latitude || !settings.longitude) ? 'Localização não cadastrada' : 'Ver localização exata'}
-                                        >
-                                            <MapPin size={12} className="group-hover:scale-110 transition-transform" />
-                                            {(!settings?.latitude || !settings.longitude) ? 'Mapa indisponível' : 'Ver no mapa ↗'}
+                                    <div className="flex-1">
+                                        <h4 className="font-bold text-sm mb-1" style={{ color: 'var(--store-text)' }}>Retirar no local</h4>
+                                        <div className="text-xs leading-relaxed" style={{ color: 'var(--store-text-muted)' }}>
+                                            {settings ? (
+                                                <>
+                                                    {settings.street || 'Endereço não configurado'}, {settings.number}<br />
+                                                    {settings.neighborhood && <>{settings.neighborhood},</>} {settings.city}
+                                                </>
+                                            ) : (
+                                                <span className="animate-pulse bg-gray-200 h-3 w-24 block rounded"></span>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div>
+                                    <div className="flex justify-between items-center mb-3">
+                                        <h4 className="font-bold text-sm" style={{ color: 'var(--store-text)' }}>Seus Endereços</h4>
+                                        <button onClick={() => setIsAddressModalOpen(true)} className="text-xs font-bold transition-opacity hover:opacity-80 flex items-center gap-1" style={{ color: 'var(--store-primary)' }}>
+                                            <Plus size={14} /> Novo Endereço
                                         </button>
                                     </div>
+
+                                    {customerAddresses.length === 0 ? (
+                                        <div className="text-center p-6 border border-dashed rounded-xl" style={{ borderColor: 'var(--store-border)' }}>
+                                            <p className="text-sm mb-3" style={{ color: 'var(--store-text-muted)' }}>Nenhum endereço salvo.</p>
+                                        </div>
+                                    ) : (
+                                        <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                                            {customerAddresses.map(address => (
+                                                <label key={address.id} className={`flex items-start gap-3 p-4 rounded-xl border-2 transition-all cursor-pointer ${selectedAddressId === address.id ? 'opacity-100' : 'opacity-60 hover:opacity-100'}`} style={{ borderColor: selectedAddressId === address.id ? 'var(--store-text)' : 'var(--store-border)', backgroundColor: selectedAddressId === address.id ? 'var(--store-bg)' : 'transparent' }}>
+                                                    <input
+                                                        type="radio"
+                                                        name="address"
+                                                        className="mt-1 flex-shrink-0 cursor-pointer"
+                                                        checked={selectedAddressId === address.id}
+                                                        onChange={() => setSelectedAddressId(address.id)}
+                                                        style={{ accentColor: 'var(--store-primary)' }}
+                                                    />
+                                                    <div>
+                                                        <span className="font-bold text-sm block flex items-center gap-1" style={{ color: 'var(--store-text)' }}>
+                                                            {address.name.toLowerCase().includes('casa') ? <Home size={12} /> : (address.name.toLowerCase().includes('trabalho') ? <Briefcase size={12} /> : <MapPin size={12} />)}
+                                                            {address.name}
+                                                        </span>
+                                                        <span className="text-xs block mt-1" style={{ color: 'var(--store-text-muted)' }}>{address.street}, {address.number} {address.complement ? `- ${address.complement}` : ''}</span>
+                                                        <span className="text-[10px] uppercase font-bold tracking-wider opacity-70 mt-1 block" style={{ color: 'var(--store-text-muted)' }}>{address.neighborhood}</span>
+                                                    </div>
+                                                </label>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
-                            </div>
+                            )}
                         </section>
 
                         {/* 2. Payment Method */}
@@ -504,6 +661,18 @@ export default function CheckoutPage() {
                                         <span className="text-gray-300">-</span>
                                     )}
                                 </div>
+                                {deliveryType === 'delivery' && (
+                                    <div className="flex justify-between text-sm" style={{ color: 'var(--store-text-muted)' }}>
+                                        <span>Taxa de Entrega</span>
+                                        {isCalculatingFee ? (
+                                            <span className="animate-pulse">Calculando...</span>
+                                        ) : (
+                                            <span className="font-bold">
+                                                {deliveryFee > 0 ? `+ R$ ${deliveryFee.toFixed(2).replace('.', ',')}` : 'Grátis'}
+                                            </span>
+                                        )}
+                                    </div>
+                                )}
                                 <div className="flex justify-between text-xl font-extrabold mt-6 pt-4 border-t"
                                     style={{ color: 'var(--store-text)', borderColor: 'var(--store-border)' }}>
                                     <span>Total</span>

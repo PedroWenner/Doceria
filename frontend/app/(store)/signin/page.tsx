@@ -1,12 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { useStoreAuth } from '@/app/context/StoreAuthContext'; // Updated import
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { toast } from 'react-hot-toast';
 
-export default function SigninPage() {
+function SigninContent() {
     const { login } = useStoreAuth(); // Use store auth
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -151,5 +151,13 @@ export default function SigninPage() {
                 </div>
             </div>
         </div>
+    );
+}
+
+export default function SigninPage() {
+    return (
+        <Suspense fallback={<div className="min-h-[80vh] flex items-center justify-center">Loading...</div>}>
+            <SigninContent />
+        </Suspense>
     );
 }
