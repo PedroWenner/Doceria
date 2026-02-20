@@ -246,7 +246,9 @@ export const translations = {
                 fixed_driver_id: 'Entregador Padrão',
                 fixed_driver_id_hint: 'Usuário que será selecionado automaticamente para entregas.',
                 use_delivery_routine: 'Usar Rotina de Entrega',
-                delivery_routine_desc: 'Habilita atribuição automática de pedidos e acompanhamento de entregas.'
+                delivery_routine_desc: 'Habilita atribuição automática de pedidos e acompanhamento de entregas.',
+                geologistics_api_key: 'Chave API GeoLogistics',
+                geologistics_api_key_hint: 'Obrigatório para sincronizar rotinas com o microserviço de entregas.'
             },
             visual: {
                 title: 'Identidade Visual',
@@ -763,7 +765,9 @@ export const translations = {
                 fixed_driver_id: 'Default Driver',
                 fixed_driver_id_hint: 'User who will be automatically selected for deliveries.',
                 use_delivery_routine: 'Use Delivery Routine',
-                delivery_routine_desc: 'Enable automatic order assignment and delivery tracking.'
+                delivery_routine_desc: 'Enable automatic order assignment and delivery tracking.',
+                geologistics_api_key: 'GeoLogistics API Key',
+                geologistics_api_key_hint: 'Required to synchronize routines with the delivery microservice.'
             },
             visual: {
                 title: 'Visual Identity',

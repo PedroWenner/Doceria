@@ -11,12 +11,24 @@ class GeoLogisticsService
 
     public function __construct()
     {
-        $this->baseUrl = env('GEOLOGISTICS_BASE_URL');
-        $this->apiKey = env('GEOLOGISTICS_API_KEY');
+        $this->baseUrl = env('GEOLOGISTICS_BASE_URL', 'http://localhost:3001');
+        
+        $setting = \App\Models\CompanySetting::first();
+        if ($setting) {
+            $this->apiKey = $setting->geologistics_api_key ?? '';
+        } else {
+            $this->apiKey = '';
+        }
     }
 
     protected function client()
     {
+        if (empty($this->apiKey)) {
+            // Se a chave não estiver configurada ou a rotina não estiver em uso,
+            // podemos retornar uma instância que falha propositalmente ou deixar a requisição seguir sem chave.
+            // Para manter a coerência caso haja erro de contrato:
+        }
+
         return Http::withHeaders([
             'x-api-key' => $this->apiKey,
             'Content-Type' => 'application/json',

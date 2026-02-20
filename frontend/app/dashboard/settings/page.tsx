@@ -73,7 +73,7 @@ export default function SettingsPage() {
         orders_refresh_rate: 60, auth_token_expiration: 60, pagination_limit: 10,
         // Operational
         enable_stock_control: true, global_min_stock: 5,
-        use_delivery_routine: false, use_fixed_driver: false,
+        use_delivery_routine: false, use_fixed_driver: false, geologistics_api_key: '',
         whatsapp_number: '', delivery_message: '',
         latitude: '', longitude: ''
     });
@@ -113,6 +113,7 @@ export default function SettingsPage() {
                     global_min_stock: response.data.global_min_stock || 5,
                     use_delivery_routine: response.data.use_delivery_routine ?? false,
                     use_fixed_driver: response.data.use_fixed_driver ?? false,
+                    geologistics_api_key: response.data.geologistics_api_key || '',
                     latitude: response.data.latitude || '',
                     longitude: response.data.longitude || ''
                 }));
@@ -576,21 +577,39 @@ export default function SettingsPage() {
                                     <Truck size={16} /> {t('settings.operational.logistics')}
                                 </h3>
                                 <div className="grid md:grid-cols-2 gap-4">
-                                    <div className="flex items-center gap-3 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-700">
-                                        <label className="relative inline-flex items-center cursor-pointer">
-                                            <input
-                                                type="checkbox"
-                                                name="use_delivery_routine"
-                                                checked={formData.use_delivery_routine}
-                                                onChange={handleChange}
-                                                className="sr-only peer"
-                                            />
-                                            <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-slate-300 dark:peer-focus:ring-slate-800 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-slate-900"></div>
-                                        </label>
-                                        <div>
-                                            <span className="font-medium text-slate-700 dark:text-slate-200 text-sm block">{t('settings.operational.use_delivery_routine')}</span>
-                                            <span className="text-xs text-slate-500 dark:text-slate-400">{t('settings.operational.delivery_routine_desc')}</span>
+                                    <div className="flex flex-col gap-3 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-700">
+                                        <div className="flex items-center gap-3">
+                                            <label className="relative inline-flex items-center cursor-pointer">
+                                                <input
+                                                    type="checkbox"
+                                                    name="use_delivery_routine"
+                                                    checked={formData.use_delivery_routine}
+                                                    onChange={handleChange}
+                                                    className="sr-only peer"
+                                                />
+                                                <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-slate-300 dark:peer-focus:ring-slate-800 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-slate-900"></div>
+                                            </label>
+                                            <div>
+                                                <span className="font-medium text-slate-700 dark:text-slate-200 text-sm block">{t('settings.operational.use_delivery_routine')}</span>
+                                                <span className="text-xs text-slate-500 dark:text-slate-400">{t('settings.operational.delivery_routine_desc')}</span>
+                                            </div>
                                         </div>
+
+                                        {formData.use_delivery_routine && (
+                                            <div className="mt-2 animate-in slide-in-from-top-2 duration-200">
+                                                <InputLabel icon={Key}>{t('settings.operational.geologistics_api_key')}</InputLabel>
+                                                <input
+                                                    type="password"
+                                                    name="geologistics_api_key"
+                                                    value={formData.geologistics_api_key}
+                                                    onChange={handleChange}
+                                                    placeholder="sk_..."
+                                                    required
+                                                    className="w-full h-10 px-3 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-400 transition-all font-mono"
+                                                />
+                                                <HelperText>{t('settings.operational.geologistics_api_key_hint')}</HelperText>
+                                            </div>
+                                        )}
                                     </div>
 
                                     <div className="flex items-center gap-3 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-700">

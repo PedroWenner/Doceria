@@ -39,7 +39,8 @@ class CompanySetting extends Model implements Auditable
         'latitude',
         'longitude',
         'use_delivery_routine',
-        'use_fixed_driver'
+        'use_fixed_driver',
+        'geologistics_api_key'
     ];
 
     protected $casts = [

@@ -46,6 +46,7 @@ class CompanySettingController extends Controller
             'global_min_stock' => 'nullable|integer|min:0',
             'use_delivery_routine' => 'nullable|boolean',
             'use_fixed_driver' => 'nullable|boolean',
+            'geologistics_api_key' => 'required_if:use_delivery_routine,true|string|nullable',
             
             // Visual
             'logo_url' => 'nullable', 
