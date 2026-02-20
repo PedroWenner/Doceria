@@ -12,12 +12,16 @@ const typeorm_1 = require("@nestjs/typeorm");
 const drivers_service_1 = require("./drivers.service");
 const drivers_controller_1 = require("./drivers.controller");
 const driver_entity_1 = require("./entities/driver.entity");
+const tenants_module_1 = require("../tenants/tenants.module");
 let DriversModule = class DriversModule {
 };
 exports.DriversModule = DriversModule;
 exports.DriversModule = DriversModule = __decorate([
     (0, common_1.Module)({
-        imports: [typeorm_1.TypeOrmModule.forFeature([driver_entity_1.Driver])],
+        imports: [
+            typeorm_1.TypeOrmModule.forFeature([driver_entity_1.Driver]),
+            tenants_module_1.TenantsModule,
+        ],
         controllers: [drivers_controller_1.DriversController],
         providers: [drivers_service_1.DriversService],
     })

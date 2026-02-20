@@ -1,3 +1,4 @@
+import { Tenant } from '../../tenants/entities/tenant.entity';
 export declare enum DriverStatus {
     AVAILABLE = "AVAILABLE",
     BUSY = "BUSY",
@@ -14,6 +15,8 @@ export declare class Driver {
     status: DriverStatus;
     latitude: number;
     longitude: number;
+    tenant: Tenant;
+    tenantId: string;
     created_at: Date;
     updated_at: Date;
 }

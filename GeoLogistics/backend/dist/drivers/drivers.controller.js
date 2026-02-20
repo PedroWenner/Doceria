@@ -22,11 +22,11 @@ let DriversController = class DriversController {
     constructor(driversService) {
         this.driversService = driversService;
     }
-    create(createDriverDto) {
-        return this.driversService.create(createDriverDto);
+    create(createDriverDto, apiKey) {
+        return this.driversService.create(createDriverDto, apiKey);
     }
-    findAll(type) {
-        return this.driversService.findAll(type);
+    findAll(type, apiKey) {
+        return this.driversService.findAll(type, apiKey);
     }
     findOne(id) {
         return this.driversService.findOne(id);
@@ -45,15 +45,17 @@ exports.DriversController = DriversController;
 __decorate([
     (0, common_1.Post)(),
     __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Headers)('x-api-key')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [create_driver_dto_1.CreateDriverDto]),
+    __metadata("design:paramtypes", [create_driver_dto_1.CreateDriverDto, String]),
     __metadata("design:returntype", void 0)
 ], DriversController.prototype, "create", null);
 __decorate([
     (0, common_1.Get)(),
     __param(0, (0, common_1.Query)('type')),
+    __param(1, (0, common_1.Headers)('x-api-key')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", void 0)
 ], DriversController.prototype, "findAll", null);
 __decorate([

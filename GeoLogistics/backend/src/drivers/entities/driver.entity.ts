@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, Index } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, Index, ManyToOne, JoinColumn } from 'typeorm';
+import { Tenant } from '../../tenants/entities/tenant.entity';
 
 export enum DriverStatus {
     AVAILABLE = 'AVAILABLE',
@@ -38,6 +39,13 @@ export class Driver {
 
     @Column({ type: 'decimal', precision: 10, scale: 6, nullable: true })
     longitude: number;
+
+    @ManyToOne(() => Tenant, { nullable: true, onDelete: 'CASCADE' })
+    @JoinColumn({ name: 'tenant_id' })
+    tenant: Tenant;
+
+    @Column({ name: 'tenant_id', nullable: true })
+    tenantId: string;
 
     @CreateDateColumn()
     created_at: Date;

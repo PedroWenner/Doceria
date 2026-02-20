@@ -5,23 +5,48 @@ import { CreateDriverDto } from './dto/create-driver.dto';
 import { UpdateDriverDto } from './dto/update-driver.dto';
 import { UpdateDriverLocationDto } from './dto/update-driver-location.dto';
 import { Driver } from './entities/driver.entity';
+import { TenantsService } from '../tenants/tenants.service';
 
 @Injectable()
 export class DriversService {
   constructor(
     @InjectRepository(Driver)
     private driverRepository: Repository<Driver>,
+    private tenantsService: TenantsService,
   ) { }
 
-  create(createDriverDto: CreateDriverDto) {
-    return this.driverRepository.save(createDriverDto);
+  async create(createDriverDto: CreateDriverDto, apiKey?: string) {
+    const driver = this.driverRepository.create(createDriverDto);
+
+    if (apiKey) {
+      const tenants = await this.tenantsService.findAll(undefined, apiKey);
+      if (tenants.length > 0) {
+        driver.tenant = tenants[0];
+        driver.tenantId = tenants[0].id; // Optimization for direct column access
+      }
+    }
+
+    return this.driverRepository.save(driver);
   }
 
-  findAll(type?: string) {
+  async findAll(type?: string, apiKey?: string) {
+    const where: any = {};
+
     if (type) {
-      return this.driverRepository.find({ where: { type: type as any } });
+      where.type = type;
     }
-    return this.driverRepository.find();
+
+    if (apiKey) {
+      const tenants = await this.tenantsService.findAll(undefined, apiKey);
+      if (tenants.length > 0) {
+        where.tenantId = tenants[0].id;
+      } else {
+        // If API key is provided but invalid, return empty array to prevent data leak
+        return [];
+      }
+    }
+
+    return this.driverRepository.find({ where });
   }
 
   findOne(id: string) {

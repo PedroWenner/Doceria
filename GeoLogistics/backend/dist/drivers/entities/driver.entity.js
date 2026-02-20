@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Driver = exports.DriverType = exports.DriverStatus = void 0;
 const typeorm_1 = require("typeorm");
+const tenant_entity_1 = require("../../tenants/entities/tenant.entity");
 var DriverStatus;
 (function (DriverStatus) {
     DriverStatus["AVAILABLE"] = "AVAILABLE";
@@ -57,6 +58,15 @@ __decorate([
     (0, typeorm_1.Column)({ type: 'decimal', precision: 10, scale: 6, nullable: true }),
     __metadata("design:type", Number)
 ], Driver.prototype, "longitude", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => tenant_entity_1.Tenant, { nullable: true, onDelete: 'CASCADE' }),
+    (0, typeorm_1.JoinColumn)({ name: 'tenant_id' }),
+    __metadata("design:type", tenant_entity_1.Tenant)
+], Driver.prototype, "tenant", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ name: 'tenant_id', nullable: true }),
+    __metadata("design:type", String)
+], Driver.prototype, "tenantId", void 0);
 __decorate([
     (0, typeorm_1.CreateDateColumn)(),
     __metadata("design:type", Date)

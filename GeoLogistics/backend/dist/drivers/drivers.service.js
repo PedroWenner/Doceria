@@ -17,18 +17,38 @@ const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const driver_entity_1 = require("./entities/driver.entity");
+const tenants_service_1 = require("../tenants/tenants.service");
 let DriversService = class DriversService {
-    constructor(driverRepository) {
+    constructor(driverRepository, tenantsService) {
         this.driverRepository = driverRepository;
+        this.tenantsService = tenantsService;
     }
-    create(createDriverDto) {
-        return this.driverRepository.save(createDriverDto);
-    }
-    findAll(type) {
-        if (type) {
-            return this.driverRepository.find({ where: { type: type } });
+    async create(createDriverDto, apiKey) {
+        const driver = this.driverRepository.create(createDriverDto);
+        if (apiKey) {
+            const tenants = await this.tenantsService.findAll(undefined, apiKey);
+            if (tenants.length > 0) {
+                driver.tenant = tenants[0];
+                driver.tenantId = tenants[0].id;
+            }
         }
-        return this.driverRepository.find();
+        return this.driverRepository.save(driver);
+    }
+    async findAll(type, apiKey) {
+        const where = {};
+        if (type) {
+            where.type = type;
+        }
+        if (apiKey) {
+            const tenants = await this.tenantsService.findAll(undefined, apiKey);
+            if (tenants.length > 0) {
+                where.tenantId = tenants[0].id;
+            }
+            else {
+                return [];
+            }
+        }
+        return this.driverRepository.find({ where });
     }
     findOne(id) {
         return this.driverRepository.findOneBy({ id });
@@ -53,6 +73,7 @@ exports.DriversService = DriversService;
 exports.DriversService = DriversService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(driver_entity_1.Driver)),
-    __metadata("design:paramtypes", [typeorm_2.Repository])
+    __metadata("design:paramtypes", [typeorm_2.Repository,
+        tenants_service_1.TenantsService])
 ], DriversService);
 //# sourceMappingURL=drivers.service.js.map

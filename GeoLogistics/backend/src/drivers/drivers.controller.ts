@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Headers } from '@nestjs/common';
 import { DriversService } from './drivers.service';
 import { CreateDriverDto } from './dto/create-driver.dto';
 import { UpdateDriverDto } from './dto/update-driver.dto';
@@ -9,13 +9,19 @@ export class DriversController {
   constructor(private readonly driversService: DriversService) { }
 
   @Post()
-  create(@Body() createDriverDto: CreateDriverDto) {
-    return this.driversService.create(createDriverDto);
+  create(
+    @Body() createDriverDto: CreateDriverDto,
+    @Headers('x-api-key') apiKey?: string
+  ) {
+    return this.driversService.create(createDriverDto, apiKey);
   }
 
   @Get()
-  findAll(@Query('type') type?: string) {
-    return this.driversService.findAll(type);
+  findAll(
+    @Query('type') type?: string,
+    @Headers('x-api-key') apiKey?: string
+  ) {
+    return this.driversService.findAll(type, apiKey);
   }
 
   @Get(':id')
