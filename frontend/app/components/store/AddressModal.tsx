@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { X, MapPin } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import jsCookie from 'js-cookie';
+import { fetchAddressByCEP } from '@/app/services/cepService';
 
 interface AddressModalProps {
     isOpen: boolean;
@@ -69,23 +70,25 @@ export default function AddressModal({ isOpen, onClose, onSave, addressToEdit }:
 
     // ViaCEP Integration
     const handleCepBlur = async () => {
-        const cep = formData.zip_code.replace(/\D/g, '');
-        if (cep.length === 8) {
+        const cleanCep = formData.zip_code.replace(/\D/g, ''); // Kept formData.zip_code
+        if (cleanCep.length === 8) {
             setIsCheckingCep(true);
             try {
-                const res = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
-                const data = await res.json();
-                if (data && !data.erro) {
+                const addressData = await fetchAddressByCEP(cleanCep);
+                if (addressData) {
                     setFormData(prev => ({
                         ...prev,
-                        street: data.logradouro || '',
-                        neighborhood: data.bairro || '',
-                        city: data.localidade || '',
-                        state: data.uf || ''
+                        street: addressData.logradouro || prev.street,
+                        neighborhood: addressData.bairro || prev.neighborhood,
+                        city: addressData.localidade || prev.city,
+                        state: addressData.uf || prev.state
                     }));
+                } else {
+                    toast.error('CEP não encontrado.');
                 }
             } catch (error) {
-                console.error("ViaCEP error", error);
+                console.error("Error fetching CEP", error);
+                toast.error('Erro ao buscar CEP.');
             } finally {
                 setIsCheckingCep(false);
             }
