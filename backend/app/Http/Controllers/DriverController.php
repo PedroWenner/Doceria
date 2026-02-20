@@ -18,12 +18,47 @@ class DriverController extends Controller
         $this->geoService = $geoService;
     }
 
-    public function index()
+    public function index(Request $request)
     {
         try {
-            // Filter only OWN_FLEET drivers for this dashboard
+            // Fetch all OWN_FLEET drivers for this dashboard
             $drivers = $this->geoService->getDrivers(['type' => 'OWN_FLEET']);
-            return $this->success($drivers);
+
+            // Search Filter
+            $search = $request->query('search');
+            if (!empty($search)) {
+                $drivers = array_filter($drivers, function($d) use ($search) {
+                    return stripos($d['name'], $search) !== false;
+                });
+            }
+
+            // Status Filter
+            $status = $request->query('status');
+            if (!empty($status) && $status !== 'all') {
+                $drivers = array_filter($drivers, function($d) use ($status) {
+                    return $d['status'] === $status;
+                });
+            }
+
+            // Reset array keys after filtering
+            $drivers = array_values($drivers);
+
+            // Pagination
+            $page = (int) $request->query('page', 1);
+            $perPage = (int) $request->query('per_page', 15);
+            $total = count($drivers);
+            $lastPage = max(1, ceil($total / $perPage));
+            $offset = ($page - 1) * $perPage;
+
+            $paginatedData = array_slice($drivers, $offset, $perPage);
+
+            return $this->success([
+                'data' => $paginatedData,
+                'current_page' => $page,
+                'last_page' => $lastPage,
+                'total' => $total,
+                'per_page' => $perPage
+            ]);
         } catch (\Exception $e) {
             return $this->error('Failed to fetch drivers: ' . $e->getMessage());
         }

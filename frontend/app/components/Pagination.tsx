@@ -1,5 +1,6 @@
 import React from 'react';
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
+import { useLanguage } from '@/app/context/LanguageContext';
 
 interface PaginationProps {
     currentPage: number;
@@ -17,6 +18,8 @@ export default function Pagination({
     perPage
 }: PaginationProps) {
     if (lastPage <= 1) return null;
+
+    const { t } = useLanguage();
 
     const getPageNumbers = () => {
         const pages = [];
@@ -50,10 +53,10 @@ export default function Pagination({
                 {total && perPage ? (
                     <div className="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-800/50 px-3 py-1.5 rounded-full border border-slate-100 dark:border-slate-800/50">
                         <span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
-                        Mostrando <span className="font-bold text-slate-900 dark:text-slate-200">{((currentPage - 1) * perPage) + 1}-{Math.min(currentPage * perPage, total)}</span> de <span className="font-bold text-slate-900 dark:text-slate-200">{total}</span>
+                        {t('pagination.showing')} <span className="font-bold text-slate-900 dark:text-slate-200">{((currentPage - 1) * perPage) + 1}-{Math.min(currentPage * perPage, total)}</span> {t('pagination.of')} <span className="font-bold text-slate-900 dark:text-slate-200">{total}</span>
                     </div>
                 ) : (
-                    <span>Página {currentPage} de {lastPage}</span>
+                    <span>{t('pagination.page')} {currentPage} {t('pagination.of')} {lastPage}</span>
                 )}
             </div>
 
@@ -65,7 +68,7 @@ export default function Pagination({
                     onClick={() => onPageChange(1)}
                     disabled={isFirstPage}
                     className={`${buttonBaseClass} ${inactiveClass}`}
-                    title="Primeira Página"
+                    title={t('pagination.first_page')}
                 >
                     <ChevronsLeft size={16} />
                 </button>
@@ -75,7 +78,7 @@ export default function Pagination({
                     onClick={() => onPageChange(currentPage - 1)}
                     disabled={isFirstPage}
                     className={`${buttonBaseClass} ${inactiveClass}`}
-                    title="Página Anterior"
+                    title={t('pagination.previous_page')}
                 >
                     <ChevronLeft size={16} />
                 </button>

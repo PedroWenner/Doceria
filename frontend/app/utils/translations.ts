@@ -482,6 +482,40 @@ export const translations = {
                 method: 'Método',
                 amount: 'Valor'
             }
+        },
+        drivers: {
+            title: 'Gerenciamento de Entregadores',
+            subtitle: 'Gerencie seus entregadores e seu desempenho.',
+            modal: {
+                title: 'Novo Entregador',
+                subtitle: 'Adicione um novo entregador.',
+                name: 'Nome',
+            },
+            filter: {
+                new_driver: 'Novo Entregador',
+                placeholer_search: 'Buscar por nome...',
+                status: 'Status',
+                all_statuses: 'Todos os Status',
+                available: 'Disponível',
+                busy: 'Em Rota',
+                offline: 'Offline'
+            },
+            table: {
+                name: 'Nome',
+                type: 'Tipo',
+                status: 'Status',
+                last_location: 'Localização Última',
+                no_drivers_found: 'Nenhum motorista encontrado.'
+            }
+        },
+        pagination: {
+            first_page: 'Primeira Página',
+            previous_page: 'Página Anterior',
+            next_page: 'Página seguinte',
+            last_page: 'Última Página',
+            showing: 'Mostrando',
+            of: 'de',
+            page: 'Página'
         }
     },
     en: {
@@ -960,6 +994,40 @@ export const translations = {
                 expense: 'Expenses',
                 all: 'All Transactions'
             },
+        },
+        drivers: {
+            title: 'Driver Management',
+            subtitle: 'Manage your drivers and their performance.',
+            modal: {
+                title: 'Novo Motorista',
+                subtitle: 'Adicione um novo motorista.',
+                name: 'Nome',
+            },
+            filter: {
+                new_driver: 'New Driver',
+                placeholer_search: 'Search by name...',
+                status: 'Status',
+                all_statuses: 'All Statuses',
+                available: 'Available',
+                busy: 'Busy',
+                offline: 'Offline'
+            },
+            table: {
+                name: 'Name',
+                type: 'Type',
+                status: 'Status',
+                last_location: 'Last Location',
+                no_drivers_found: 'No drivers found.'
+            }
+        },
+        pagination: {
+            first_page: 'First Page',
+            previous_page: 'Previous Page',
+            next_page: 'Next Page',
+            last_page: 'Last Page',
+            showing: 'Showing',
+            of: 'of',
+            page: 'Página'
         }
     }
 };
