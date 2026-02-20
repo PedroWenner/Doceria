@@ -24,6 +24,10 @@ class DriverController extends Controller
             // Fetch all OWN_FLEET drivers for this dashboard
             $drivers = $this->geoService->getDrivers(['type' => 'OWN_FLEET']);
 
+            if (!is_array($drivers)) {
+                $drivers = [];
+            }
+
             // Search Filter
             $search = $request->query('search');
             if (!empty($search)) {
