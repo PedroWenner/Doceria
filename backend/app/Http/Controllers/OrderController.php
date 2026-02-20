@@ -47,6 +47,7 @@ class OrderController extends Controller
             'total_amount' => 'required|numeric',
             'payment_method' => 'required|string',
             'delivery_type' => 'required|string',
+            'customer_address_id' => 'nullable|exists:customer_addresses,id',
             'delivery_address' => 'nullable|array',
             'notes' => 'nullable|string' 
         ]);
@@ -60,6 +61,7 @@ class OrderController extends Controller
                 'total_amount' => $validated['total_amount'],
                 'payment_method' => $validated['payment_method'],
                 'delivery_type' => $validated['delivery_type'],
+                'customer_address_id' => $validated['customer_address_id'] ?? null,
                 'delivery_address' => $validated['delivery_address'] ?? null,
                 'notes' => $validated['notes'] ?? null,
             ]);

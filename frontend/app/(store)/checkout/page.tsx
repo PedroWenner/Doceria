@@ -312,6 +312,7 @@ export default function CheckoutPage() {
                 total_amount: finalTotal,
                 payment_method: selectedMethod?.slug,
                 delivery_type: deliveryType,
+                customer_address_id: deliveryType === 'delivery' ? selectedAddressId : null,
                 delivery_address: formattedAddress,
                 notes: JSON.stringify({
                     change_for: null,
@@ -407,6 +408,7 @@ export default function CheckoutPage() {
             total_amount: finalTotal,
             payment_method: selectedMethod?.slug,
             delivery_type: deliveryType,
+            customer_address_id: deliveryType === 'delivery' ? selectedAddressId : null,
             delivery_address: formattedAddress,
             notes: JSON.stringify({
                 change_for: selectedMethod?.slug === 'money' || selectedMethod?.slug === 'dinheiro' ? changeFor : null,

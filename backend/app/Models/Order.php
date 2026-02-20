@@ -16,14 +16,19 @@ class Order extends Model implements Auditable
         'customer_name',
         'customer_phone',
         'status',
-        'payment_status',
         'total_amount',
         'payment_method',
         'delivery_type',
+        'customer_address_id',
         'delivery_address',
         'courier_name',
         'notes'
     ];
+
+    public function address()
+    {
+        return $this->belongsTo(CustomerAddress::class, 'customer_address_id');
+    }
 
     protected $casts = [
         'delivery_address' => 'array',
