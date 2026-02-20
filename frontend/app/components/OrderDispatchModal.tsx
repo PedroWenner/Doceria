@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import Cookies from 'js-cookie';
 import { Order } from '@/app/types/order';
 import { useLanguage } from '@/app/context/LanguageContext';
 import {
@@ -11,7 +12,8 @@ import {
     User,
     MapPin,
     Clock,
-    Truck
+    Truck,
+    Globe
 } from 'lucide-react';
 
 interface Props {
@@ -19,17 +21,46 @@ interface Props {
     order: Order | null;
     status: string;
     onClose: () => void;
-    onConfirm: (courierName?: string) => void;
+    onConfirm: (driverIdOrCourierName?: string) => void;
 }
 
 export default function OrderDispatchModal({ isOpen, order, status, onClose, onConfirm }: Props) {
     const { t } = useLanguage();
     const [courierName, setCourierName] = useState('');
+    const [drivers, setDrivers] = useState<any[]>([]);
+    const [selectedDriverId, setSelectedDriverId] = useState<string>('');
+    const [isLoadingDrivers, setIsLoadingDrivers] = useState(false);
+
+    const isDelivery = order?.delivery_type === 'delivery';
+    const isDispatchingToGeoLogistics = status === 'ready' && isDelivery;
+    const isManualDelivered = status === 'delivered' && isDelivery;
+
+    useEffect(() => {
+        if (isOpen && isDispatchingToGeoLogistics) {
+            fetchDrivers();
+        }
+    }, [isOpen, isDispatchingToGeoLogistics]);
+
+    const fetchDrivers = async () => {
+        setIsLoadingDrivers(true);
+        try {
+            const token = Cookies.get('admin_token');
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+            const res = await fetch(`${apiUrl}/drivers`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const response = await res.json();
+                setDrivers(response.data?.data || []);
+            }
+        } catch (error) {
+            console.error('Failed to fetch drivers', error);
+        } finally {
+            setIsLoadingDrivers(false);
+        }
+    };
 
     if (!isOpen || !order) return null;
-
-    const isDelivery = order.delivery_type === 'delivery';
-    const isDispatching = status === 'delivered' || status === 'ready';
 
     const getWhatsAppLink = () => {
         const phone = order.customer_phone?.replace(/[^\d]/g, '') || '';
@@ -39,7 +70,11 @@ export default function OrderDispatchModal({ isOpen, order, status, onClose, onC
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        onConfirm(courierName);
+        if (isDispatchingToGeoLogistics) {
+            onConfirm(selectedDriverId); // empty string will map to null in payload
+        } else {
+            onConfirm(courierName);
+        }
     };
 
     return (
@@ -50,7 +85,7 @@ export default function OrderDispatchModal({ isOpen, order, status, onClose, onC
                     <div>
                         <h2 className="text-lg font-bold text-slate-900 dark:text-slate-50 flex items-center gap-2">
                             {status === 'delivered' ? <Bike size={20} className="text-sky-500" /> : <CheckCircle size={20} className="text-emerald-500" />}
-                            {status === 'delivered' ? 'Despachar Entrega' : 'Concluir Pedido'}
+                            {status === 'delivered' ? 'Confirmar Entrega' : 'Despachar Pedido'}
                         </h2>
                         <span className="text-xs font-mono text-slate-400">Order #{order.id}</span>
                     </div>
@@ -79,7 +114,46 @@ export default function OrderDispatchModal({ isOpen, order, status, onClose, onC
                         )}
                     </div>
 
-                    {isDelivery && status === 'delivered' ? (
+                    {isDispatchingToGeoLogistics ? (
+                        <form onSubmit={handleSubmit}>
+                            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2">
+                                Atribuir Entregador
+                            </label>
+                            <div className="relative mb-6">
+                                <span className="absolute left-3 top-2.5 text-slate-400">
+                                    {selectedDriverId === '' ? <Globe size={18} /> : <Bike size={18} />}
+                                </span>
+                                <select
+                                    value={selectedDriverId}
+                                    onChange={e => setSelectedDriverId(e.target.value)}
+                                    disabled={isLoadingDrivers}
+                                    className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-50 focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-50 outline-none transition-all appearance-none"
+                                >
+                                    <option value="">Rede GeoLogistics (Automático)</option>
+                                    {drivers.map(driver => (
+                                        <option key={driver.id} value={driver.id}>
+                                            Frota Própria: {driver.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className="flex justify-end gap-3">
+                                <button
+                                    type="button"
+                                    onClick={onClose}
+                                    className="px-4 py-2 rounded-lg text-slate-600 dark:text-slate-400 font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                                >
+                                    Cancelar
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="px-5 py-2 bg-emerald-600 text-white rounded-lg font-bold hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-600/20"
+                                >
+                                    Enviar p/ Logística
+                                </button>
+                            </div>
+                        </form>
+                    ) : isManualDelivered ? (
                         <form onSubmit={handleSubmit}>
                             <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2">
                                 Nome do Entregador
@@ -107,7 +181,7 @@ export default function OrderDispatchModal({ isOpen, order, status, onClose, onC
                                     type="submit"
                                     className="px-5 py-2 bg-slate-900 dark:bg-slate-50 text-white dark:text-slate-900 rounded-lg font-bold hover:bg-slate-800 dark:hover:bg-slate-200 transition-all shadow-lg shadow-slate-900/10"
                                 >
-                                    Confirmar Envio
+                                    Confirmar Entrega
                                 </button>
                             </div>
                         </form>
@@ -136,7 +210,7 @@ export default function OrderDispatchModal({ isOpen, order, status, onClose, onC
                                     onClick={() => onConfirm()}
                                     className="px-5 py-2 bg-slate-900 dark:bg-slate-50 text-white dark:text-slate-900 rounded-lg font-bold hover:bg-slate-800 dark:hover:bg-slate-200 transition-all shadow-lg shadow-slate-900/10"
                                 >
-                                    {isDelivery ? 'Confirmar' : 'Finalizar Pedido'}
+                                    Finalizar Pedido
                                 </button>
                             </div>
                         </div>

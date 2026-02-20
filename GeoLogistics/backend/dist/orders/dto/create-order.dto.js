@@ -16,7 +16,7 @@ class CreateOrderDto {
 exports.CreateOrderDto = CreateOrderDto;
 __decorate([
     (0, class_validator_1.IsUUID)(),
-    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateOrderDto.prototype, "tenant_id", void 0);
 __decorate([
@@ -53,4 +53,9 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateOrderDto.prototype, "dropoff_address", void 0);
+__decorate([
+    (0, class_validator_1.IsUUID)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateOrderDto.prototype, "driver_id", void 0);
 //# sourceMappingURL=create-order.dto.js.map

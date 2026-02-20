@@ -11,7 +11,7 @@ export declare class OrdersService {
     private readonly webhookService;
     private readonly tenantsService;
     constructor(orderRepository: Repository<Order>, pricingService: PricingService, webhookService: WebhookService, tenantsService: TenantsService);
-    create(createOrderDto: CreateOrderDto): Promise<Order>;
+    create(createOrderDto: CreateOrderDto, apiKey?: string): Promise<Order>;
     findAll(): Promise<Order[]>;
     findOne(id: string): Promise<Order>;
     update(id: string, updateOrderDto: UpdateOrderDto): Promise<import("typeorm").UpdateResult>;

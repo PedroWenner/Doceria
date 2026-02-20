@@ -9,7 +9,7 @@ export declare class OrdersController {
         statusCounts: any;
         totalRevenue: number;
     }>;
-    create(createOrderDto: CreateOrderDto): Promise<import("./entities/order.entity").Order>;
+    create(createOrderDto: CreateOrderDto, apiKey?: string): Promise<import("./entities/order.entity").Order>;
     findAll(): Promise<import("./entities/order.entity").Order[]>;
     findOne(id: string): Promise<import("./entities/order.entity").Order>;
     update(id: string, updateOrderDto: UpdateOrderDto): Promise<import("typeorm").UpdateResult>;

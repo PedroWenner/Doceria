@@ -27,13 +27,23 @@ let OrdersService = class OrdersService {
         this.webhookService = webhookService;
         this.tenantsService = tenantsService;
     }
-    async create(createOrderDto) {
+    async create(createOrderDto, apiKey) {
+        if (apiKey) {
+            const tenants = await this.tenantsService.findAll(undefined, apiKey);
+            if (tenants && tenants.length > 0) {
+                createOrderDto.tenant_id = tenants[0].id;
+            }
+        }
+        if (!createOrderDto.tenant_id) {
+            throw new Error('Tenant ID is required. Please provide it directly or via headers.');
+        }
         const pricing = await this.pricingService.calculatePrice(createOrderDto.tenant_id, createOrderDto.pickup_lat, createOrderDto.pickup_lon, createOrderDto.dropoff_lat, createOrderDto.dropoff_lon);
         const order = this.orderRepository.create({
             ...createOrderDto,
             price: pricing.price,
             distance_km: pricing.route.distance / 1000,
-            status: order_entity_1.OrderStatus.PENDING,
+            status: createOrderDto.driver_id ? order_entity_1.OrderStatus.ACCEPTED : order_entity_1.OrderStatus.PENDING,
+            driver_id: createOrderDto.driver_id || null,
         });
         const savedOrder = await this.orderRepository.save(order);
         const tenant = await this.tenantsService.findOne(createOrderDto.tenant_id);

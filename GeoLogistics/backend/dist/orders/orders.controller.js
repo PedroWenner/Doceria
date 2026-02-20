@@ -24,8 +24,8 @@ let OrdersController = class OrdersController {
     getStats() {
         return this.ordersService.getStats();
     }
-    create(createOrderDto) {
-        return this.ordersService.create(createOrderDto);
+    create(createOrderDto, apiKey) {
+        return this.ordersService.create(createOrderDto, apiKey);
     }
     findAll() {
         return this.ordersService.findAll();
@@ -50,8 +50,9 @@ __decorate([
 __decorate([
     (0, common_1.Post)(),
     __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Headers)('x-api-key')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [create_order_dto_1.CreateOrderDto]),
+    __metadata("design:paramtypes", [create_order_dto_1.CreateOrderDto, String]),
     __metadata("design:returntype", void 0)
 ], OrdersController.prototype, "create", null);
 __decorate([

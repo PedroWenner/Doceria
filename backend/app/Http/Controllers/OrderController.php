@@ -36,6 +36,53 @@ class OrderController extends Controller
         return $this->success($order, 'Status updated successfully');
     }
 
+    public function dispatchOrder(Request $request, Order $order)
+    {
+        $validated = $request->validate([
+            'driver_id' => 'nullable|uuid'
+        ]);
+
+        if ($order->delivery_type !== 'delivery') {
+            return $this->error('Only delivery orders can be dispatched to GeoLogistics.', 400);
+        }
+
+        if (!$order->customer_address_id) {
+            return $this->error('Order does not have a valid customer address linked.', 400);
+        }
+
+        $address = $order->address;
+        if (!$address || !$address->latitude || !$address->longitude) {
+            return $this->error('Customer address is missing coordinates.', 400);
+        }
+
+        $setting = \App\Models\CompanySetting::first();
+        if (!$setting || !$setting->latitude || !$setting->longitude) {
+            return $this->error('Store origin coordinates not configured.', 400);
+        }
+
+        try {
+            /** @var \App\Services\GeoLogisticsService $geoService */
+            $geoService = app(\App\Services\GeoLogisticsService::class);
+            
+            $geoService->createOrder([
+                'pickup_lat' => (float) $setting->latitude,
+                'pickup_lon' => (float) $setting->longitude,
+                'pickup_address' => "{$setting->street}, {$setting->number}",
+                'dropoff_lat' => (float) $address->latitude,
+                'dropoff_lon' => (float) $address->longitude,
+                'dropoff_address' => "{$address->street}, {$address->number}",
+                'driver_id' => $validated['driver_id'] ?? null
+            ]);
+
+            // Update Doceria order status
+            $order->update(['status' => 'ready']); // Ready represents dispachted internally
+
+            return $this->success($order, 'Order dispatched to GeoLogistics successfully');
+        } catch (\Exception $e) {
+            return $this->error('Failed to dispatch order: ' . $e->getMessage(), 500);
+        }
+    }
+
     public function store(Request $request)
     {
         $validated = $request->validate([

@@ -64,7 +64,7 @@ class DriverController extends Controller
                 'per_page' => $perPage
             ]);
         } catch (\Exception $e) {
-            return $this->error('Failed to fetch drivers: ' . $e->getMessage());
+            return $this->error('Failed to fetch drivers: ' . $e->getMessage(), 500);
         }
     }
 

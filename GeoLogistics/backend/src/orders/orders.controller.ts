@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Headers } from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
@@ -13,8 +13,11 @@ export class OrdersController {
   }
 
   @Post()
-  create(@Body() createOrderDto: CreateOrderDto) {
-    return this.ordersService.create(createOrderDto);
+  create(
+    @Body() createOrderDto: CreateOrderDto,
+    @Headers('x-api-key') apiKey?: string
+  ) {
+    return this.ordersService.create(createOrderDto, apiKey);
   }
 
   @Get()

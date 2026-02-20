@@ -2,7 +2,7 @@ import { IsNumber, IsNotEmpty, IsString, IsOptional, IsUUID, Min, Max } from 'cl
 
 export class CreateOrderDto {
     @IsUUID()
-    @IsNotEmpty()
+    @IsOptional()
     tenant_id: string;
 
     @IsNumber()
@@ -28,4 +28,8 @@ export class CreateOrderDto {
     @IsString()
     @IsOptional()
     dropoff_address?: string;
+
+    @IsUUID()
+    @IsOptional()
+    driver_id?: string;
 }

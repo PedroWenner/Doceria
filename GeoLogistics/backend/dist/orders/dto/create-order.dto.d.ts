@@ -6,4 +6,5 @@ export declare class CreateOrderDto {
     dropoff_lat: number;
     dropoff_lon: number;
     dropoff_address?: string;
+    driver_id?: string;
 }

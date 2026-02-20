@@ -18,7 +18,18 @@ export class OrdersService {
     private readonly tenantsService: TenantsService,
   ) { }
 
-  async create(createOrderDto: CreateOrderDto) {
+  async create(createOrderDto: CreateOrderDto, apiKey?: string) {
+    if (apiKey) {
+      const tenants = await this.tenantsService.findAll(undefined, apiKey);
+      if (tenants && tenants.length > 0) {
+        createOrderDto.tenant_id = tenants[0].id;
+      }
+    }
+
+    if (!createOrderDto.tenant_id) {
+      throw new Error('Tenant ID is required. Please provide it directly or via headers.');
+    }
+
     // 1. Calculate Price based on coordinates
     const pricing = await this.pricingService.calculatePrice(
       createOrderDto.tenant_id,
@@ -33,7 +44,8 @@ export class OrdersService {
       ...createOrderDto,
       price: pricing.price,
       distance_km: pricing.route.distance / 1000,
-      status: OrderStatus.PENDING,
+      status: createOrderDto.driver_id ? OrderStatus.ACCEPTED : OrderStatus.PENDING,
+      driver_id: createOrderDto.driver_id || null,
     });
 
     const savedOrder = await this.orderRepository.save(order);

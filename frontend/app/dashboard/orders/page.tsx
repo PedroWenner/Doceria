@@ -114,7 +114,7 @@ export default function OrdersPage() {
         if (!currentOrder || currentOrder.status === newStatus) return;
 
         // Intercept logic
-        if (newStatus === 'delivered' || (newStatus === 'ready' && currentOrder.delivery_type === 'pickup')) {
+        if (newStatus === 'delivered' || newStatus === 'ready') {
             setActiveOrder(currentOrder);
             setTargetStatus(newStatus);
             setIsModalOpen(true);
@@ -149,9 +149,37 @@ export default function OrdersPage() {
         }
     };
 
-    const handleConfirmDispatch = (courierName?: string) => {
-        if (activeOrder) {
-            updateOrderStatus(activeOrder.id, targetStatus, courierName);
+    const handleConfirmDispatch = async (driverIdOrCourierName?: string) => {
+        if (!activeOrder) return;
+
+        if (targetStatus === 'ready' && activeOrder.delivery_type === 'delivery') {
+            try {
+                // Optimistic UI might be tricky here, so we'll just await and refresh
+                const res = await fetch(`${apiUrl}/orders/${activeOrder.id}/dispatch`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ driver_id: driverIdOrCourierName || null }) // null means GeoLogistics Network
+                });
+
+                if (res.ok) {
+                    setIsModalOpen(false);
+                    setActiveOrder(null);
+                    fetchOrders(); // Refresh to get updated status
+                } else {
+                    const err = await res.json();
+                    console.error('Failed to dispatch:', err);
+                    alert(err.message || 'Erro ao despachar o pedido.');
+                }
+            } catch (error) {
+                console.error('Dispatch error:', error);
+                alert('Erro de conexão ao despachar.');
+            }
+        } else {
+            // Normal status update for 'delivered' or 'ready' (pickup)
+            updateOrderStatus(activeOrder.id, targetStatus, driverIdOrCourierName);
             setIsModalOpen(false);
             setActiveOrder(null);
         }
